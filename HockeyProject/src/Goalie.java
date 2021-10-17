@@ -21,7 +21,7 @@ public class Goalie {
                   int shotsAgainst, int wins, int losses, int otLosses) {
         this.playerNumber = playerNumber;
         this.name = name;
-        shotsBlocked = (int) (savePercentage * shotsAgainst);
+        shotsBlocked = (int) ((savePercentage/100) * shotsAgainst);
         this.shotsAgainst = shotsAgainst;
         this.wins = wins;
         this.losses = losses;
@@ -37,7 +37,7 @@ public class Goalie {
     }
 
     public double getSavePercent() {
-        return (double) shotsBlocked/shotsAgainst;
+        return ((double) shotsBlocked/shotsAgainst) * 100;
     }
 
     public int getWins() {

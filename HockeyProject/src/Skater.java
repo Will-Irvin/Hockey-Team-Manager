@@ -67,10 +67,11 @@ public class Skater {
     }
 
     public String toString() {
-        return String.format("%s #%d, Stick: %s: \n" +
-                "    Goals: %d\n" +
-                "    Assists: %d\n" +
-                "    +/-: %d\n",
+        return String.format("%s #%d\n" +
+                        "    Stick Hand: %s \n" +
+                        "    Goals: %d\n" +
+                        "    Assists: %d\n" +
+                        "    +/-: %d\n",
                 name, playerNumber, stickHand, goals, assists, plusMinus);
     }
 }

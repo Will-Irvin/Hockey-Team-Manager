@@ -11,7 +11,7 @@ public class Center extends Skater{
     public Center(String name, int playerNumber, String stickHand, int goals,
                   int assists, int plusMinus, double faceOffPercentage, int faceOffTotal) {
         super(name, playerNumber, stickHand, goals, assists, plusMinus);
-        faceoffWins = (int) (faceOffTotal * faceOffPercentage);
+        faceoffWins = (int) (faceOffTotal * (faceOffPercentage/100));
         this.faceoffTotal = faceOffTotal;
     }
 
