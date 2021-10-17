@@ -1,7 +1,8 @@
 public class Goalie {
     private int playerNumber;
     private String name;
-    private double savePercent;
+    private int shotsBlocked;
+    private int shotsAgainst;
     private int wins;
     private int losses;
     private int otLosses;
@@ -10,9 +11,21 @@ public class Goalie {
         this.playerNumber = playerNumber;
         this.name = name;
         wins = 0;
-        savePercent = 0;
+        shotsBlocked = 0;
+        shotsAgainst = 0;
         losses = 0;
         otLosses = 0;
+    }
+
+    public Goalie(int playerNumber, String name, double savePercentage,
+                  int shotsAgainst, int wins, int losses, int otLosses) {
+        this.playerNumber = playerNumber;
+        this.name = name;
+        shotsBlocked = (int) (savePercentage * shotsAgainst);
+        this.shotsAgainst = shotsAgainst;
+        this.wins = wins;
+        this.losses = losses;
+        this.otLosses = otLosses;
     }
 
     public int getPlayerNumber() {
@@ -24,7 +37,7 @@ public class Goalie {
     }
 
     public double getSavePercent() {
-        return savePercent;
+        return (double) shotsBlocked/shotsAgainst;
     }
 
     public int getWins() {
@@ -49,5 +62,21 @@ public class Goalie {
 
     public void loseOT() {
         otLosses++;
+    }
+
+    public void save() {
+        shotsAgainst++;
+        shotsBlocked++;
+    }
+
+    public void scoredOn() {
+        shotsAgainst++;
+    }
+
+    public String toString() {
+        return String.format("%s #%d\n" +
+                "    Record: %d-%d-%d\n" +
+                "    Save Percentage: %.2f\n",
+                name, playerNumber, wins, losses, otLosses, getSavePercent());
     }
 }
