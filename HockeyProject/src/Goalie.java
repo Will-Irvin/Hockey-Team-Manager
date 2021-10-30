@@ -1,6 +1,6 @@
 public class Goalie {
-    private int playerNumber;
-    private String name;
+    private final int playerNumber;
+    private final String name;
     private int shotsBlocked;
     private int shotsAgainst;
     private int wins;
@@ -8,8 +8,18 @@ public class Goalie {
     private int otLosses;
 
     public Goalie(int playerNumber, String name) {
-        this.playerNumber = playerNumber;
-        this.name = name;
+        if (playerNumber < 0 || playerNumber > 99) {
+            throw new IllegalArgumentException("Player Number must be between 0-99");
+        } else {
+            this.playerNumber = playerNumber;
+        }
+        if (name == null) {
+            throw new NullPointerException("Name cannot be null");
+        } else if (name.length() == 0) {
+            throw new IllegalArgumentException("Name must have length greater than 0");
+        } else {
+            this.name = name;
+        }
         wins = 0;
         shotsBlocked = 0;
         shotsAgainst = 0;
@@ -19,12 +29,37 @@ public class Goalie {
 
     public Goalie(int playerNumber, String name, double savePercentage,
                   int shotsAgainst, int wins, int losses, int otLosses) {
-        this.playerNumber = playerNumber;
-        this.name = name;
+        if (playerNumber < 0 || playerNumber > 99) {
+            throw new IllegalArgumentException("Player Number must be between 0-99");
+        } else {
+            this.playerNumber = playerNumber;
+        }
+        if (name == null) {
+            throw new NullPointerException("Name cannot be null");
+        } else if (name.length() == 0) {
+            throw new IllegalArgumentException("Name must have length greater than 0");
+        } else {
+            this.name = name;
+        }
+        if (savePercentage < 0 || savePercentage > 100) {
+            throw new IllegalArgumentException("Save % Must be between 0 and 100");
+        }
+        if (shotsAgainst < 0) {
+            throw new IllegalArgumentException("Shots Against stat must be positive");
+        }
         shotsBlocked = (int) ((savePercentage/100) * shotsAgainst);
         this.shotsAgainst = shotsAgainst;
+        if (wins < 0) {
+            throw new IllegalArgumentException("Wins stat must be positive");
+        }
         this.wins = wins;
+        if (losses < 0) {
+            throw new IllegalArgumentException("Losses stat must be positive");
+        }
         this.losses = losses;
+        if (otLosses < 0) {
+            throw new IllegalArgumentException("OT Losses stat must be positive");
+        }
         this.otLosses = otLosses;
     }
 
@@ -52,6 +87,40 @@ public class Goalie {
         return otLosses;
     }
 
+    public void setWins(int wins) {
+        if (wins < 0) {
+            System.out.println("Wins stat must be positive");
+        } else {
+            this.wins = wins;
+        }
+    }
+
+    public void setLosses(int losses) {
+        if (losses < 0) {
+            System.out.println("Losses stat must be positive");
+        } else {
+            this.losses = losses;
+        }
+    }
+
+    public void setOtLosses(int otLosses) {
+        if (otLosses < 0) {
+            System.out.println("OT Losses stat must be positive");
+        } else {
+            this.otLosses = otLosses;
+        }
+    }
+
+    public void setSavePercentage(double savePercentage, int shotsAgainst) {
+        if (savePercentage < 0 || savePercentage > 100) {
+            System.out.println("Save Percentage must be between 0-100");
+        } else if (shotsAgainst < 0) {
+            System.out.println("Shots against stat must be positive");
+        } else {
+            shotsBlocked = (int) ((savePercentage/100) * shotsAgainst);
+        }
+    }
+
     public void win() {
         wins++;
     }
@@ -76,7 +145,7 @@ public class Goalie {
     public String toString() {
         return String.format("%s #%d\n" +
                 "    Record: %d-%d-%d\n" +
-                "    Save Percentage: %.2f\n",
+                "    Save Percentage: %.2f",
                 name, playerNumber, wins, losses, otLosses, getSavePercent());
     }
 }
