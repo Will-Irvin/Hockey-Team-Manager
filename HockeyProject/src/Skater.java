@@ -5,9 +5,10 @@ public class Skater {
     private int assists;
     private int plusMinus;
     private final String stickHand;
-    private String position;
+    private Position position;
 
-    public Skater(String name, int playerNumber, String stickHand, String position) {
+    public Skater(String name, int playerNumber, String stickHand, Position position)
+            throws NullPointerException, IllegalArgumentException{
         if (name == null) {
             throw new NullPointerException("Name cannot be null");
         } else if (name.length() == 0) {
@@ -36,7 +37,8 @@ public class Skater {
         plusMinus = 0;
     }
 
-    public Skater(String name, int playerNumber, String stickHand, String position, int goals, int assists, int plusMinus) {
+    public Skater(String name, int playerNumber, String stickHand, Position position,
+                  int goals, int assists, int plusMinus) throws NullPointerException, IllegalArgumentException {
         if (name == null) {
             throw new NullPointerException("Name cannot be null");
         } else if (name.length() == 0) {
@@ -96,13 +98,13 @@ public class Skater {
         return stickHand;
     }
 
-    public String getPosition() {
+    public Position getPosition() {
         return position;
     }
 
-    public void setGoals(int goals) {
+    public void setGoals(int goals) throws IllegalArgumentException {
         if (goals < 0) {
-            System.out.println("Goals stat must be positive");
+            throw new IllegalArgumentException("Goals stat must be positive");
         } else {
             this.goals = goals;
         }
@@ -110,7 +112,7 @@ public class Skater {
 
     public void setAssists(int assists) {
         if (goals < 0) {
-            System.out.println("Assists stat must be positive");
+            throw new IllegalArgumentException("Assists stat must be positive");
         } else {
             this.assists = assists;
         }
@@ -132,6 +134,14 @@ public class Skater {
 
     public void scoredAgainst() {
         plusMinus--;
+    }
+
+    public boolean equals(Object o) {
+        if (o instanceof Skater) {
+            Skater s = (Skater) o;
+            if (s.getPlayerNumber() == this.playerNumber) return true;
+        }
+        return false;
     }
 
     public void scoredOnIce() {
