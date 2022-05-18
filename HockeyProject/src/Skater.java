@@ -149,12 +149,29 @@ public class Skater {
     }
 
     public String toString() {
-        return String.format("%s #%d\n" +
-                        "    Position: %s\n" +
-                        "    Stick Hand: %s \n" +
+        String result = String.format("%s #%d\n    ", name, playerNumber);
+        switch (this.position) {
+            case CENTER:
+                result += "Center\n";
+                break;
+            case LEFT_WING:
+                result += "Left Wing\n";
+                break;
+            case RIGHT_WING:
+                result += "Right Wing\n";
+                break;
+            case LEFT_DEFENSE:
+                result += "Left Defense";
+                break;
+            case RIGHT_DEFENSE:
+                result += "Right Defense";
+                break;
+        }
+        result += String.format("Stick Hand: %s \n" +
                         "    Goals: %d\n" +
                         "    Assists: %d\n" +
                         "    +/-: %d",
-                name, playerNumber, position, stickHand.charAt(0), goals, assists, plusMinus);
+                stickHand.charAt(0), goals, assists, plusMinus);
+        return result;
     }
 }
