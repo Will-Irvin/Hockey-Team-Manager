@@ -22,6 +22,60 @@ public class Line {
         this.rightDe = rightDe;
     }
 
+    public String getName() {
+        return name;
+    }
+
+    public Center getCenter() {
+        return center;
+    }
+
+    public Skater getLeftWing() {
+        return leftWing;
+    }
+
+    public Skater getRightWing() {
+        return rightWing;
+    }
+
+    public Defenseman getLeftDe() {
+        return leftDe;
+    }
+
+    public Defenseman getRightDe() {
+        return rightDe;
+    }
+
+    public void setName(String name) {
+        if (name == null) {
+            throw new NullPointerException("Name cannot be null");
+        }
+        if (name.isBlank()) {
+            throw new IllegalArgumentException("Name cannot be blank");
+        }
+        this.name = name;
+    }
+
+    public void setCenter(Center center) {
+        this.center = center;
+    }
+
+    public void setLeftWing(Skater leftWing) {
+        this.leftWing = leftWing;
+    }
+
+    public void setRightWing(Skater rightWing) {
+        this.rightWing = rightWing;
+    }
+
+    public void setLeftDe(Defenseman leftDe) {
+        this.leftDe = leftDe;
+    }
+
+    public void setRightDe(Defenseman rightDe) {
+        this.rightDe = rightDe;
+    }
+
     public void score(Position position) throws IllegalArgumentException {
         if (center == null && position == Position.CENTER ) {
             throw new IllegalArgumentException(scoreError);
@@ -39,49 +93,49 @@ public class Line {
             throw new IllegalArgumentException(scoreError);
         }
         // Center
-        try {
+        if (center != null) {
             if (position == Position.CENTER) {
                 center.score();
             } else {
                 center.scoredOnIce();
             }
-        } catch (NullPointerException ignored) {}
+        }
 
         // Left Wing
-        try {
+        if (leftWing != null) {
             if (position == Position.LEFT_WING) {
                 leftWing.score();
             } else {
                 leftWing.scoredOnIce();
             }
-        } catch (NullPointerException ignored) {}
+        }
 
         // Right Wing
-        try {
+        if (rightWing != null) {
             if (position == Position.RIGHT_WING) {
                 rightWing.score();
             } else {
                 rightWing.scoredOnIce();
             }
-        } catch (NullPointerException ignored) {}
+        }
 
         // Left Defense
-        try {
+        if (leftDe != null) {
             if (position == Position.LEFT_DEFENSE) {
                 leftDe.score();
             } else {
                 leftDe.scoredOnIce();
             }
-        } catch (NullPointerException ignored) {}
+        }
 
         // Right Defense
-        try {
+        if (rightDe != null) {
             if (position == Position.RIGHT_DEFENSE) {
                 rightDe.score();
             } else {
                 rightDe.scoredOnIce();
             }
-        } catch (NullPointerException ignored) {}
+        }
     }
 
     public void score(Position scorer, Position assist) throws IllegalArgumentException {
@@ -107,7 +161,7 @@ public class Line {
         }
 
         // Center
-        try {
+        if (center != null) {
             if (scorer == Position.CENTER) {
                 center.score();
             } else if (assist == Position.CENTER) {
@@ -115,10 +169,10 @@ public class Line {
             } else {
                 center.scoredOnIce();
             }
-        } catch (NullPointerException ignored) {}
+        }
 
         // Left Wing
-        try {
+        if (leftWing != null) {
             if (scorer == Position.LEFT_WING) {
                 leftWing.score();
             } else if (assist == Position.LEFT_WING) {
@@ -126,10 +180,10 @@ public class Line {
             } else {
                 leftWing.scoredOnIce();
             }
-        } catch (NullPointerException ignored) {}
+        }
 
         // Right Wing
-        try {
+        if (rightWing != null) {
             if (scorer == Position.RIGHT_WING) {
                 rightWing.score();
             } else if (assist == Position.RIGHT_WING) {
@@ -137,10 +191,10 @@ public class Line {
             } else {
                 rightWing.scoredOnIce();
             }
-        } catch (NullPointerException ignored) {}
+        }
 
         // Left Defense
-        try {
+        if (leftDe != null) {
             if (scorer == Position.LEFT_DEFENSE) {
                 leftDe.score();
             } else if (assist == Position.LEFT_DEFENSE) {
@@ -148,10 +202,10 @@ public class Line {
             } else {
                 leftDe.scoredOnIce();
             }
-        } catch (NullPointerException ignored) {}
+        }
 
         // Right Defense
-        try {
+        if (rightDe != null) {
             if (scorer == Position.RIGHT_DEFENSE) {
                 rightDe.score();
             } else if (assist == Position.RIGHT_DEFENSE) {
@@ -159,7 +213,7 @@ public class Line {
             } else {
                 rightDe.scoredOnIce();
             }
-        } catch (NullPointerException ignored) {}
+        }
     }
 
     public void score(Position scorer, Position assist1, Position assist2) throws IllegalArgumentException {
@@ -187,7 +241,7 @@ public class Line {
             throw new IllegalArgumentException(scoreError);
         }
         // Center
-        try {
+        if (center != null) {
             if (scorer == Position.CENTER) {
                 center.score();
             } else if (assist1 == Position.CENTER || assist2 == Position.CENTER) {
@@ -195,10 +249,10 @@ public class Line {
             } else {
                 center.scoredOnIce();
             }
-        } catch (NullPointerException ignored) {}
+        }
 
         // Left Wing
-        try {
+        if (leftWing != null) {
             if (scorer == Position.LEFT_WING) {
                 leftWing.score();
             } else if (assist1 == Position.LEFT_WING || assist2 == Position.LEFT_WING) {
@@ -206,10 +260,10 @@ public class Line {
             } else {
                 leftWing.scoredOnIce();
             }
-        } catch (NullPointerException ignored) {}
+        }
 
         // Right Wing
-        try {
+        if (rightWing != null) {
             if (scorer == Position.RIGHT_WING) {
                 rightWing.score();
             } else if (assist1 == Position.RIGHT_WING || assist2 == Position.RIGHT_WING) {
@@ -217,10 +271,10 @@ public class Line {
             } else {
                 rightWing.scoredOnIce();
             }
-        } catch (NullPointerException ignored) {}
+        }
 
         // Left Defense
-        try {
+        if (leftDe != null) {
             if (scorer == Position.LEFT_DEFENSE) {
                 leftDe.score();
             } else if (assist1 == Position.LEFT_DEFENSE || assist2 == Position.LEFT_DEFENSE) {
@@ -228,10 +282,10 @@ public class Line {
             } else {
                 leftDe.scoredOnIce();
             }
-        } catch (NullPointerException ignored) {}
+        }
 
         // Right Defense
-        try {
+        if (rightDe != null) {
             if (scorer == Position.RIGHT_DEFENSE) {
                 rightDe.score();
             } else if (assist1 == Position.RIGHT_DEFENSE || assist2 == Position.RIGHT_DEFENSE) {
@@ -239,7 +293,7 @@ public class Line {
             } else {
                 rightDe.scoredOnIce();
             }
-        } catch (NullPointerException ignored) {}
+        }
     }
 
     public void lineScoredOn() {
@@ -261,12 +315,22 @@ public class Line {
     }
 
     public String toString() {
-        return String.format("%s:\n" +
-                "Center: %s\n" +
-                "Left Wing: %s\n" +
-                "Right Wing: %s\n" +
-                "Left Defense: %s\n" +
-                "Right Defense: %s", this.name, center.getName(), leftWing.getName(), rightWing.getName(),
-                leftDe.getName(), rightDe.getName());
+        String result = String.format("%s:\n", this.name);
+        if (center != null) {
+            result += String.format("Center: %s\n", center.getName());
+        }
+        if (leftWing != null) {
+            result += String.format("Left Wing: %s\n", leftWing.getName());
+        }
+        if (rightWing != null) {
+            result += String.format("Right Wing: %s\n", rightWing.getName());
+        }
+        if (leftDe != null) {
+            result += String.format("Left Defense: %s\n", leftDe.getName());
+        }
+        if (rightDe != null) {
+            result += String.format("Right Defense: %s", rightDe.getName());
+        }
+        return result;
     }
 }
