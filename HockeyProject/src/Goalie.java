@@ -72,6 +72,9 @@ public class Goalie {
     }
 
     public double getSavePercent() {
+        if (shotsAgainst == 0) {
+            return 0;
+        }
         return ((double) shotsBlocked/shotsAgainst) * 100;
     }
 
@@ -142,6 +145,16 @@ public class Goalie {
         shotsAgainst++;
     }
 
+    public void enterSaves(int numgoals, int numshots) {
+        if (numgoals < 0 || numshots < 0) {
+            throw new IllegalArgumentException("Entered values cannot be negative");
+        }
+        if (numgoals > numshots) {
+            throw new IllegalArgumentException("Cannot have more goals scored than shots taken");
+        }
+        shotsBlocked += numshots - numgoals;
+        shotsAgainst += numshots;
+    }
     public String toString() {
         return String.format("%s #%d\n" +
                 "    Record: %d-%d-%d\n" +

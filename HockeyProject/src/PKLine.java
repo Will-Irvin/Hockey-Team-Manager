@@ -1,6 +1,6 @@
 public class PKLine extends Line {
-    int numberKilled;
-    int numberAttempts;
+    private int numberKilled;
+    private int numberAttempts;
 
     public PKLine(String name, Skater winger1, Skater winger2, Defenseman leftDe, Defenseman rightDe) {
         super(name, null, winger1, winger2, leftDe, rightDe);
@@ -29,7 +29,10 @@ public class PKLine extends Line {
     }
 
     public double getKillPercent() {
-        return (double) numberKilled / numberAttempts;
+        if (numberAttempts == 0) {
+            return 0;
+        }
+        return (double) numberKilled / numberAttempts * 100;
     }
 
     public void setKillStats(int numberKilled, int numberAttempts) throws IllegalArgumentException {
@@ -42,6 +45,15 @@ public class PKLine extends Line {
         }
         this.numberKilled = numberKilled;
         this.numberAttempts = numberAttempts;
+    }
+
+    public void killedPenalty() {
+        numberKilled++;
+        numberAttempts++;
+    }
+
+    public void scoredOn() {
+        numberAttempts++;
     }
 
     public String toString() {
