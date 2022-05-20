@@ -145,6 +145,13 @@ public class Goalie {
         shotsAgainst++;
     }
 
+    public boolean equals(Object o) {
+        if (o instanceof Goalie g) {
+            return g.getPlayerNumber() == this.getPlayerNumber();
+        }
+        return false;
+    }
+
     public void enterSaves(int numgoals, int numshots) {
         if (numgoals < 0 || numshots < 0) {
             throw new IllegalArgumentException("Entered values cannot be negative");
@@ -155,6 +162,7 @@ public class Goalie {
         shotsBlocked += numshots - numgoals;
         shotsAgainst += numshots;
     }
+
     public String toString() {
         return String.format("%s #%d\n" +
                 "    Record: %d-%d-%d\n" +

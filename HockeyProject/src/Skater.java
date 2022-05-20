@@ -1,18 +1,18 @@
 public class Skater {
-    private final String name;
+    private String name;
     private final int playerNumber;
     private int goals;
     private int assists;
     private int plusMinus;
     private final String stickHand;
-    private Position position;
+    private final Position position;
 
     public Skater(String name, int playerNumber, String stickHand, Position position)
             throws NullPointerException, IllegalArgumentException{
         if (name == null) {
             throw new NullPointerException("Name cannot be null");
-        } else if (name.length() == 0) {
-            throw new IllegalArgumentException("Name must have length greater than 0");
+        } else if (name.isBlank()) {
+            throw new IllegalArgumentException("Name cannot be blank");
         } else {
             this.name = name;
         }
@@ -78,6 +78,16 @@ public class Skater {
         return name;
     }
 
+    public void setName() {
+        if (name == null) {
+            throw new NullPointerException("Name cannot be null");
+        } else if (name.isBlank()) {
+            throw new IllegalArgumentException("Name cannot be blank");
+        } else {
+            this.name = name;
+        }
+    }
+
     public int getPlayerNumber() {
         return playerNumber;
     }
@@ -137,9 +147,8 @@ public class Skater {
     }
 
     public boolean equals(Object o) {
-        if (o instanceof Skater) {
-            Skater s = (Skater) o;
-            if (s.getPlayerNumber() == this.playerNumber) return true;
+        if (o instanceof Skater s) {
+            return s.getPlayerNumber() == this.playerNumber;
         }
         return false;
     }
