@@ -1,11 +1,12 @@
 public class Goalie {
-    private final int playerNumber;
-    private final String name;
+    private int playerNumber;
+    private String name;
     private int shotsBlocked;
     private int shotsAgainst;
     private int wins;
     private int losses;
     private int otLosses;
+    private int shutouts;
 
     public Goalie(int playerNumber, String name) {
         if (playerNumber < 0 || playerNumber > 99) {
@@ -15,7 +16,7 @@ public class Goalie {
         }
         if (name == null) {
             throw new NullPointerException("Name cannot be null");
-        } else if (name.length() == 0) {
+        } else if (name.isBlank()) {
             throw new IllegalArgumentException("Name must have length greater than 0");
         } else {
             this.name = name;
@@ -25,10 +26,11 @@ public class Goalie {
         shotsAgainst = 0;
         losses = 0;
         otLosses = 0;
+        shutouts = 0;
     }
 
     public Goalie(int playerNumber, String name, double savePercentage,
-                  int shotsAgainst, int wins, int losses, int otLosses) {
+                  int shotsAgainst, int wins, int losses, int otLosses, int shutouts) {
         if (playerNumber < 0 || playerNumber > 99) {
             throw new IllegalArgumentException("Player Number must be between 0-99");
         } else {
@@ -41,13 +43,13 @@ public class Goalie {
         } else {
             this.name = name;
         }
-        if (savePercentage < 0 || savePercentage > 100) {
-            throw new IllegalArgumentException("Save % Must be between 0 and 100");
+        if (savePercentage < 0 || savePercentage > 1) {
+            throw new IllegalArgumentException("Save % Must be between 0 and 1");
         }
         if (shotsAgainst < 0) {
             throw new IllegalArgumentException("Shots Against stat must be positive");
         }
-        shotsBlocked = (int) ((savePercentage/100) * shotsAgainst);
+        shotsBlocked = (int) (savePercentage * shotsAgainst);
         this.shotsAgainst = shotsAgainst;
         if (wins < 0) {
             throw new IllegalArgumentException("Wins stat must be positive");
@@ -61,6 +63,12 @@ public class Goalie {
             throw new IllegalArgumentException("OT Losses stat must be positive");
         }
         this.otLosses = otLosses;
+        if (shutouts < 0) {
+            throw new IllegalArgumentException("Shutouts stat must be positive");
+        } else if (shutouts > wins) {
+            throw new IllegalArgumentException("Cannot have more shutouts than wins");
+        }
+        this.shutouts = shutouts;
     }
 
     public int getPlayerNumber() {
@@ -71,11 +79,34 @@ public class Goalie {
         return name;
     }
 
+    public void setPlayerNumber(int playerNumber) throws IllegalArgumentException {
+        if (playerNumber < 0 || playerNumber > 99) {
+            throw new IllegalArgumentException("Player Number must be between 0-99");
+        }
+        this.playerNumber = playerNumber;
+    }
+
+    public void setName(String name) throws NullPointerException, IllegalArgumentException {
+        if (name == null) {
+            throw new NullPointerException("Name cannot be null");
+        } else if (name.isBlank()) {
+            throw new IllegalArgumentException("Name must have length greater than 0");
+        }
+        this.name = name;
+    }
+
     public double getSavePercent() {
         if (shotsAgainst == 0) {
             return 0;
         }
-        return ((double) shotsBlocked/shotsAgainst) * 100;
+        return ((double) shotsBlocked/shotsAgainst);
+    }
+
+    public double getGAA() {
+        if (wins + losses + otLosses == 0) {
+            return -1;
+        }
+        return (double) (shotsAgainst - shotsBlocked) / (wins + losses + otLosses);
     }
 
     public int getWins() {
@@ -90,42 +121,59 @@ public class Goalie {
         return otLosses;
     }
 
-    public void setWins(int wins) {
+    public int getShutouts() {
+        return shutouts;
+    }
+
+    public void setShutouts(int shutouts) throws IllegalArgumentException {
+        if (shutouts < 0) {
+            throw new IllegalArgumentException("Shutouts stat must be positive");
+        } else if (shutouts > wins) {
+            throw new IllegalArgumentException("Cannot have more shutouts than wins");
+        }
+        this.shutouts = shutouts;
+    }
+
+    public void setWins(int wins) throws IllegalArgumentException {
         if (wins < 0) {
-            System.out.println("Wins stat must be positive");
-        } else {
-            this.wins = wins;
+            throw new IllegalArgumentException("Wins stat must be positive");
+        } else if (shutouts > wins) {
+            throw new IllegalArgumentException("Cannot have more shutouts than wins");
         }
+        this.wins = wins;
     }
 
-    public void setLosses(int losses) {
+    public void setLosses(int losses) throws IllegalArgumentException {
         if (losses < 0) {
-            System.out.println("Losses stat must be positive");
-        } else {
-            this.losses = losses;
+            throw new IllegalArgumentException("Losses stat must be positive");
         }
+        this.losses = losses;
     }
 
-    public void setOtLosses(int otLosses) {
+    public void setOtLosses(int otLosses) throws IllegalArgumentException {
         if (otLosses < 0) {
-            System.out.println("OT Losses stat must be positive");
-        } else {
-            this.otLosses = otLosses;
+            throw new IllegalArgumentException("OT Losses stat must be positive");
         }
+        this.otLosses = otLosses;
     }
 
-    public void setSavePercentage(double savePercentage, int shotsAgainst) {
-        if (savePercentage < 0 || savePercentage > 100) {
-            System.out.println("Save Percentage must be between 0-100");
+    public void setSavePercentage(double savePercentage, int shotsAgainst) throws IllegalArgumentException {
+        if (savePercentage < 0 || savePercentage > 1) {
+            throw new IllegalArgumentException("Save Percentage must be between 0-1");
         } else if (shotsAgainst < 0) {
-            System.out.println("Shots against stat must be positive");
-        } else {
-            shotsBlocked = (int) ((savePercentage/100) * shotsAgainst);
+            throw new IllegalArgumentException("Shots against stat must be positive");
         }
+        shotsBlocked = (int) ((savePercentage) * shotsAgainst);
+        this.shotsAgainst = shotsAgainst;
     }
 
     public void win() {
         wins++;
+    }
+
+    public void shutoutWin() {
+        wins++;
+        shutouts++;
     }
 
     public void lose() {
@@ -166,7 +214,9 @@ public class Goalie {
     public String toString() {
         return String.format("%s #%d\n" +
                 "    Record: %d-%d-%d\n" +
+                "    Shutouts: %d\n" +
+                "    Goals Against Average: %.3f\n" +
                 "    Save Percentage: %.2f",
-                name, playerNumber, wins, losses, otLosses, getSavePercent());
+                name, playerNumber, wins, losses, otLosses, shutouts, getGAA(), getSavePercent());
     }
 }

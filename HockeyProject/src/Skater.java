@@ -1,6 +1,6 @@
 public class Skater {
     private String name;
-    private final int playerNumber;
+    private int playerNumber;
     private int goals;
     private int assists;
     private int plusMinus;
@@ -100,6 +100,10 @@ public class Skater {
         return assists;
     }
 
+    public int getPoints() {
+        return goals + assists;
+    }
+
     public int getPlusMinus() {
         return plusMinus;
     }
@@ -110,6 +114,13 @@ public class Skater {
 
     public Position getPosition() {
         return position;
+    }
+
+    public void setPlayerNumber(int playerNumber) throws IllegalArgumentException {
+        if (playerNumber < 1 || playerNumber > 99) {
+            throw new IllegalArgumentException("Player number must be between 1-99");
+        }
+        this.playerNumber = playerNumber;
     }
 
     public void setGoals(int goals) throws IllegalArgumentException {
@@ -179,8 +190,9 @@ public class Skater {
         result += String.format("Stick Hand: %s \n" +
                         "    Goals: %d\n" +
                         "    Assists: %d\n" +
+                        "    Points: %d\n" +
                         "    +/-: %d",
-                stickHand.charAt(0), goals, assists, plusMinus);
+                stickHand.charAt(0), goals, assists, getPoints(), plusMinus);
         return result;
     }
 }

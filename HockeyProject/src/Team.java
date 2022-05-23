@@ -204,7 +204,7 @@ public class Team {
     }
 
     public boolean changePlayer(Skater oldPlayer, Skater newPlayer) {
-        if (newPlayer != oldPlayer) return false;
+        if (!oldPlayer.equals(newPlayer) && players.contains(newPlayer)) return false;
         if (!players.remove(oldPlayer)) {
             return false;
         }
@@ -212,11 +212,19 @@ public class Team {
     }
 
     public boolean changeGoalie(Goalie oldGoalie, Goalie newGoalie) {
-        if (newGoalie != oldGoalie) return false;
+        if (!newGoalie.equals(oldGoalie) && goalies.contains(newGoalie)) return false;
         if (!goalies.remove(oldGoalie)) {
             return false;
         }
         return addGoalie(newGoalie);
+    }
+
+    public boolean changeLine(Line oldLine, Line newLine) {
+        if (!lines.remove(oldLine)) {
+            return false;
+        }
+        lines.add(newLine);
+        return true;
     }
 
     public boolean removePlayer(Skater player) {
@@ -225,6 +233,40 @@ public class Team {
 
     public boolean removeGoalie(Goalie goalie) {
         return goalies.remove(goalie);
+    }
+
+    public boolean removeLine(Line line) {
+        return lines.remove(line);
+    }
+
+    public double getPKSuccess() {
+        int lineTotal = 0;
+        double rateTotal = 0;
+        for (Line line: lines) {
+            if (line instanceof PKLine) {
+                lineTotal++;
+                rateTotal += ((PKLine) line).getKillPercent();
+            }
+        }
+        if (lineTotal == 0) {
+            return -1;
+        }
+        return rateTotal / lineTotal;
+    }
+
+    public double getPPSuccess() {
+        int lineTotal = 0;
+        double rateTotal = 0;
+        for (Line line: lines) {
+            if (line instanceof PPLine) {
+                lineTotal++;
+                rateTotal += ((PPLine) line).getSuccessRate();
+            }
+        }
+        if (lineTotal == 0) {
+            return -1;
+        }
+        return rateTotal / lineTotal;
     }
 
     public String toString() {

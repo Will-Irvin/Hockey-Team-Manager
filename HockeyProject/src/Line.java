@@ -314,6 +314,39 @@ public class Line {
         } catch (NullPointerException ignored) {}
     }
 
+    public boolean equals(Object o) {
+        if (o instanceof Line l) {
+            if (l.getName().equals(name)) {
+                if (l.getCenter() != null) {
+                    if (!l.getCenter().equals(this.center)) return false;
+                } else {
+                    if (this.center != null) return false;
+                }
+                if (l.getLeftWing() != null) {
+                    if (!l.getLeftWing().equals(this.leftWing)) return false;
+                } else {
+                    if (this.leftWing != null) return false;
+                }
+                if (l.getRightWing() != null) {
+                    if (!l.getRightWing().equals(this.rightWing)) return false;
+                } else {
+                    if (this.rightWing != null) return false;
+                }
+                if (l.getLeftDe() != null) {
+                    if (!l.getLeftDe().equals(this.leftDe)) return false;
+                } else {
+                    if (this.leftDe != null) return false;
+                }
+                if (l.getRightDe() != null) {
+                    return l.getRightDe().equals(this.rightDe);
+                } else {
+                    return this.rightDe == null;
+                }
+            }
+        }
+        return false;
+    }
+
     public String toString() {
         String result = String.format("%s:\n", this.name);
         if (center != null) {

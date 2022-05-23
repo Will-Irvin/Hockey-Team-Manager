@@ -67,4 +67,14 @@ public class PPLine extends Line {
         this.numberScored = numberScored;
         this.numberOpps = numberOpps;
     }
+
+    public void setStatsWithPercentage(double successPercent, int numberOpps) {
+        if (successPercent < 0 || successPercent > 100) {
+            throw new IllegalArgumentException("Percentage must be in range 0-100");
+        }
+        if (numberOpps < 0) {
+            throw new IllegalArgumentException("Number of opportunities cannot be negative");
+        }
+        numberScored = (int) ((successPercent / 100) * numberOpps);
+    }
 }

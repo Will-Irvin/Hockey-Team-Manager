@@ -47,6 +47,17 @@ public class PKLine extends Line {
         this.numberAttempts = numberAttempts;
     }
 
+    public void setKillStatsWithPercentage(double successPercent, int numberAttempts) {
+        if (successPercent < 0 || successPercent > 100) {
+            throw new IllegalArgumentException("Percentage must be in the range 0-100");
+        }
+        if (numberAttempts < 0) {
+            throw new IllegalArgumentException("Number of attempts cannot be negative");
+        }
+        numberKilled = (int) ((successPercent / 100) * numberAttempts);
+        this.numberAttempts = numberAttempts;
+    }
+
     public void killedPenalty() {
         numberKilled++;
         numberAttempts++;
