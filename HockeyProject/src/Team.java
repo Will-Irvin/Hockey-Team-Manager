@@ -344,6 +344,19 @@ public class Team {
         return (successTotal / tryTotal) * 100;
     }
 
+    /**
+     * Calculates the average number of shots that a team lets up per game using the team's record and the total number
+     * of shots that each goalie has faced
+     * @return Average number of shots that the team lets up per game
+     */
+    public double getAverageShots() {
+        int totalShots = 0;
+        for (Goalie goalie: goalies) {
+            totalShots += goalie.getShotsAgainst();
+        }
+        return (double) totalShots / (wins + losses + lossesOT);
+    }
+
     // toString
     public String toString() {
         String result = String.format("%s\n", name);

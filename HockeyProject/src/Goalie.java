@@ -158,6 +158,10 @@ public class Goalie {
         return shutouts;
     }
 
+    public int getShotsAgainst() {
+        return shotsAgainst;
+    }
+
     /**
      * @throws IllegalArgumentException If given argument is negative or larger than number of wins
      */
