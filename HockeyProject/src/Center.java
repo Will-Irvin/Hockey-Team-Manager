@@ -9,7 +9,8 @@ public class Center extends Skater{
     }
 
     public Center(String name, int playerNumber, String stickHand, int goals,
-                  int assists, int plusMinus, double faceOffPercentage, int faceOffTotal) {
+                  int assists, int plusMinus, double faceOffPercentage, int faceOffTotal)
+                  throws IllegalArgumentException {
         super(name, playerNumber, stickHand, Position.CENTER, goals, assists, plusMinus);
         if (faceOffPercentage < 0 || faceOffPercentage > 100) {
             throw new IllegalArgumentException("Face Off % must be between 0-100");
@@ -34,7 +35,7 @@ public class Center extends Skater{
         faceoffTotal++;
     }
 
-    public void setFaceoffPercent(double faceoffPercent, int faceoffTotal) throws IllegalArgumentException{
+    public void setFaceoffPercent(double faceoffPercent, int faceoffTotal) throws IllegalArgumentException {
         if (faceoffPercent < 0 || faceoffPercent > 100) {
             throw new IllegalArgumentException("Face Off % must be between 0-100");
         } else if (faceoffTotal < 1) {
@@ -47,6 +48,6 @@ public class Center extends Skater{
 
     public String toString() {
         return super.toString()
-                + String.format("\n    Faceoff Percentage: %.2f", getFaceoffPercent());
+                + String.format("\n    Faceoff Percentage: %.2f%%", getFaceoffPercent());
     }
 }

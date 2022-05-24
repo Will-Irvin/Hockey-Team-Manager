@@ -12,7 +12,7 @@ public class Defenseman extends Skater {
     }
 
     public Defenseman(String name, int playerNumber, String stickHand, Position side,
-                      int goals, int assists, int plusMinus, int shotsBlocked) {
+                      int goals, int assists, int plusMinus, int shotsBlocked) throws IllegalArgumentException {
         super(name, playerNumber, stickHand, side, goals, assists, plusMinus);
 
         if (side != Position.LEFT_DEFENSE && side != Position.RIGHT_DEFENSE) {
@@ -37,7 +37,7 @@ public class Defenseman extends Skater {
         if (shotsBlocked < 0) {
             throw new IllegalArgumentException("Shots Blocked stat must be positive");
         } else {
-            shotsBlocked = shotsBlocked;
+            this.shotsBlocked = shotsBlocked;
         }
     }
 

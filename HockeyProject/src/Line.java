@@ -7,7 +7,8 @@ public class Line {
     private Defenseman rightDe;
     private static final String scoreError = "A given position is not assigned to this line";
 
-    public Line(String name, Center center, Skater leftWing, Skater rightWing, Defenseman leftDe, Defenseman rightDe) {
+    public Line(String name, Center center, Skater leftWing, Skater rightWing, Defenseman leftDe, Defenseman rightDe)
+            throws NullPointerException, IllegalArgumentException {
         if (name == null) {
             throw new NullPointerException("Name cannot be null");
         }
@@ -46,7 +47,7 @@ public class Line {
         return rightDe;
     }
 
-    public void setName(String name) {
+    public void setName(String name) throws NullPointerException, IllegalArgumentException {
         if (name == null) {
             throw new NullPointerException("Name cannot be null");
         }
@@ -297,21 +298,21 @@ public class Line {
     }
 
     public void lineScoredOn() {
-        try {
+        if (center != null) {
             center.scoredAgainst();
-        } catch (NullPointerException ignored) {}
-        try {
+        }
+        if (leftDe != null) {
             leftDe.scoredAgainst();
-        } catch (NullPointerException ignored) {}
-        try {
+        }
+        if (rightDe != null) {
             rightDe.scoredAgainst();
-        } catch (NullPointerException ignored) {}
-        try {
+        }
+        if (leftWing != null) {
             leftWing.scoredAgainst();
-        } catch (NullPointerException ignored) {}
-        try {
+        }
+        if (rightWing != null) {
             rightWing.scoredAgainst();
-        } catch (NullPointerException ignored) {}
+        }
     }
 
     public boolean equals(Object o) {

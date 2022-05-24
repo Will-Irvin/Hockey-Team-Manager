@@ -2,7 +2,8 @@ public class PKLine extends Line {
     private int numberKilled;
     private int numberAttempts;
 
-    public PKLine(String name, Skater winger1, Skater winger2, Defenseman leftDe, Defenseman rightDe) {
+    public PKLine(String name, Skater winger1, Skater winger2, Defenseman leftDe, Defenseman rightDe)
+            throws NullPointerException {
         super(name, null, winger1, winger2, leftDe, rightDe);
         if (winger1 == null || winger2 == null || leftDe == null || rightDe == null) {
             throw new NullPointerException("Penalty Kill positions cannot be empty");
@@ -12,7 +13,7 @@ public class PKLine extends Line {
     }
 
     public PKLine(String name, Skater winger1, Skater winger2, Defenseman leftDe, Defenseman rightDe,
-                  int numberKilled, int numberAttempts) {
+                  int numberKilled, int numberAttempts) throws NullPointerException, IllegalArgumentException {
         super(name, null, winger1, winger2, leftDe, rightDe);
         if (winger1 == null || winger2 == null || leftDe == null || rightDe == null) {
             throw new NullPointerException("Penalty Kill positions cannot be empty");
@@ -26,6 +27,14 @@ public class PKLine extends Line {
         }
         this.numberKilled = numberKilled;
         this.numberAttempts = numberAttempts;
+    }
+
+    public int getNumberKilled() {
+        return numberKilled;
+    }
+
+    public int getNumberAttempts() {
+        return numberAttempts;
     }
 
     public double getKillPercent() {
@@ -47,7 +56,7 @@ public class PKLine extends Line {
         this.numberAttempts = numberAttempts;
     }
 
-    public void setKillStatsWithPercentage(double successPercent, int numberAttempts) {
+    public void setKillStatsWithPercentage(double successPercent, int numberAttempts) throws IllegalArgumentException {
         if (successPercent < 0 || successPercent > 100) {
             throw new IllegalArgumentException("Percentage must be in the range 0-100");
         }
@@ -72,7 +81,8 @@ public class PKLine extends Line {
                 "Offense 1: %s\n" +
                 "Offense 2: %s\n" +
                 "Left Defense: %s\n" +
-                "Right Defense: %s\n", getName(), getLeftWing().getName(), getRightWing().getName(),
-                getLeftDe().getName(), getRightDe().getName());
+                "Right Defense: %s\n" +
+                "PK%%: %.2f\n", getName(), getLeftWing().getName(), getRightWing().getName(),
+                getLeftDe().getName(), getRightDe().getName(), getKillPercent());
     }
 }

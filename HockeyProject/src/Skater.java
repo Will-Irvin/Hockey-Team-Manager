@@ -4,7 +4,7 @@ public class Skater {
     private int goals;
     private int assists;
     private int plusMinus;
-    private final String stickHand;
+    private String stickHand;
     private final Position position;
 
     public Skater(String name, int playerNumber, String stickHand, Position position)
@@ -78,7 +78,7 @@ public class Skater {
         return name;
     }
 
-    public void setName() {
+    public void setName() throws NullPointerException, IllegalArgumentException {
         if (name == null) {
             throw new NullPointerException("Name cannot be null");
         } else if (name.isBlank()) {
@@ -131,7 +131,7 @@ public class Skater {
         }
     }
 
-    public void setAssists(int assists) {
+    public void setAssists(int assists) throws IllegalArgumentException {
         if (goals < 0) {
             throw new IllegalArgumentException("Assists stat must be positive");
         } else {
@@ -141,6 +141,15 @@ public class Skater {
 
     public void setPlusMinus(int plusMinus) {
         this.plusMinus = plusMinus;
+    }
+
+    public void setStickHand(String stickHand) throws NullPointerException, IllegalArgumentException {
+        if (stickHand == null) {
+            throw new NullPointerException("Stick hand cannot be null");
+        } else if (!stickHand.equals("Left") && !stickHand.equals("Right")) {
+            throw new NullPointerException("Stick hand must be Left or Right");
+        }
+        this.stickHand = stickHand;
     }
 
     public void score() {
@@ -171,21 +180,11 @@ public class Skater {
     public String toString() {
         String result = String.format("%s #%d\n    ", name, playerNumber);
         switch (this.position) {
-            case CENTER:
-                result += "Center\n";
-                break;
-            case LEFT_WING:
-                result += "Left Wing\n";
-                break;
-            case RIGHT_WING:
-                result += "Right Wing\n";
-                break;
-            case LEFT_DEFENSE:
-                result += "Left Defense";
-                break;
-            case RIGHT_DEFENSE:
-                result += "Right Defense";
-                break;
+            case CENTER -> result += "Center\n";
+            case LEFT_WING -> result += "Left Wing\n";
+            case RIGHT_WING -> result += "Right Wing\n";
+            case LEFT_DEFENSE -> result += "Left Defense\n";
+            case RIGHT_DEFENSE -> result += "Right Defense\n";
         }
         result += String.format("Stick Hand: %s \n" +
                         "    Goals: %d\n" +

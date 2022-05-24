@@ -9,12 +9,12 @@ public class Team {
     private int losses;
     private int lossesOT;
 
-    public Team(String name) {
+    public Team(String name) throws NullPointerException, IllegalArgumentException {
         if (name == null) {
             throw new NullPointerException("Name cannot be null");
         }
         if (name.isBlank()) {
-            throw new NullPointerException("Name cannot be empty");
+            throw new IllegalArgumentException("Name cannot be empty");
         }
         this.name = name;
         this.players = new ArrayList<>();
@@ -25,7 +25,7 @@ public class Team {
         this.lossesOT = 0;
     }
 
-    public Team(String name, int wins, int losses, int lossesOT) {
+    public Team(String name, int wins, int losses, int lossesOT) throws NullPointerException, IllegalArgumentException {
         if (name == null) {
             throw new NullPointerException("Name cannot be null");
         }
@@ -45,7 +45,7 @@ public class Team {
     }
 
     public Team(String name, ArrayList<Skater> players, ArrayList<Line> lines, ArrayList<Goalie> goalies, int wins,
-                int losses, int lossesOT) {
+                int losses, int lossesOT) throws NullPointerException, IllegalArgumentException {
         if (name == null || players == null || lines == null || goalies == null) {
             throw new NullPointerException("Given arguments cannot be null");
         }
@@ -102,7 +102,7 @@ public class Team {
         return lossesOT;
     }
 
-    public void setRecord(int wins, int losses, int lossesOT) {
+    public void setRecord(int wins, int losses, int lossesOT) throws IllegalArgumentException {
         if (wins < 0 || losses < 0 || lossesOT < 0) {
             throw new IllegalArgumentException("Record cannot have negative values");
         }
@@ -240,33 +240,33 @@ public class Team {
     }
 
     public double getPKSuccess() {
-        int lineTotal = 0;
-        double rateTotal = 0;
+        int tryTotal = 0;
+        double successTotal = 0;
         for (Line line: lines) {
             if (line instanceof PKLine) {
-                lineTotal++;
-                rateTotal += ((PKLine) line).getKillPercent();
+                tryTotal += ((PKLine) line).getNumberAttempts();
+                successTotal += ((PKLine) line).getNumberKilled();
             }
         }
-        if (lineTotal == 0) {
+        if (tryTotal == 0) {
             return -1;
         }
-        return rateTotal / lineTotal;
+        return (successTotal / tryTotal) * 100;
     }
 
     public double getPPSuccess() {
-        int lineTotal = 0;
-        double rateTotal = 0;
+        int tryTotal = 0;
+        double successTotal = 0;
         for (Line line: lines) {
             if (line instanceof PPLine) {
-                lineTotal++;
-                rateTotal += ((PPLine) line).getSuccessRate();
+                tryTotal += ((PPLine) line).getNumberOpps();
+                successTotal += ((PPLine) line).getNumberScored();
             }
         }
-        if (lineTotal == 0) {
+        if (tryTotal == 0) {
             return -1;
         }
-        return rateTotal / lineTotal;
+        return (successTotal / tryTotal) * 100;
     }
 
     public String toString() {

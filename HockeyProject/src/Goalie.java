@@ -8,7 +8,7 @@ public class Goalie {
     private int otLosses;
     private int shutouts;
 
-    public Goalie(int playerNumber, String name) {
+    public Goalie(int playerNumber, String name) throws IllegalArgumentException, NullPointerException {
         if (playerNumber < 0 || playerNumber > 99) {
             throw new IllegalArgumentException("Player Number must be between 0-99");
         } else {
@@ -30,7 +30,8 @@ public class Goalie {
     }
 
     public Goalie(int playerNumber, String name, double savePercentage,
-                  int shotsAgainst, int wins, int losses, int otLosses, int shutouts) {
+                  int shotsAgainst, int wins, int losses, int otLosses, int shutouts)
+            throws IllegalArgumentException, NullPointerException{
         if (playerNumber < 0 || playerNumber > 99) {
             throw new IllegalArgumentException("Player Number must be between 0-99");
         } else {
@@ -200,7 +201,7 @@ public class Goalie {
         return false;
     }
 
-    public void enterSaves(int numgoals, int numshots) {
+    public void enterSaves(int numgoals, int numshots) throws IllegalArgumentException {
         if (numgoals < 0 || numshots < 0) {
             throw new IllegalArgumentException("Entered values cannot be negative");
         }
@@ -215,8 +216,8 @@ public class Goalie {
         return String.format("%s #%d\n" +
                 "    Record: %d-%d-%d\n" +
                 "    Shutouts: %d\n" +
-                "    Goals Against Average: %.3f\n" +
-                "    Save Percentage: %.2f",
+                "    Goals Against Average: %.2f\n" +
+                "    Save Percentage: %.3f",
                 name, playerNumber, wins, losses, otLosses, shutouts, getGAA(), getSavePercent());
     }
 }
