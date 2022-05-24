@@ -1,7 +1,16 @@
+/**
+ * PKLine
+ * A class that extends from the line class to be specific to the penalty kill special teams lines.
+ */
+
 public class PKLine extends Line {
     private int numberKilled;
-    private int numberAttempts;
+    private int numberAttempts;    // Used to calculate the PK percentage
 
+    /**
+     * Assigns given arguments to their respective instance variables, initializes Center to null and stats to 0
+     * @throws NullPointerException Thrown if any of the given players are null
+     */
     public PKLine(String name, Skater winger1, Skater winger2, Defenseman leftDe, Defenseman rightDe)
             throws NullPointerException {
         super(name, null, winger1, winger2, leftDe, rightDe);
@@ -12,6 +21,11 @@ public class PKLine extends Line {
         numberAttempts = 0;
     }
 
+    /**
+     * Assigns given arguments to their respective instance variables, initializes Center to null
+     * @throws NullPointerException Thrown if any of the given players are null
+     * @throws IllegalArgumentException Thrown if any of the given stats are negative
+     */
     public PKLine(String name, Skater winger1, Skater winger2, Defenseman leftDe, Defenseman rightDe,
                   int numberKilled, int numberAttempts) throws NullPointerException, IllegalArgumentException {
         super(name, null, winger1, winger2, leftDe, rightDe);
@@ -29,6 +43,31 @@ public class PKLine extends Line {
         this.numberAttempts = numberAttempts;
     }
 
+    /**
+     * Works almost identically to previous constructor, but uses a percentage to initialize the numberKilled instead of
+     * the specific number
+     * @throws NullPointerException If any of the given players are null
+     * @throws IllegalArgumentException If the percentage is not in a valid range or if numberAttempts is negative
+     */
+    public PKLine(String name, Skater winger1, Skater winger2, Defenseman leftDe, Defenseman rightDe, double pkPercent,
+                  int numberAttempts) throws NullPointerException, IllegalArgumentException {
+        super(name, null, winger1, winger2, leftDe, rightDe);
+        if (winger1 == null || winger2 == null || leftDe == null || rightDe == null) {
+            throw new NullPointerException("Penalty Kill positions cannot be empty");
+        }
+        if (pkPercent < 0 || pkPercent > 100) {
+            throw new IllegalArgumentException("Percentage must be between 0-100");
+        }
+        if (numberAttempts < 0) {
+            throw new IllegalArgumentException("Number of attempts cannot be negative");
+        }
+
+        numberKilled = (int) ((pkPercent / 100) * numberAttempts);
+        this.numberAttempts = numberAttempts;
+    }
+
+    // Getter methods
+
     public int getNumberKilled() {
         return numberKilled;
     }
@@ -37,6 +76,10 @@ public class PKLine extends Line {
         return numberAttempts;
     }
 
+    /**
+     * Calculates percentage of penalties that have successfully been killed based off numberKilled and numberAttempts
+     * @return The calculated percentage
+     */
     public double getKillPercent() {
         if (numberAttempts == 0) {
             return 0;
@@ -44,6 +87,10 @@ public class PKLine extends Line {
         return (double) numberKilled / numberAttempts * 100;
     }
 
+    /**
+     * @throws IllegalArgumentException Thrown if numberKilled is larger than numberAttempts or if either value is
+     * negative
+     */
     public void setKillStats(int numberKilled, int numberAttempts) throws IllegalArgumentException {
         if (numberKilled > numberAttempts) {
             throw new IllegalArgumentException("Number of successfully killed penalties cannot be greater than " +
@@ -56,6 +103,10 @@ public class PKLine extends Line {
         this.numberAttempts = numberAttempts;
     }
 
+    /**
+     * Uses a percentage to calculate and assign numberKilled
+     * @throws IllegalArgumentException Thrown if successPercent is not a valid percent or if numberAttempts is negative
+     */
     public void setKillStatsWithPercentage(double successPercent, int numberAttempts) throws IllegalArgumentException {
         if (successPercent < 0 || successPercent > 100) {
             throw new IllegalArgumentException("Percentage must be in the range 0-100");
@@ -67,19 +118,22 @@ public class PKLine extends Line {
         this.numberAttempts = numberAttempts;
     }
 
+    // Increments numberKilled and numberAttempts up by 1
     public void killedPenalty() {
         numberKilled++;
         numberAttempts++;
     }
 
+    // Increments only numberAttempts up by 1
     public void scoredOn() {
         numberAttempts++;
     }
 
+    // toString method
     public String toString() {
         return String.format("%s\n" +
-                "Offense 1: %s\n" +
-                "Offense 2: %s\n" +
+                "Offense: %s\n" +
+                "Offense: %s\n" +
                 "Left Defense: %s\n" +
                 "Right Defense: %s\n" +
                 "PK%%: %.2f\n", getName(), getLeftWing().getName(), getRightWing().getName(),

@@ -1,3 +1,9 @@
+/**
+ * Line
+ * Class that stores information and methods to manipulate a line containing five players, a center, two wingers, and
+ * two defensemen.
+ */
+
 public class Line {
     private String name;
     private Center center;
@@ -5,8 +11,15 @@ public class Line {
     private Skater rightWing;
     private Defenseman leftDe;
     private Defenseman rightDe;
+
+    // Error message for score methods
     private static final String scoreError = "A given position is not assigned to this line";
 
+    /**
+     * Initializes instance variables with their respective arguments. A player can be left null if the user so chooses.
+     * @throws NullPointerException Thrown if the given name is null
+     * @throws IllegalArgumentException Thrown if the given name is blank
+     */
     public Line(String name, Center center, Skater leftWing, Skater rightWing, Defenseman leftDe, Defenseman rightDe)
             throws NullPointerException, IllegalArgumentException {
         if (name == null) {
@@ -22,6 +35,8 @@ public class Line {
         this.leftDe = leftDe;
         this.rightDe = rightDe;
     }
+
+    // Getter Methods
 
     public String getName() {
         return name;
@@ -47,6 +62,10 @@ public class Line {
         return rightDe;
     }
 
+    /**
+     * @throws NullPointerException Thrown if the given name is null
+     * @throws IllegalArgumentException Thrown if the given name is blank
+     */
     public void setName(String name) throws NullPointerException, IllegalArgumentException {
         if (name == null) {
             throw new NullPointerException("Name cannot be null");
@@ -56,6 +75,8 @@ public class Line {
         }
         this.name = name;
     }
+
+    // Position setter methods
 
     public void setCenter(Center center) {
         this.center = center;
@@ -77,6 +98,11 @@ public class Line {
         this.rightDe = rightDe;
     }
 
+    /**
+     * Updates the stats for each player on the line after a goal is scored.
+     * @param position Position of the player who scored the goal.
+     * @throws IllegalArgumentException Thrown if the given position is not assigned to the line
+     */
     public void score(Position position) throws IllegalArgumentException {
         if (center == null && position == Position.CENTER ) {
             throw new IllegalArgumentException(scoreError);
@@ -139,6 +165,13 @@ public class Line {
         }
     }
 
+    /**
+     * Works like the earlier score method; however, used if the goal was assisted
+     * @param scorer The position of the player who scored the goal
+     * @param assist The position of the player who assisted the goal
+     * @throws IllegalArgumentException Thrown if the two given positions match or if either of the given positions are
+     * not assigned to the line
+     */
     public void score(Position scorer, Position assist) throws IllegalArgumentException {
         if (scorer == assist) {
             throw new IllegalArgumentException("Player that scored cannot have the same" +
@@ -217,6 +250,14 @@ public class Line {
         }
     }
 
+    /**
+     * Does the role of earlier score methods; however, used if there are two assisters
+     * @param scorer Position of player who scored the goal
+     * @param assist1 Position of player who assisted the goal
+     * @param assist2 Position of other player who assisted the goal
+     * @throws IllegalArgumentException Thrown if any of the given positions match or if any of the given positions are
+     * not assigned to the line
+     */
     public void score(Position scorer, Position assist1, Position assist2) throws IllegalArgumentException {
         if (scorer == assist1 || scorer == assist2 || assist1 == assist2) {
             throw new IllegalArgumentException("None of the given positions can match");
@@ -297,6 +338,9 @@ public class Line {
         }
     }
 
+    /**
+     * Calls the scored against method on every player assigned to the line
+     */
     public void lineScoredOn() {
         if (center != null) {
             center.scoredAgainst();
@@ -315,6 +359,11 @@ public class Line {
         }
     }
 
+    /**
+     * @param o Object being compared to the line
+     * @return True if the object is a line, has the same name as the current line, and has the same players as the
+     * current line
+     */
     public boolean equals(Object o) {
         if (o instanceof Line l) {
             if (l.getName().equals(name)) {
@@ -348,6 +397,7 @@ public class Line {
         return false;
     }
 
+    // toString method
     public String toString() {
         String result = String.format("%s:\n", this.name);
         if (center != null) {

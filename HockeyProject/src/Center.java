@@ -1,13 +1,27 @@
-public class Center extends Skater{
-    private int faceoffWins;
-    private int faceoffTotal;
+/**
+ * Center
+ * Class that extends from skater to include information and methods relevant to a player at Center. This information
+ * mostly relates to faceoffs.
+ */
 
+public class Center extends Skater {
+    private int faceoffWins;
+    private int faceoffTotal;    // Used to calculate faceoff percentage
+
+    /**
+     * Behaves like basic Skater constructor and initializes stats to 0. Assigns position as CENTER
+     */
     public Center(String name, int playerNumber, String stickHand) {
         super(name, playerNumber, stickHand, Position.CENTER);
         faceoffWins = 0;
         faceoffTotal = 0;
     }
 
+    /**
+     * Assigns arguments to their respective variables, assigns position to CENTER
+     * @throws IllegalArgumentException Thrown when faceOffPercentage argument is not in range 0-100 or when
+     * faceOffTotal is negative
+     */
     public Center(String name, int playerNumber, String stickHand, int goals,
                   int assists, int plusMinus, double faceOffPercentage, int faceOffTotal)
                   throws IllegalArgumentException {
@@ -22,30 +36,43 @@ public class Center extends Skater{
         this.faceoffTotal = faceOffTotal;
     }
 
+    /**
+     * Calculates face off win percentage using the instance variables
+     * @return The calculated percentage
+     */
     public double getFaceoffPercent() {
         return ((double) faceoffWins/faceoffTotal) * 100;
     }
 
+    // Increments wins and total up by 1
     public void winFaceoff() {
         faceoffTotal++;
         faceoffWins++;
     }
 
+    // Only increments total up by 1
     public void loseFaceoff() {
         faceoffTotal++;
     }
 
+    /**
+     * Update wins and total variables using the given arguments
+     * @param faceoffPercent Percentage of face offs won, used to calculate the faceoffWin variable
+     * @param faceoffTotal Total number of face offs taken
+     * @throws IllegalArgumentException Thrown if percent is not in range 0-100, or if face off total is negative
+     */
     public void setFaceoffPercent(double faceoffPercent, int faceoffTotal) throws IllegalArgumentException {
         if (faceoffPercent < 0 || faceoffPercent > 100) {
             throw new IllegalArgumentException("Face Off % must be between 0-100");
-        } else if (faceoffTotal < 1) {
-            throw new IllegalArgumentException("Face Off total must be at least 1");
+        } else if (faceoffTotal < 0) {
+            throw new IllegalArgumentException("Face Off total cannot be negative");
         } else {
             faceoffWins = (int)((faceoffPercent/100) * faceoffTotal);
             this.faceoffTotal = faceoffTotal;
         }
     }
 
+    // toString method
     public String toString() {
         return super.toString()
                 + String.format("\n    Faceoff Percentage: %.2f%%", getFaceoffPercent());

@@ -1,3 +1,9 @@
+/**
+ * Skater
+ * Class that stores information for a basic skater/player on a team along with methods to manipulate and retrieve said
+ * information.
+ */
+
 public class Skater {
     private String name;
     private int playerNumber;
@@ -7,6 +13,11 @@ public class Skater {
     private String stickHand;
     private final Position position;
 
+    /**
+     * Sets given arguments to their respective instance variables. Initializes stats such as goals/assists to 0.
+     * @throws NullPointerException If a given object argument is null
+     * @throws IllegalArgumentException If a given argument is blank or if the player number is invalid
+     */
     public Skater(String name, int playerNumber, String stickHand, Position position)
             throws NullPointerException, IllegalArgumentException{
         if (name == null) {
@@ -37,6 +48,12 @@ public class Skater {
         plusMinus = 0;
     }
 
+    /**
+     * Sets given arguments to their respective instance variables.
+     * @throws NullPointerException If a given object is null.
+     * @throws IllegalArgumentException If a given argument is invalid, if the player number is not within the
+     * specified range, or if the given stats are negative.
+     */
     public Skater(String name, int playerNumber, String stickHand, Position position,
                   int goals, int assists, int plusMinus) throws NullPointerException, IllegalArgumentException {
         if (name == null) {
@@ -78,7 +95,11 @@ public class Skater {
         return name;
     }
 
-    public void setName() throws NullPointerException, IllegalArgumentException {
+    /**
+     * @throws NullPointerException If the given name is null
+     * @throws IllegalArgumentException If the given name is blank
+     */
+    public void setName(String name) throws NullPointerException, IllegalArgumentException {
         if (name == null) {
             throw new NullPointerException("Name cannot be null");
         } else if (name.isBlank()) {
@@ -116,6 +137,9 @@ public class Skater {
         return position;
     }
 
+    /**
+     * @throws IllegalArgumentException If the given player number is not in range 1-99
+     */
     public void setPlayerNumber(int playerNumber) throws IllegalArgumentException {
         if (playerNumber < 1 || playerNumber > 99) {
             throw new IllegalArgumentException("Player number must be between 1-99");
@@ -123,6 +147,9 @@ public class Skater {
         this.playerNumber = playerNumber;
     }
 
+    /**
+     * @throws IllegalArgumentException If the given stat is negative
+     */
     public void setGoals(int goals) throws IllegalArgumentException {
         if (goals < 0) {
             throw new IllegalArgumentException("Goals stat must be positive");
@@ -131,6 +158,9 @@ public class Skater {
         }
     }
 
+    /**
+     * @throws IllegalArgumentException If the given stat is negative
+     */
     public void setAssists(int assists) throws IllegalArgumentException {
         if (goals < 0) {
             throw new IllegalArgumentException("Assists stat must be positive");
@@ -143,6 +173,10 @@ public class Skater {
         this.plusMinus = plusMinus;
     }
 
+    /**
+     * @throws NullPointerException If the given argument is null
+     * @throws IllegalArgumentException If the given argument is not left or right
+     */
     public void setStickHand(String stickHand) throws NullPointerException, IllegalArgumentException {
         if (stickHand == null) {
             throw new NullPointerException("Stick hand cannot be null");
@@ -152,20 +186,28 @@ public class Skater {
         this.stickHand = stickHand;
     }
 
+    // Increments goals and plusMinus up by 1
     public void score() {
         goals++;
         plusMinus++;
     }
 
+    // Increments assists and plusMinus up by 1
     public void assist() {
         assists++;
         plusMinus++;
     }
 
+    // Subtracts 1 from plusMinus
     public void scoredAgainst() {
         plusMinus--;
     }
 
+    /**
+     * Returns true if the given object is a skater, and the two skaters have the same player number
+     * @param o Given object to compare
+     * @return True if the skaters have the same player number
+     */
     public boolean equals(Object o) {
         if (o instanceof Skater s) {
             return s.getPlayerNumber() == this.playerNumber;
@@ -173,10 +215,12 @@ public class Skater {
         return false;
     }
 
+    // Increments plusMinus up by 1
     public void scoredOnIce() {
         plusMinus++;
     }
 
+    // toString that displays all valid information on the player
     public String toString() {
         String result = String.format("%s #%d\n    ", name, playerNumber);
         switch (this.position) {

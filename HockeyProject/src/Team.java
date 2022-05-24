@@ -1,5 +1,9 @@
 import java.util.ArrayList;
 
+/**
+ * Team
+ * Class used to store information and methods related to a hockey team including its players, lines, and stats
+ */
 public class Team {
     private String name;
     private ArrayList<Skater> players;
@@ -9,6 +13,12 @@ public class Team {
     private int losses;
     private int lossesOT;
 
+    /**
+     * Initializes team with given name, empty lists, and a record of 0-0-0
+     * @param name Given name
+     * @throws NullPointerException If given name is null
+     * @throws IllegalArgumentException If given name is blank
+     */
     public Team(String name) throws NullPointerException, IllegalArgumentException {
         if (name == null) {
             throw new NullPointerException("Name cannot be null");
@@ -25,6 +35,11 @@ public class Team {
         this.lossesOT = 0;
     }
 
+    /**
+     * Initializes team with given arguments assigned to their respective instance variables, and empty lists
+     * @throws NullPointerException If given name is null
+     * @throws IllegalArgumentException If name is blank or if stats are negative
+     */
     public Team(String name, int wins, int losses, int lossesOT) throws NullPointerException, IllegalArgumentException {
         if (name == null) {
             throw new NullPointerException("Name cannot be null");
@@ -44,6 +59,11 @@ public class Team {
         this.lossesOT = lossesOT;
     }
 
+    /**
+     * Initializes team with given arguments assigned to their respective instance variables
+     * @throws NullPointerException Thrown if given name or lists are null
+     * @throws IllegalArgumentException Thrown if name is blank or given stats are negative
+     */
     public Team(String name, ArrayList<Skater> players, ArrayList<Line> lines, ArrayList<Goalie> goalies, int wins,
                 int losses, int lossesOT) throws NullPointerException, IllegalArgumentException {
         if (name == null || players == null || lines == null || goalies == null) {
@@ -68,6 +88,10 @@ public class Team {
         return name;
     }
 
+    /**
+     * @throws NullPointerException If given name is null
+     * @throws IllegalArgumentException If given name is blank
+     */
     public void setName(String name) throws NullPointerException, IllegalArgumentException {
         if (name == null) {
             throw new NullPointerException("Name cannot be null");
@@ -77,6 +101,8 @@ public class Team {
         }
         this.name = name;
     }
+
+    // Getter Methods
 
     public ArrayList<Skater> getPlayers() {
         return players;
@@ -102,6 +128,9 @@ public class Team {
         return lossesOT;
     }
 
+    /**
+     * @throws IllegalArgumentException If given stats are negative
+     */
     public void setRecord(int wins, int losses, int lossesOT) throws IllegalArgumentException {
         if (wins < 0 || losses < 0 || lossesOT < 0) {
             throw new IllegalArgumentException("Record cannot have negative values");
@@ -111,18 +140,27 @@ public class Team {
         this.lossesOT = lossesOT;
     }
 
+    // Increments wins up by 1
     public void win() {
         wins++;
     }
 
+    // Increments losses up by 1
     public void lose() {
         losses++;
     }
 
+    // Increments lossesOT up by 1
     public void tie() {
         lossesOT++;
     }
 
+    /**
+     * Adds given player to the team's ArrayList of players, ensures that list remains sorted by player number and that
+     * no two players have the same number
+     * @param player The player being added to the team
+     * @return True if the player is added to the team, false if the team already has a player with that number
+     */
     public boolean addPlayer(Skater player) {
         if (players.contains(player)) {
             return false;
@@ -161,6 +199,12 @@ public class Team {
         }
     }
 
+    /**
+     * Similar to the addPlayer method, adds a goalie to the team, keeps the list sorted by player number, and ensures
+     * that no two goalies have the same number
+     * @param goalie The goalie being added to the team
+     * @return True if the goalie is added, false if a goalie with the same player number already exists on the team
+     */
     public boolean addGoalie(Goalie goalie) {
         if (goalies.contains(goalie)) {
             return false;
@@ -199,10 +243,18 @@ public class Team {
         }
     }
 
+    // Adds a line to the teams list
     public void addLine(Line line) {
         lines.add(line);
     }
 
+    /**
+     * Updates a given player already on the team. Ensures that the new player can be safely added to the team before
+     * removing the old player
+     * @param oldPlayer Player being changed
+     * @param newPlayer New player being added
+     * @return True if the change was made false otherwise
+     */
     public boolean changePlayer(Skater oldPlayer, Skater newPlayer) {
         if (!oldPlayer.equals(newPlayer) && players.contains(newPlayer)) return false;
         if (!players.remove(oldPlayer)) {
@@ -211,6 +263,12 @@ public class Team {
         return addPlayer(newPlayer);
     }
 
+    /**
+     * Does functionality of changePlayer but for goalies
+     * @param oldGoalie Goalie being changed
+     * @param newGoalie New goalie being added
+     * @return True if the change was made, false otherwise
+     */
     public boolean changeGoalie(Goalie oldGoalie, Goalie newGoalie) {
         if (!newGoalie.equals(oldGoalie) && goalies.contains(newGoalie)) return false;
         if (!goalies.remove(oldGoalie)) {
@@ -219,6 +277,7 @@ public class Team {
         return addGoalie(newGoalie);
     }
 
+    // Edit a line on the list
     public boolean changeLine(Line oldLine, Line newLine) {
         if (!lines.remove(oldLine)) {
             return false;
@@ -227,18 +286,29 @@ public class Team {
         return true;
     }
 
+    /**
+     * @param player Player removed from the list
+     * @return Whether the removal was successful or not
+     */
     public boolean removePlayer(Skater player) {
         return players.remove(player);
     }
 
+    // Like removePLayer but for goalies
     public boolean removeGoalie(Goalie goalie) {
         return goalies.remove(goalie);
     }
 
+    // Like removePlayer but for lines
     public boolean removeLine(Line line) {
         return lines.remove(line);
     }
 
+    /**
+     * Calculates the teams overall penalty kill success rate by looking through the list of lines for Penalty Kill
+     * lines and using their stats to calculate the overall success rate
+     * @return Overall penalty kill success rate of the team
+     */
     public double getPKSuccess() {
         int tryTotal = 0;
         double successTotal = 0;
@@ -254,6 +324,11 @@ public class Team {
         return (successTotal / tryTotal) * 100;
     }
 
+    /**
+     * Calculates the teams overall power play success rate by looking through the list of lines for Power Play lines
+     * and using their stats to calculate the overall success rate
+     * @return Overall power play success rate of the team
+     */
     public double getPPSuccess() {
         int tryTotal = 0;
         double successTotal = 0;
@@ -269,6 +344,7 @@ public class Team {
         return (successTotal / tryTotal) * 100;
     }
 
+    // toString
     public String toString() {
         String result = String.format("%s\n", name);
         for (Skater player : players) {
