@@ -82,6 +82,13 @@ public class Center extends Skater {
         }
     }
 
+    // Resets stats to 0
+    public void resetStats() {
+        super.resetStats();
+        faceoffTotal = 0;
+        faceoffWins = 0;
+    }
+
     /**
      * @return A formatted String that contains all relevant information on the player
      */

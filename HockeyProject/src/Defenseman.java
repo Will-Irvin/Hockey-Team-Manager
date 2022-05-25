@@ -59,6 +59,12 @@ public class Defenseman extends Skater {
         }
     }
 
+    // Resets stats to 0
+    public void resetStats() {
+        super.resetStats();
+        shotsBlocked = 0;
+    }
+
     /**
      * @return A formatted String that contains all relevant information about the player
      */

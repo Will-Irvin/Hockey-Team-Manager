@@ -282,6 +282,14 @@ public class Goalie {
         shotsAgainst += numShots;
     }
 
+    public void resetStats() {
+        shotsAgainst = 0;
+        shotsBlocked = 0;
+        wins = 0;
+        losses = 0;
+        otLosses = 0;
+        shutouts = 0;
+    }
     /**
      * @return A formatted String containing the goalie's relevant stats
      */

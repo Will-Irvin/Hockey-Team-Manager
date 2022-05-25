@@ -375,6 +375,30 @@ public class Team {
     }
 
     /**
+     * Resets the team stats and the stats for the entire roster of the team (if there is a new season for example)
+     * as well as any special teams stats
+     */
+    public void resetTeamStats() {
+        wins = 0;
+        losses = 0;
+        lossesOT = 0;
+        for (Skater player: players) {
+            player.resetStats();
+        }
+        for (Goalie goalie: goalies) {
+            goalie.resetStats();
+        }
+        for (Line line: lines) {
+            if (line instanceof PKLine pk) {
+                pk.setKillStatsWithPercentage(0, 0);
+            }
+            if (line instanceof PPLine pp) {
+                pp.setStatsWithPercentage(0, 0);
+            }
+        }
+    }
+
+    /**
      * @return A string containing every player listed on the team
      */
     public String generateRoster() {

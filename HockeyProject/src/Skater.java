@@ -221,6 +221,15 @@ public class Skater {
     }
 
     /**
+     * Resets the players stats to 0 (for something like a new season)
+     */
+    public void resetStats() {
+        goals = 0;
+        assists = 0;
+        plusMinus = 0;
+    }
+
+    /**
      * @return A formatted String that displays all valid information on the player
      */
     public String statsDisplay() {
