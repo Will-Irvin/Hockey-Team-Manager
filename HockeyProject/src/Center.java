@@ -36,6 +36,16 @@ public class Center extends Skater {
         this.faceoffTotal = faceOffTotal;
     }
 
+    // Getter Methods
+
+    public int getFaceoffWins() {
+        return faceoffWins;
+    }
+
+    public int getFaceoffTotal() {
+        return faceoffTotal;
+    }
+
     /**
      * Calculates face off win percentage using the instance variables
      * @return The calculated percentage
@@ -72,9 +82,11 @@ public class Center extends Skater {
         }
     }
 
-    // toString method
-    public String toString() {
-        return super.toString()
+    /**
+     * @return A formatted String that contains all relevant information on the player
+     */
+    public String statsDisplay() {
+        return super.statsDisplay()
                 + String.format("\n    Faceoff Percentage: %.2f%%", getFaceoffPercent());
     }
 }

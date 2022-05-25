@@ -129,8 +129,10 @@ public class PKLine extends Line {
         numberAttempts++;
     }
 
-    // toString method
-    public String toString() {
+    /**
+     * @return A formatted String containing each player in the line and the success percentage of the line
+     */
+    public String lineRoster() {
         return String.format("%s\n" +
                 "Offense: %s\n" +
                 "Offense: %s\n" +

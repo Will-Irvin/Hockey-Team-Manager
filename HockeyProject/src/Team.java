@@ -305,6 +305,23 @@ public class Team {
     }
 
     /**
+     * Calculates team's overall face off percentage win rate by looking through the list of players for each center
+     * and adding their stats to a running total.
+     * @return The calculated percentage
+     */
+    public double getFaceoffPercent() {
+        int totalFaceoffs = 0;
+        int faceoffWins = 0;
+        for (Skater player: players) {
+            if (player instanceof Center center) {
+                totalFaceoffs += center.getFaceoffTotal();
+                faceoffWins += center.getFaceoffWins();
+            }
+        }
+        return ((double) faceoffWins / totalFaceoffs) * 100;
+    }
+
+    /**
      * Calculates the teams overall penalty kill success rate by looking through the list of lines for Penalty Kill
      * lines and using their stats to calculate the overall success rate
      * @return Overall penalty kill success rate of the team
@@ -357,12 +374,36 @@ public class Team {
         return (double) totalShots / (wins + losses + lossesOT);
     }
 
-    // toString
-    public String toString() {
-        String result = String.format("%s\n", name);
+    /**
+     * @return A string containing every player listed on the team
+     */
+    public String generateRoster() {
+        String result = String.format("%s\nSkaters:\n", name);
+
         for (Skater player : players) {
-            result += String.format("%d %s\n", player.getPlayerNumber(), player.getName());
+            result += String.format("%s %d\n", player.getName(), player.getPlayerNumber());
+        }
+        result += "Goalies:\n";
+        for (Goalie goalie: goalies) {
+            result += String.format("%s %d\n", goalie.getName(), goalie.getPlayerNumber());
         }
         return result.substring(0, result.length() - 1);
+    }
+
+    /**
+     * @return A formatted String containing the team's overall stats
+     */
+    public String displayTeamStats() {
+        return String.format("%s\nRecord: %d-%d-%d\n" +
+                "Face Off %%: %.2f\n" +
+                "Power Play %%: %.2f\n" +
+                "Penalty Kill %%: %.2f\n" +
+                "Average Shots Against Per Game: %.2f", name, wins, losses, lossesOT, getFaceoffPercent(),
+                getPPSuccess(), getPKSuccess(), getAverageShots());
+    }
+
+    // toString Method
+    public String toString() {
+        return name;
     }
 }

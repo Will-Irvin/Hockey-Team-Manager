@@ -220,8 +220,10 @@ public class Skater {
         plusMinus++;
     }
 
-    // toString that displays all valid information on the player
-    public String toString() {
+    /**
+     * @return A formatted String that displays all valid information on the player
+     */
+    public String statsDisplay() {
         String result = String.format("%s #%d\n    ", name, playerNumber);
         switch (this.position) {
             case CENTER -> result += "Center\n";
@@ -238,4 +240,10 @@ public class Skater {
                 stickHand.charAt(0), goals, assists, getPoints(), plusMinus);
         return result;
     }
+
+    // toString Method
+    public String toString() {
+        return String.format("%s %d", name, playerNumber);
+    }
+
 }

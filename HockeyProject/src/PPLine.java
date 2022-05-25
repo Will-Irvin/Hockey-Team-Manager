@@ -155,9 +155,11 @@ public class PPLine extends Line {
         this.numberOpps = numberOpps;
     }
 
-    // toString Method
-    public String toString() {
-        String result = super.toString();
+    /**
+     * @return A formatted String containing the players on the line and the power play success percentage of the line
+     */
+    public String lineRoster() {
+        String result = super.lineRoster();
         result += String.format("PP%%: %.2f", getSuccessRate());
         return result;
     }

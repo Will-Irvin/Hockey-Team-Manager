@@ -59,9 +59,11 @@ public class Defenseman extends Skater {
         }
     }
 
-    // toString method
-    public String toString() {
-        return super.toString() +
+    /**
+     * @return A formatted String that contains all relevant information about the player
+     */
+    public String statsDisplay() {
+        return super.statsDisplay() +
                 String.format("\n    Shots Blocked: %d", shotsBlocked);
     }
 }

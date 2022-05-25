@@ -282,13 +282,20 @@ public class Goalie {
         shotsAgainst += numShots;
     }
 
-    // toString method
-    public String toString() {
+    /**
+     * @return A formatted String containing the goalie's relevant stats
+     */
+    public String statsDisplay() {
         return String.format("%s #%d\n" +
                 "    Record: %d-%d-%d\n" +
                 "    Shutouts: %d\n" +
                 "    Goals Against Average: %.2f\n" +
                 "    Save Percentage: %.3f",
                 name, playerNumber, wins, losses, otLosses, shutouts, getGAA(), getSavePercent());
+    }
+
+    // toString Method
+    public String toString() {
+        return String.format("%s %d", name, playerNumber);
     }
 }

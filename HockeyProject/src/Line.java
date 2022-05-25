@@ -397,8 +397,10 @@ public class Line {
         return false;
     }
 
-    // toString method
-    public String toString() {
+    /**
+     * @return A formatted String that lists every player included in the line
+     */
+    public String lineRoster() {
         String result = String.format("%s:\n", this.name);
         if (center != null) {
             result += String.format("Center: %s\n", center.getName());
@@ -416,5 +418,10 @@ public class Line {
             result += String.format("Right Defense: %s", rightDe.getName());
         }
         return result;
+    }
+
+    // toString Method
+    public String toString() {
+        return name;
     }
 }
