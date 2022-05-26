@@ -128,6 +128,39 @@ public class Team {
         return lossesOT;
     }
 
+    // Generates and returns a list containing every OffenseLine in the team
+    public ArrayList<OffenseLine> getOffenseLines() {
+        ArrayList<OffenseLine> result = new ArrayList<>();
+        for (Line line: lines) {
+            if (line instanceof OffenseLine offense) {
+                result.add(offense);
+            }
+        }
+        return result;
+    }
+
+    // Generates and returns a list containing every DefenseLine in the team
+    public ArrayList<DefenseLine> getDefenseLines() {
+        ArrayList<DefenseLine> result = new ArrayList<>();
+        for (Line line: lines) {
+            if (line instanceof DefenseLine de) {
+                result.add(de);
+            }
+        }
+        return result;
+    }
+
+    // Generates and returns a list containing every special teams line in the team
+    public ArrayList<Line> getSpecialTeams() {
+        ArrayList<Line> result = new ArrayList<>();
+        for (Line line: lines) {
+            if (line instanceof PPLine || line instanceof PKLine) {
+                result.add(line);
+            }
+        }
+        return result;
+    }
+
     /**
      * @throws IllegalArgumentException If given stats are negative
      */
