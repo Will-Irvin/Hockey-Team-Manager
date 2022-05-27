@@ -1,4 +1,6 @@
-public class PPLine extends Line {
+import java.io.Serializable;
+
+public class PPLine extends Line implements Serializable {
     private int numberScored;  // Successful power plays
     private int numberOpps;    // Total power play attempts (opportunities)
 

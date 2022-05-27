@@ -1,3 +1,5 @@
+import java.io.Serializable;
+
 /**
  * DefenseLine
  *
@@ -5,7 +7,7 @@
  * not necessarily match up for the entirety of play.
  */
 
-public class DefenseLine extends Line {
+public class DefenseLine extends Line implements Serializable {
     /**
      * Assigns given players to their position and given name. Leaves offensive positions null.
      * @throws NullPointerException If any of the given players are null

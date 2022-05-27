@@ -1,10 +1,12 @@
+import java.io.Serializable;
+
 /**
  * Skater
  * Class that stores information for a basic skater/player on a team along with methods to manipulate and retrieve said
  * information.
  */
 
-public class Skater {
+public class Skater implements Serializable {
     private String name;
     private int playerNumber;
     private int goals;

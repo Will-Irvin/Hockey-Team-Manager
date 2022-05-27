@@ -1,10 +1,12 @@
+import java.io.Serializable;
+
 /**
  * Center
  * Class that extends from skater to include information and methods relevant to a player at Center. This information
  * mostly relates to faceoffs.
  */
 
-public class Center extends Skater {
+public class Center extends Skater implements Serializable {
     private int faceoffWins;
     private int faceoffTotal;    // Used to calculate faceoff percentage
 

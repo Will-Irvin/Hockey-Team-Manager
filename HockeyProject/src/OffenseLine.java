@@ -1,3 +1,5 @@
+import java.io.Serializable;
+
 /**
  * OffenseLine
  *
@@ -5,7 +7,7 @@
  * defense lines and while they sometimes line up in full lines, this is not always the case.
  */
 
-public class OffenseLine extends Line {
+public class OffenseLine extends Line implements Serializable {
     /**
      * Assigns given name to the line and given players to their respective positions, leaves defensive positions null.
      * @throws NullPointerException If any of the given players are null

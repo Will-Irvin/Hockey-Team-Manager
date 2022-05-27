@@ -1,10 +1,12 @@
+import java.io.Serializable;
+
 /**
  * Line
  * Class that stores information and methods to manipulate a line containing five players, a center, two wingers, and
  * two defensemen.
  */
 
-public class Line {
+public class Line implements Serializable {
     private String name;
     private Center center;
     private Skater leftWing;

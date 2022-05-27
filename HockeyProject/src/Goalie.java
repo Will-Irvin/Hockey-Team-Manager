@@ -1,4 +1,6 @@
-public class Goalie {
+import java.io.Serializable;
+
+public class Goalie implements Serializable {
     private int playerNumber;
     private String name;
     private int shotsBlocked;

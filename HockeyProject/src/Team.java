@@ -1,10 +1,11 @@
+import java.io.Serializable;
 import java.util.ArrayList;
 
 /**
  * Team
  * Class used to store information and methods related to a hockey team including its players, lines, and stats
  */
-public class Team {
+public class Team implements Serializable {
     private String name;
     private ArrayList<Skater> players;
     private ArrayList<Line> lines;
@@ -12,9 +13,6 @@ public class Team {
     private int wins;
     private int losses;
     private int lossesOT;
-
-    // Static variable used to store every team created in the program
-    private static final ArrayList<Team> teams = new ArrayList<>();
 
     /**
      * Initializes team with given name, empty lists, and a record of 0-0-0
@@ -36,7 +34,6 @@ public class Team {
         this.wins = 0;
         this.losses = 0;
         this.lossesOT = 0;
-        teams.add(this);
     }
 
     /**
@@ -61,7 +58,6 @@ public class Team {
         this.wins = wins;
         this.losses = losses;
         this.lossesOT = lossesOT;
-        teams.add(this);
     }
 
     /**
@@ -87,7 +83,6 @@ public class Team {
         this.wins = wins;
         this.losses = losses;
         this.lossesOT = lossesOT;
-        teams.add(this);
     }
 
     public String getName() {
@@ -132,10 +127,6 @@ public class Team {
 
     public int getLossesOT() {
         return lossesOT;
-    }
-
-    public static ArrayList<Team> getTeams() {
-        return teams;
     }
 
     // Generates and returns a list containing every OffenseLine in the team
@@ -467,14 +458,6 @@ public class Team {
                 "Penalty Kill %%: %.2f\n" +
                 "Average Shots Against Per Game: %.2f", name, wins, losses, lossesOT, getFaceoffPercent(),
                 getPPSuccess(), getPKSuccess(), getAverageShots());
-    }
-
-    /**
-     * @param team Team being removed from the global list
-     * @return True if the given team was successfully removed
-     */
-    public static boolean removeTeam(Team team) {
-        return teams.remove(team);
     }
 
     // toString Method

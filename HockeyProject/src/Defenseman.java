@@ -1,9 +1,11 @@
+import java.io.Serializable;
+
 /**
  * Defenseman
  * Class contains information and methods specific to a player with a defensive position.
  */
 
-public class Defenseman extends Skater {
+public class Defenseman extends Skater implements Serializable {
     private int shotsBlocked;
 
     /**
