@@ -279,7 +279,34 @@ public class Team implements Serializable {
 
     // Adds a line to the teams list
     public void addLine(Line line) {
-        lines.add(line);
+        if (lines.size() == 0) {
+            lines.add(line);
+            return;
+        }
+        int low = 0;
+        int high = lines.size();
+        while (true) {
+            int i = (low + high) / 2;
+            if (line.getName().compareTo(lines.get(i).getName()) <= 0) {
+                if (i == 0 || line.getName().compareTo(lines.get(i - 1).getName()) >= 0) {
+                    lines.add(i, line);
+                    return;
+                } else {
+                    high = i;
+                }
+            } else {
+                if (i == lines.size() - 1) {
+                    lines.add(line);
+                    return;
+                }
+                if (line.getName().compareTo(lines.get(i + 1).getName()) <= 0) {
+                    lines.add(i + 1, line);
+                    return;
+                } else {
+                    low = i;
+                }
+            }
+        }
     }
 
     /**
@@ -316,7 +343,7 @@ public class Team implements Serializable {
         if (!lines.remove(oldLine)) {
             return false;
         }
-        lines.add(newLine);
+        addLine(newLine);
         return true;
     }
 
