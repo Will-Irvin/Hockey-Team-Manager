@@ -379,6 +379,9 @@ public class Team implements Serializable {
                 faceoffWins += center.getFaceoffWins();
             }
         }
+        if (totalFaceoffs == 0) {
+            return 0;
+        }
         return ((double) faceoffWins / totalFaceoffs) * 100;
     }
 
@@ -397,7 +400,7 @@ public class Team implements Serializable {
             }
         }
         if (tryTotal == 0) {
-            return -1;
+            return 0;
         }
         return (successTotal / tryTotal) * 100;
     }
@@ -417,7 +420,7 @@ public class Team implements Serializable {
             }
         }
         if (tryTotal == 0) {
-            return -1;
+            return 0;
         }
         return (successTotal / tryTotal) * 100;
     }
@@ -432,7 +435,11 @@ public class Team implements Serializable {
         for (Goalie goalie: goalies) {
             totalShots += goalie.getShotsAgainst();
         }
-        return (double) totalShots / (wins + losses + lossesOT);
+        int matches = wins + losses + lossesOT;
+        if (matches == 0) {
+            return 0;
+        }
+        return (double) totalShots / matches;
     }
 
     /**
