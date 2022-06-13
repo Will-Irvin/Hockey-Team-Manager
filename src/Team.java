@@ -495,6 +495,7 @@ public class Team implements Serializable {
     }
 
     // toString Method
+    @Override
     public String toString() {
         return name;
     }

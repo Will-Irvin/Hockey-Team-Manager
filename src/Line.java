@@ -366,6 +366,7 @@ public class Line implements Serializable {
      * @return True if the object is a line, has the same name as the current line, and has the same players as the
      * current line
      */
+    @Override
     public boolean equals(Object o) {
         if (o instanceof Line l) {
             if (l.getName().equals(name)) {
@@ -423,6 +424,7 @@ public class Line implements Serializable {
     }
 
     // toString Method
+    @Override
     public String toString() {
         return name;
     }

@@ -85,6 +85,7 @@ public class Center extends Skater implements Serializable {
     }
 
     // Resets stats to 0
+    @Override
     public void resetStats() {
         super.resetStats();
         faceoffTotal = 0;
@@ -94,6 +95,7 @@ public class Center extends Skater implements Serializable {
     /**
      * @return A formatted String that contains all relevant information on the player
      */
+    @Override
     public String statsDisplay() {
         return super.statsDisplay()
                 + String.format("\n    Faceoff Percentage: %.2f%%", getFaceoffPercent());

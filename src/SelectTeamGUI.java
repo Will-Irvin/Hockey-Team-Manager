@@ -145,6 +145,7 @@ public class SelectTeamGUI extends JComponent implements Runnable {
         }
     }
 
+    @Override
     public void run() {
         // Sets up the teams array with its data, displays an error message if there are issues with reading the files
         try {

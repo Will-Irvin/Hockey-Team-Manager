@@ -77,6 +77,7 @@ public class PPLine extends Line implements Serializable {
      * @param position Position of the player who scored the goal.
      * @throws IllegalArgumentException See super class
      */
+    @Override
     public void score(Position position) throws IllegalArgumentException {
         super.score(position);
         numberScored++;
@@ -89,6 +90,7 @@ public class PPLine extends Line implements Serializable {
      * @param assist The position of the player who assisted the goal
      * @throws IllegalArgumentException See super class
      */
+    @Override
     public void score(Position score, Position assist) throws IllegalArgumentException {
         super.score(score, assist);
         numberScored++;
@@ -102,6 +104,7 @@ public class PPLine extends Line implements Serializable {
      * @param assist2 Position of other player who assisted the goal
      * @throws IllegalArgumentException See super class
      */
+    @Override
     public void score(Position score, Position assist1, Position assist2) throws IllegalArgumentException {
         super.score(score, assist1, assist2);
         numberScored++;
@@ -160,6 +163,7 @@ public class PPLine extends Line implements Serializable {
     /**
      * @return A formatted String containing the players on the line and the power play success percentage of the line
      */
+    @Override
     public String lineRoster() {
         String result = super.lineRoster();
         result += String.format("PP%%: %.2f", getSuccessRate());

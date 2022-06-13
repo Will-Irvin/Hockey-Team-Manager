@@ -62,6 +62,7 @@ public class Defenseman extends Skater implements Serializable {
     }
 
     // Resets stats to 0
+    @Override
     public void resetStats() {
         super.resetStats();
         shotsBlocked = 0;
@@ -70,6 +71,7 @@ public class Defenseman extends Skater implements Serializable {
     /**
      * @return A formatted String that contains all relevant information about the player
      */
+    @Override
     public String statsDisplay() {
         return super.statsDisplay() +
                 String.format("\n    Shots Blocked: %d", shotsBlocked);

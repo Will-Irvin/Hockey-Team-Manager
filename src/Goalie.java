@@ -260,6 +260,7 @@ public class Goalie implements Serializable {
      * @param o Object being compared
      * @return True if the object is a goalie and has the same player number as the original goalie
      */
+    @Override
     public boolean equals(Object o) {
         if (o instanceof Goalie g) {
             return g.getPlayerNumber() == this.getPlayerNumber();
@@ -305,6 +306,7 @@ public class Goalie implements Serializable {
     }
 
     // toString Method
+    @Override
     public String toString() {
         return String.format("%s %d", name, playerNumber);
     }

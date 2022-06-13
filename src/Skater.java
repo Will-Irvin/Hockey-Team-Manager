@@ -210,6 +210,7 @@ public class Skater implements Serializable {
      * @param o Given object to compare
      * @return True if the skaters have the same player number
      */
+    @Override
     public boolean equals(Object o) {
         if (o instanceof Skater s) {
             return s.getPlayerNumber() == this.playerNumber;
@@ -253,6 +254,7 @@ public class Skater implements Serializable {
     }
 
     // toString Method
+    @Override
     public String toString() {
         return String.format("%s %d", name, playerNumber);
     }
