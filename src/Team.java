@@ -195,13 +195,13 @@ public class Team implements Serializable {
      * @param player The player being added to the team
      * @return True if the player is added to the team, false if the team already has a player with that number
      */
-    public boolean addPlayer(Skater player) {
+    public int addPlayer(Skater player) {
         if (players.contains(player)) {
-            return false;
+            return -1;
         }
         if (players.size() == 0) {
             players.add(player);
-            return true;
+            return 0;
         }
         int low = 0;
         int high = players.size();
@@ -210,22 +210,22 @@ public class Team implements Serializable {
             if (player.getPlayerNumber() < players.get(i).getPlayerNumber()) {
                 if (i == 0) {
                     players.add(0, player);
-                    return true;
+                    return i;
                 }
                 if (player.getPlayerNumber() > players.get(i - 1).getPlayerNumber()) {
                     players.add(i, player);
-                    return true;
+                    return i;
                 } else {
                     high = i;
                 }
             } else {
                 if (i == players.size() - 1) {
                     players.add(player);
-                    return true;
+                    return i;
                 }
-                if (player.getPlayerNumber() < players.get(i + i).getPlayerNumber()) {
+                if (player.getPlayerNumber() < players.get(i + 1).getPlayerNumber()) {
                     players.add(i + 1, player);
-                    return true;
+                    return i + 1;
                 } else {
                     low = i;
                 }
@@ -239,13 +239,13 @@ public class Team implements Serializable {
      * @param goalie The goalie being added to the team
      * @return True if the goalie is added, false if a goalie with the same player number already exists on the team
      */
-    public boolean addGoalie(Goalie goalie) {
+    public int addGoalie(Goalie goalie) {
         if (goalies.contains(goalie)) {
-            return false;
+            return -1;
         }
         if (goalies.size() == 0) {
             goalies.add(goalie);
-            return true;
+            return 0;
         }
         int low = 0;
         int high = goalies.size();
@@ -254,22 +254,22 @@ public class Team implements Serializable {
             if (goalie.getPlayerNumber() < goalies.get(i).getPlayerNumber()) {
                 if (i == 0) {
                     goalies.add(0, goalie);
-                    return true;
+                    return i;
                 }
                 if (goalie.getPlayerNumber() > goalies.get(i - 1).getPlayerNumber()) {
                     goalies.add(i, goalie);
-                    return true;
+                    return i;
                 } else {
                     high = i;
                 }
             } else {
                 if (i == goalies.size() - 1) {
                     goalies.add(goalie);
-                    return true;
+                    return i;
                 }
                 if (goalie.getPlayerNumber() < goalies.get(i + i).getPlayerNumber()) {
                     goalies.add(i + 1, goalie);
-                    return true;
+                    return i + 1;
                 } else {
                     low = i;
                 }
@@ -277,14 +277,14 @@ public class Team implements Serializable {
         }
     }
 
-    // Adds a line to the teams list
-    public boolean addLine(Line line) {
+    // Adds a line to the teams list, applies same method as addPlayer/addGoalie
+    public int addLine(Line line) {
         if (lines.contains(line)) {
-            return false;
+            return -1;
         }
         if (lines.size() == 0) {
             lines.add(line);
-            return true;
+            return 0;
         }
         int low = 0;
         int high = lines.size();
@@ -293,18 +293,18 @@ public class Team implements Serializable {
             if (line.getName().compareTo(lines.get(i).getName()) <= 0) {
                 if (i == 0 || line.getName().compareTo(lines.get(i - 1).getName()) >= 0) {
                     lines.add(i, line);
-                    return true;
+                    return i;
                 } else {
                     high = i;
                 }
             } else {
                 if (i == lines.size() - 1) {
                     lines.add(line);
-                    return true;
+                    return i;
                 }
                 if (line.getName().compareTo(lines.get(i + 1).getName()) <= 0) {
                     lines.add(i + 1, line);
-                    return true;
+                    return i + 1;
                 } else {
                     low = i;
                 }
@@ -319,10 +319,10 @@ public class Team implements Serializable {
      * @param newPlayer New player being added
      * @return True if the change was made false otherwise
      */
-    public boolean changePlayer(Skater oldPlayer, Skater newPlayer) {
-        if (!oldPlayer.equals(newPlayer) && players.contains(newPlayer)) return false;
+    public int changePlayer(Skater oldPlayer, Skater newPlayer) {
+        if (!oldPlayer.equals(newPlayer) && players.contains(newPlayer)) return -1;
         if (!players.remove(oldPlayer)) {
-            return false;
+            return -1;
         }
         return addPlayer(newPlayer);
     }
@@ -333,10 +333,10 @@ public class Team implements Serializable {
      * @param newGoalie New goalie being added
      * @return True if the change was made, false otherwise
      */
-    public boolean changeGoalie(Goalie oldGoalie, Goalie newGoalie) {
-        if (!newGoalie.equals(oldGoalie) && goalies.contains(newGoalie)) return false;
+    public int changeGoalie(Goalie oldGoalie, Goalie newGoalie) {
+        if (!newGoalie.equals(oldGoalie) && goalies.contains(newGoalie)) return -1;
         if (!goalies.remove(oldGoalie)) {
-            return false;
+            return -1;
         }
         return addGoalie(newGoalie);
     }

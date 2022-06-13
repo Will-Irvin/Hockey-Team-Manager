@@ -38,6 +38,7 @@ public class SelectTeamGUI extends JComponent implements Runnable {
     JLabel otherOptionsLabel;
     JButton createTeam;
     JButton deleteTeam;
+    JButton restoreSample;
 
     JButton newUsers;
 
@@ -52,7 +53,59 @@ public class SelectTeamGUI extends JComponent implements Runnable {
      * @return The generated sample team containing data from the 2015 Chicago Blackhawks Regular Season.
      */
     public static Team createSample() {
-        Team blackhawks = new Team("Sample Team: Chicago Blackhawks - 2015 Regular Season");
+        Team blackhawks = new Team("Sample Team: Chicago Blackhawks - 2015 Regular Season", 47, 26,
+                9);
+        blackhawks.addPlayer(new Skater("Patrick Kane", 88, "Left", Position.RIGHT_WING));
+        blackhawks.addPlayer(new Center("Artem Anisimov", 15, "Left"));
+        blackhawks.addPlayer(new Skater("Kyle Baun", 39, "Right", Position.LEFT_WING));
+        blackhawks.addPlayer(new Skater("Bryan Bickell", 29, "Left", Position.LEFT_WING));
+        blackhawks.addGoalie(new Goalie("Corey Crawford", 50));
+        blackhawks.addPlayer(new Defenseman("Trevor Daley", 6, "Left",
+                Position.LEFT_DEFENSE));
+        blackhawks.addPlayer(new Center("Phillip Danault", 24, "Left"));
+        blackhawks.addPlayer(new Center("Marko Dano", 56, "Left"));
+        blackhawks.addGoalie(new Goalie("Scott Darling", 33));
+        blackhawks.addPlayer(new Skater("Andrew Desjardins", 11, "Left", Position.LEFT_WING));
+        blackhawks.addPlayer(new Defenseman("Christian Ehrhoff", 55, "Left",
+                Position.LEFT_DEFENSE));
+        blackhawks.addPlayer(new Skater("Tomas Fleischmann", 12, "Left", Position.LEFT_WING));
+        blackhawks.addPlayer(new Center("Ryan Garbutt", 28, "Left"));
+        blackhawks.addPlayer(new Defenseman("Erik Gustafsson", 52, "Left",
+                Position.LEFT_DEFENSE));
+        blackhawks.addPlayer(new Skater("Ryan Hartman", 38, "Right", Position.RIGHT_WING));
+        blackhawks.addPlayer(new Center("Vinnie Hinostroza", 48, "Right"));
+        blackhawks.addPlayer(new Defenseman("Niklas Hjalmarsson", 4, "Left",
+                Position.LEFT_DEFENSE));
+        blackhawks.addPlayer(new Skater("Marian Hossa", 81, "Left", Position.RIGHT_WING));
+        blackhawks.addPlayer(new Defenseman("Duncan Keith", 2, "Left",
+                Position.LEFT_DEFENSE));
+        blackhawks.addPlayer(new Skater("Tanner Kero", 67, "Left", Position.RIGHT_WING));
+        blackhawks.addPlayer(new Center("Markus Kruger", 22, "Left"));
+        blackhawks.addPlayer(new Skater("Andrew Ladd", 16, "Left", Position.LEFT_WING));
+        blackhawks.addPlayer(new Skater("Brandon Mashinter", 53, "Left", Position.LEFT_WING));
+        blackhawks.addPlayer(new Skater("Mark McNeill", 41, "Right", Position.RIGHT_WING));
+        blackhawks.addPlayer(new Skater("Artemi Panarin", 72, "Right", Position.LEFT_WING));
+        blackhawks.addPlayer(new Skater("Richard Panik", 14, "Left", Position.RIGHT_WING));
+        blackhawks.addPlayer(new Center("Dennis Rasmussen", 70, "Right"));
+        blackhawks.addPlayer(new Defenseman("Michal Rozsival", 32, "Right",
+                Position.RIGHT_DEFENSE));
+        blackhawks.addPlayer(new Defenseman("David Rundblad", 5, "Right",
+                Position.RIGHT_DEFENSE));
+        blackhawks.addPlayer(new Defenseman("Rob Scuderi", 47, "Left",
+                Position.LEFT_DEFENSE));
+        blackhawks.addPlayer(new Defenseman("Brent Seabrook", 7, "Right",
+                Position.RIGHT_DEFENSE));
+        blackhawks.addPlayer(new Skater("Jiri Sekac", 34, "Left", Position.LEFT_WING));
+        blackhawks.addPlayer(new Skater("Andrew Shaw", 65, "Right", Position.RIGHT_WING));
+        blackhawks.addPlayer(new Defenseman("Viktor Svedberg", 43, "Left",
+                Position.LEFT_DEFENSE));
+        blackhawks.addPlayer(new Center("Teuvo Teravainen", 86, "Left"));
+        blackhawks.addPlayer(new Skater("Viktor, Tikhonov", 14, "Right",
+                Position.RIGHT_WING));
+        blackhawks.addPlayer(new Center("Jonathan Toews", 19, "Left"));
+        blackhawks.addPlayer(new Defenseman("Trevor van Riemsdyk", 57, "Right",
+                Position.RIGHT_DEFENSE));
+        blackhawks.addPlayer(new Skater("Dale Weise", 25, "Right", Position.RIGHT_WING));
         return blackhawks;
     }
 
@@ -111,13 +164,13 @@ public class SelectTeamGUI extends JComponent implements Runnable {
      * their team name
      * @param team Team being added
      */
-    public static boolean addTeam(Team team) {
+    public static int addTeam(Team team) {
         if (teams.contains(team)) {
-            return false;
+            return -1;
         }
         if (teams.size() == 0) {
             teams.add(team);
-            return true;
+            return 0;
         }
 
         int low = 0;
@@ -127,20 +180,20 @@ public class SelectTeamGUI extends JComponent implements Runnable {
             if (team.getName().compareTo(teams.get(i).getName()) <= 0) {
                 if (i == 0) {
                     teams.add(0, team);
-                    return true;
+                    return i;
                 } else if (team.getName().compareTo(teams.get(i - 1).getName()) >= 0) {
                     teams.add(i, team);
-                    return true;
+                    return i;
                 } else {
                     high = i;
                 }
             } else {
                 if (i == teams.size() - 1) {
                     teams.add(team);
-                    return true;
+                    return i;
                 } else if (team.getName().compareTo(teams.get(i + 1).getName()) <= 0) {
                     teams.add(i + 1, team);
-                    return true;
+                    return i + 1;
                 } else {
                     low = i;
                 }
@@ -156,6 +209,7 @@ public class SelectTeamGUI extends JComponent implements Runnable {
         } catch (IOException | ClassNotFoundException e) {
             JOptionPane.showMessageDialog(null, "There was an issue reading from the file. " +
                     "Please try again.", "File Error", JOptionPane.ERROR_MESSAGE);
+            e.printStackTrace();
             return;
         } catch (Exception e) {
             JOptionPane.showMessageDialog(null, e.getMessage(), "File Error",
@@ -189,9 +243,11 @@ public class SelectTeamGUI extends JComponent implements Runnable {
         otherOptionsLabel = new JLabel("Additional Options: ");
         createTeam = new JButton("Create New Team");
         deleteTeam = new JButton("Delete Team");
+        restoreSample = new JButton("Restore Sample Team");
         otherOptions.add(otherOptionsLabel);
         otherOptions.add(createTeam);
         otherOptions.add(deleteTeam);
+        otherOptions.add(restoreSample);
 
         content.add(otherOptions);
 
@@ -245,7 +301,7 @@ public class SelectTeamGUI extends JComponent implements Runnable {
                                     JOptionPane.QUESTION_MESSAGE));
                             Team newTeam = new Team(name, wins, losses, otLosses);
 
-                            if (!addTeam(newTeam)) {
+                            if (addTeam(newTeam) == -1) {
                                 JOptionPane.showMessageDialog(frame, "Two teams cannot have the same name",
                                         "Create Team", JOptionPane.ERROR_MESSAGE);
                                 return;
@@ -277,7 +333,7 @@ public class SelectTeamGUI extends JComponent implements Runnable {
 
                             Team newTeam = new Team(name);
 
-                            if (!addTeam(newTeam)) {
+                            if (addTeam(newTeam) == -1) {
                                 JOptionPane.showMessageDialog(frame, "Two teams cannot have the same name",
                                         "Create Team", JOptionPane.ERROR_MESSAGE);
                                 return;
@@ -357,6 +413,18 @@ public class SelectTeamGUI extends JComponent implements Runnable {
                     frame.setVisible(true);
                 }
             });
+        });
+
+        // Adds sample team back into the list if the user deleted it but wants it back
+        restoreSample.addActionListener(e -> {
+            Team sample = createSample();
+            int index = addTeam(sample);
+            if (index == -1) {
+                JOptionPane.showMessageDialog(frame, "The sample team is still in your list",
+                        "Restore Sample", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+            teamSelection.insertItemAt(sample, index);
         });
 
         newUsers.addActionListener(e -> {

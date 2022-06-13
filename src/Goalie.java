@@ -15,7 +15,7 @@ public class Goalie implements Serializable {
      * @throws IllegalArgumentException If player number is invalid or if name is blank
      * @throws NullPointerException If given name is null
      */
-    public Goalie(int playerNumber, String name) throws IllegalArgumentException, NullPointerException {
+    public Goalie(String name, int playerNumber) throws IllegalArgumentException, NullPointerException {
         if (playerNumber < 0 || playerNumber > 99) {
             throw new IllegalArgumentException("Player Number must be between 0-99");
         } else {
@@ -42,7 +42,7 @@ public class Goalie implements Serializable {
      * number of shutouts is greater than number of wins
      * @throws NullPointerException If given name is null
      */
-    public Goalie(int playerNumber, String name, double savePercentage,
+    public Goalie(String name, int playerNumber, double savePercentage,
                   int shotsAgainst, int wins, int losses, int otLosses, int shutouts)
             throws IllegalArgumentException, NullPointerException {
         if (playerNumber < 0 || playerNumber > 99) {
