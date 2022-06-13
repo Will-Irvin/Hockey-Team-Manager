@@ -77,9 +77,6 @@ public class Skater implements Serializable {
         } else {
             this.stickHand = stickHand;
         }
-        if (position == null) {
-            throw new NullPointerException("Position cannot be null");
-        }
         this.position = position;
         if (goals < 0) {
             throw new IllegalArgumentException("Goals stat must be positive");
