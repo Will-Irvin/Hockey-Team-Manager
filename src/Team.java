@@ -278,10 +278,13 @@ public class Team implements Serializable {
     }
 
     // Adds a line to the teams list
-    public void addLine(Line line) {
+    public boolean addLine(Line line) {
+        if (lines.contains(line)) {
+            return false;
+        }
         if (lines.size() == 0) {
             lines.add(line);
-            return;
+            return true;
         }
         int low = 0;
         int high = lines.size();
@@ -290,18 +293,18 @@ public class Team implements Serializable {
             if (line.getName().compareTo(lines.get(i).getName()) <= 0) {
                 if (i == 0 || line.getName().compareTo(lines.get(i - 1).getName()) >= 0) {
                     lines.add(i, line);
-                    return;
+                    return true;
                 } else {
                     high = i;
                 }
             } else {
                 if (i == lines.size() - 1) {
                     lines.add(line);
-                    return;
+                    return true;
                 }
                 if (line.getName().compareTo(lines.get(i + 1).getName()) <= 0) {
                     lines.add(i + 1, line);
-                    return;
+                    return true;
                 } else {
                     low = i;
                 }
@@ -492,6 +495,18 @@ public class Team implements Serializable {
                 "Penalty Kill %%: %.2f\n" +
                 "Average Shots Against Per Game: %.2f", name, wins, losses, lossesOT, getFaceoffPercent(),
                 getPPSuccess(), getPKSuccess(), getAverageShots());
+    }
+
+    /**
+     * @param o Object being compared to the current team
+     * @return True if the object is a team with the exact same name, false otherwise
+     */
+    @Override
+    public boolean equals(Object o) {
+        if (o instanceof Team t) {
+            return t.getName().equals(this.name);
+        }
+        return false;
     }
 
     // toString Method

@@ -111,10 +111,13 @@ public class SelectTeamGUI extends JComponent implements Runnable {
      * their team name
      * @param team Team being added
      */
-    public static void addTeam(Team team) {
+    public static boolean addTeam(Team team) {
+        if (teams.contains(team)) {
+            return false;
+        }
         if (teams.size() == 0) {
             teams.add(team);
-            return;
+            return true;
         }
 
         int low = 0;
@@ -124,20 +127,20 @@ public class SelectTeamGUI extends JComponent implements Runnable {
             if (team.getName().compareTo(teams.get(i).getName()) <= 0) {
                 if (i == 0) {
                     teams.add(0, team);
-                    return;
+                    return true;
                 } else if (team.getName().compareTo(teams.get(i - 1).getName()) >= 0) {
                     teams.add(i, team);
-                    return;
+                    return true;
                 } else {
                     high = i;
                 }
             } else {
                 if (i == teams.size() - 1) {
                     teams.add(team);
-                    return;
+                    return true;
                 } else if (team.getName().compareTo(teams.get(i + 1).getName()) <= 0) {
                     teams.add(i + 1, team);
-                    return;
+                    return true;
                 } else {
                     low = i;
                 }
@@ -151,7 +154,7 @@ public class SelectTeamGUI extends JComponent implements Runnable {
         try {
             openFile();
         } catch (IOException | ClassNotFoundException e) {
-            JOptionPane.showMessageDialog(null, "There was an issue reading from the file." +
+            JOptionPane.showMessageDialog(null, "There was an issue reading from the file. " +
                     "Please try again.", "File Error", JOptionPane.ERROR_MESSAGE);
             return;
         } catch (Exception e) {
@@ -242,7 +245,12 @@ public class SelectTeamGUI extends JComponent implements Runnable {
                                     JOptionPane.QUESTION_MESSAGE));
                             Team newTeam = new Team(name, wins, losses, otLosses);
 
-                            addTeam(newTeam);
+                            if (!addTeam(newTeam)) {
+                                JOptionPane.showMessageDialog(frame, "Two teams cannot have the same name",
+                                        "Create Team", JOptionPane.ERROR_MESSAGE);
+                                return;
+                            }
+
                             updateFile();
 
                             // Set selected team and close frame
@@ -269,7 +277,11 @@ public class SelectTeamGUI extends JComponent implements Runnable {
 
                             Team newTeam = new Team(name);
 
-                            addTeam(newTeam);
+                            if (!addTeam(newTeam)) {
+                                JOptionPane.showMessageDialog(frame, "Two teams cannot have the same name",
+                                        "Create Team", JOptionPane.ERROR_MESSAGE);
+                                return;
+                            }
                             updateFile();
 
                             selectedTeam = newTeam;
