@@ -454,9 +454,8 @@ public class SelectTeamGUI extends JComponent implements Runnable {
             teamSelection.insertItemAt(sample, index);
         });
 
-        newUsers.addActionListener(e -> {
-            JOptionPane.showMessageDialog(frame, newInfo, "New User Information", JOptionPane.INFORMATION_MESSAGE);
-        });
+        newUsers.addActionListener(e -> JOptionPane.showMessageDialog(frame, newInfo, "New User Information",
+                JOptionPane.INFORMATION_MESSAGE));
     }
 
     public static void main(String[] args) {

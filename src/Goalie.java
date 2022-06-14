@@ -297,11 +297,12 @@ public class Goalie implements Serializable {
      * @return A formatted String containing the goalie's relevant stats
      */
     public String statsDisplay() {
-        return String.format("%s #%d\n" +
-                "    Record: %d-%d-%d\n" +
-                "    Shutouts: %d\n" +
-                "    Goals Against Average: %.2f\n" +
-                "    Save Percentage: %.3f",
+        return String.format("""
+                        %s #%d
+                            Record: %d-%d-%d
+                            Shutouts: %d
+                            Goals Against Average: %.2f
+                            Save Percentage: %.3f""",
                 name, playerNumber, wins, losses, otLosses, shutouts, getGAA(), getSavePercent());
     }
 

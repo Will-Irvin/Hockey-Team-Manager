@@ -302,7 +302,7 @@ public class Skater implements Serializable {
                             Points: %d
                             +/-: %d
                             Hits: %d
-                            Penalty Minutes: %d""",
+                            Penalty Minutes: %.1f""",
                 stickHand.charAt(0), goals, assists, getPoints(), plusMinus, hits, penaltyMinutes);
         return result;
     }

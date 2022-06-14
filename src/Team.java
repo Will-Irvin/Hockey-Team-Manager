@@ -7,9 +7,9 @@ import java.util.ArrayList;
  */
 public class Team implements Serializable {
     private String name;
-    private ArrayList<Skater> players;
-    private ArrayList<Line> lines;
-    private ArrayList<Goalie> goalies;
+    private final ArrayList<Skater> players;
+    private final ArrayList<Line> lines;
+    private final ArrayList<Goalie> goalies;
     private int wins;
     private int losses;
     private int lossesOT;
@@ -473,14 +473,14 @@ public class Team implements Serializable {
      * @return A string containing every player listed on the team
      */
     public String generateRoster() {
-        String result = String.format("%s\nSkaters:\n", name);
+        StringBuilder result = new StringBuilder(String.format("%s\nSkaters:\n", name));
 
         for (Skater player : players) {
-            result += String.format("%s %d\n", player.getName(), player.getPlayerNumber());
+            result.append(String.format("%s %d\n", player.getName(), player.getPlayerNumber()));
         }
-        result += "Goalies:\n";
+        result.append("Goalies:\n");
         for (Goalie goalie: goalies) {
-            result += String.format("%s %d\n", goalie.getName(), goalie.getPlayerNumber());
+            result.append(String.format("%s %d\n", goalie.getName(), goalie.getPlayerNumber()));
         }
         return result.substring(0, result.length() - 1);
     }
@@ -489,11 +489,13 @@ public class Team implements Serializable {
      * @return A formatted String containing the team's overall stats
      */
     public String displayTeamStats() {
-        return String.format("%s\nRecord: %d-%d-%d\n" +
-                "Face Off %%: %.2f\n" +
-                "Power Play %%: %.2f\n" +
-                "Penalty Kill %%: %.2f\n" +
-                "Average Shots Against Per Game: %.2f", name, wins, losses, lossesOT, getFaceoffPercent(),
+        return String.format("""
+                        %s
+                        Record: %d-%d-%d
+                        Face Off %%: %.2f
+                        Power Play %%: %.2f
+                        Penalty Kill %%: %.2f
+                        Average Shots Against Per Game: %.2f""", name, wins, losses, lossesOT, getFaceoffPercent(),
                 getPPSuccess(), getPKSuccess(), getAverageShots());
     }
 
