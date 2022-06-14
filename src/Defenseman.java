@@ -28,8 +28,9 @@ public class Defenseman extends Skater implements Serializable {
      * is negative
      */
     public Defenseman(String name, int playerNumber, String stickHand, Position side,
-                      int goals, int assists, int plusMinus, int shotsBlocked) throws IllegalArgumentException {
-        super(name, playerNumber, stickHand, side, goals, assists, plusMinus);
+                      int goals, int assists, int plusMinus, int hits, double penaltyMinutes, int shotsBlocked)
+            throws IllegalArgumentException {
+        super(name, playerNumber, stickHand, side, goals, assists, plusMinus, hits, penaltyMinutes);
 
         if (side != Position.LEFT_DEFENSE && side != Position.RIGHT_DEFENSE) {
             throw new IllegalArgumentException("Position must be a defensive position");

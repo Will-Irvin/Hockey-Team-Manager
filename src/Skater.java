@@ -12,6 +12,8 @@ public class Skater implements Serializable {
     private int goals;
     private int assists;
     private int plusMinus;
+    private int hits;
+    private double penaltyMinutes;
     private String stickHand;
     private final Position position;
 
@@ -48,6 +50,8 @@ public class Skater implements Serializable {
         goals = 0;
         assists = 0;
         plusMinus = 0;
+        hits = 0;
+        penaltyMinutes = 0;
     }
 
     /**
@@ -57,7 +61,8 @@ public class Skater implements Serializable {
      * specified range, or if the given stats are negative.
      */
     public Skater(String name, int playerNumber, String stickHand, Position position,
-                  int goals, int assists, int plusMinus) throws NullPointerException, IllegalArgumentException {
+                  int goals, int assists, int plusMinus, int hits, double penaltyMinutes)
+            throws NullPointerException, IllegalArgumentException {
         if (name == null) {
             throw new NullPointerException("Name cannot be null");
         } else if (name.length() == 0) {
@@ -86,8 +91,16 @@ public class Skater implements Serializable {
         if (assists < 0) {
             throw new IllegalArgumentException("Assists stat must be positive");
         }
+        if (hits < 0) {
+            throw new IllegalArgumentException("Hits stat must be positive");
+        }
+        if (penaltyMinutes < 0) {
+            throw new IllegalArgumentException("Penalty Minutes cannot be negative");
+        }
         this.assists = assists;
         this.plusMinus = plusMinus;
+        this.hits = hits;
+        this.penaltyMinutes = penaltyMinutes;
     }
 
     public String getName() {
@@ -136,6 +149,14 @@ public class Skater implements Serializable {
         return position;
     }
 
+    public int getHits() {
+        return hits;
+    }
+
+    public double getPenaltyMinutes() {
+        return penaltyMinutes;
+    }
+
     /**
      * @throws IllegalArgumentException If the given player number is not in range 1-99
      */
@@ -173,6 +194,26 @@ public class Skater implements Serializable {
     }
 
     /**
+     * @throws IllegalArgumentException If the given argument is negative
+     */
+    public void setHits(int hits) throws IllegalArgumentException {
+        if (hits < 0) {
+            throw new IllegalArgumentException("Hits stat cannot be negative");
+        }
+        this.hits = hits;
+    }
+
+    /**
+     * @throws IllegalArgumentException If given argument is negative
+     */
+    public void setPenaltyMinutes(double penaltyMinutes) throws IllegalArgumentException {
+        if (penaltyMinutes < 0) {
+            throw new IllegalArgumentException("Penalty Minutes cannot be negative");
+        }
+        this.penaltyMinutes = penaltyMinutes;
+    }
+
+    /**
      * @throws NullPointerException If the given argument is null
      * @throws IllegalArgumentException If the given argument is not left or right
      */
@@ -200,6 +241,19 @@ public class Skater implements Serializable {
     // Subtracts 1 from plusMinus
     public void scoredAgainst() {
         plusMinus--;
+    }
+
+    // Increments hit up by 1
+    public void hit() {
+        hits++;
+    }
+
+    // Adds given number to penalty minutes
+    public void penalty(double minutes) throws IllegalArgumentException {
+        if (minutes < 0) {
+            throw new IllegalArgumentException("Penalty length cannot be negative");
+        }
+        penaltyMinutes += minutes;
     }
 
     /**
@@ -241,12 +295,15 @@ public class Skater implements Serializable {
             case LEFT_DEFENSE -> result += "Left Defense\n";
             case RIGHT_DEFENSE -> result += "Right Defense\n";
         }
-        result += String.format("Stick Hand: %s \n" +
-                        "    Goals: %d\n" +
-                        "    Assists: %d\n" +
-                        "    Points: %d\n" +
-                        "    +/-: %d",
-                stickHand.charAt(0), goals, assists, getPoints(), plusMinus);
+        result += String.format("""
+                        Stick Hand: %s
+                            Goals: %d
+                            Assists: %d
+                            Points: %d
+                            +/-: %d
+                            Hits: %d
+                            Penalty Minutes: %d""",
+                stickHand.charAt(0), goals, assists, getPoints(), plusMinus, hits, penaltyMinutes);
         return result;
     }
 
