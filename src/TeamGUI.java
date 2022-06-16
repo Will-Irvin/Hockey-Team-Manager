@@ -15,8 +15,8 @@ public class TeamGUI extends Thread {
     // Read in from the stored file, user selects team from this list
     private static final ArrayList<Team> teams = new ArrayList<>();
     private Team team;  // Team that the user chooses to open or creates
-    private boolean isOpen;
 
+    // Select GUI Strings/Components
     private static final String fileName = "TeamManagerData";  // Designated name for file storing data
     private static final String newInfo = "Thank you for using Team Manager! Here are a few things to note as you get" +
             " started:\n" +
@@ -32,9 +32,10 @@ public class TeamGUI extends Thread {
             "will only be the sample team. There is no way to recover any data without the file.";
 
     // JComponents
+    JFrame selectFrame;
 
     JComboBox<Team> teamSelection;
-    JButton selectTeam;
+    JButton selectTeamButton;
 
     JLabel otherOptionsLabel;
     JButton createTeam;
@@ -204,16 +205,6 @@ public class TeamGUI extends Thread {
     JSlider postGameFaceOffs;
     JSlider postGameShotsAgainst;
     JSlider postGameHits;
-
-    // Getter methods
-
-    public Team getTeam() {
-        return team;
-    }
-
-    public boolean isOpen() {
-        return isOpen;
-    }
 
     /**
      * Creates a sample team that is pre-generated for a user who has no file. Allows the user to get accustomed to the
@@ -425,6 +416,21 @@ public class TeamGUI extends Thread {
     }
 
     /**
+     * Creates a panel containing each of the given components, and adds it to the given container at the specified
+     * index
+     * @param components The JComponents being inserted into the new panel
+     * @param container Container where the JPanel will go
+     * @param index Position where the panel will go in the container
+     */
+    private void createPanel(JComponent[] components, Container container, int index) {
+        JPanel panel = new JPanel();
+        for (JComponent component : components) {
+            panel.add(component);
+        }
+        container.add(panel, index);
+    }
+
+    /**
      * This method can only be used to check responses that should be positive ints. If the string contains a response
      * attempts to enter the response into the appropriate index. If there is no response, leaves the index as -1.
      * @param stringInputs The inputs being checked.
@@ -558,13 +564,19 @@ public class TeamGUI extends Thread {
         mainTabs.add("Manage Teams", teamTabs);
 
 
+        mainFrame.addWindowListener(new WindowAdapter() {
+            @Override
+            public void windowClosed(WindowEvent e) {
+                team = null;
+                selectFrame.setVisible(true);
+            }
+        });
         mainFrame.setVisible(true);
     }
 
     @Override
     public void run() {
         // Sets up the teams array with its data, displays an error message if there are issues with reading the files
-        isOpen = true;
         try {
             openFile();
         } catch (IOException | ClassNotFoundException e) {
@@ -579,59 +591,50 @@ public class TeamGUI extends Thread {
         }
 
         // Setting up frame
-        JFrame frame = new JFrame("Welcome to Team Manager");
-        Container content = frame.getContentPane();
-        content.setLayout(new BoxLayout(content, BoxLayout.Y_AXIS));
-        frame.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
-        frame.setVisible(true);
+        selectFrame = new JFrame("Welcome to Team Manager");
+        Container selectContent = selectFrame.getContentPane();
+        selectContent.setLayout(new BoxLayout(selectContent, BoxLayout.Y_AXIS));
+        selectFrame.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
+        selectFrame.setVisible(true);
 
         // Top of frame, selecting an already created team
-        JPanel selectTeamPanel = new JPanel();
         // Combo Box to select your team
         teamSelection = new JComboBox<Team>();
         for (Team team: teams) {
             teamSelection.addItem(team);
         }
-        selectTeamPanel.add(teamSelection);
         // Button to confirm selection
-        selectTeam = new JButton("Open this team");
-        selectTeamPanel.add(selectTeam);
-
-        content.add(selectTeamPanel);
+        selectTeamButton = new JButton("Open this team");
+        JComponent[] selectTeamComponents = {teamSelection, selectTeamButton};
+        createPanel(selectTeamComponents, selectContent);
 
         // Middle of frame that contains other options with teams
-        JPanel otherOptions = new JPanel();
         otherOptionsLabel = new JLabel("Additional Options: ");
         createTeam = new JButton("Create New Team");
         deleteTeam = new JButton("Delete Team");
         restoreSample = new JButton("Restore Sample Team");
-        otherOptions.add(otherOptionsLabel);
-        otherOptions.add(createTeam);
-        otherOptions.add(deleteTeam);
-        otherOptions.add(restoreSample);
 
-        content.add(otherOptions);
+        createPanel(new JComponent[]{otherOptionsLabel, createTeam, deleteTeam, restoreSample}, selectContent);
 
         // Bottom of Frame, button where new users can find additional guidance
-        JPanel bottom = new JPanel();
         newUsers = new JButton("Help and Guidance for New Users");
-        bottom.add(newUsers);
+        createPanel(new JComponent[]{newUsers}, selectContent);
 
-        content.add(bottom);
-        frame.pack();
-        frame.setLocationRelativeTo(null);
+        selectFrame.pack();
+        selectFrame.setLocationRelativeTo(null);
 
         /*
           Sets the selected team instance var to the selected team from the combo box and closes the frame. If no
           selection is made (o is null/not a team) an error message will display and the frame will remain open.
          */
-        selectTeam.addActionListener(e -> {
+        selectTeamButton.addActionListener(e -> {
             Object o = teamSelection.getSelectedItem();
             if (o instanceof Team t) {
                 team = t;
-                frame.dispose();
+                selectFrame.setVisible(false);
+                displayTeamGUI();
             } else {
-                JOptionPane.showMessageDialog(frame, "Please ensure that you have selected a team. " +
+                JOptionPane.showMessageDialog(selectFrame, "Please ensure that you have selected a team. " +
                         "If there are no options to select from, please create a new team.", "Team Select",
                         JOptionPane.ERROR_MESSAGE);
             }
@@ -643,27 +646,27 @@ public class TeamGUI extends Thread {
           the GUI for that team will open, and the data file will be updated with the new team.
          */
         createTeam.addActionListener(e -> {
-            int input = JOptionPane.showConfirmDialog(frame, "Would you like to provide a win/loss record for" +
+            int input = JOptionPane.showConfirmDialog(selectFrame, "Would you like to provide a win/loss record for" +
                     " this team?", "Create Team", JOptionPane.YES_NO_CANCEL_OPTION);
             switch (input) {
                 case JOptionPane.YES_OPTION -> { // Prompt for wins, losses, ot losses
                     while (true) {
                         try {
                             // Entering information for new team
-                            String name = JOptionPane.showInputDialog(frame, "Enter Team Name:",
+                            String name = JOptionPane.showInputDialog(selectFrame, "Enter Team Name:",
                                     "Create Team", JOptionPane.QUESTION_MESSAGE);
-                            int wins = Integer.parseInt(JOptionPane.showInputDialog(frame,
+                            int wins = Integer.parseInt(JOptionPane.showInputDialog(selectFrame,
                                     "Enter number of wins:", "Create Team", JOptionPane.QUESTION_MESSAGE));
-                            int losses = Integer.parseInt(JOptionPane.showInputDialog(frame,
+                            int losses = Integer.parseInt(JOptionPane.showInputDialog(selectFrame,
                                     "Enter number of losses:", "Create Team",
                                     JOptionPane.QUESTION_MESSAGE));
-                            int otLosses = Integer.parseInt(JOptionPane.showInputDialog(frame,
+                            int otLosses = Integer.parseInt(JOptionPane.showInputDialog(selectFrame,
                                     "Enter number of overtime losses or ties:", "Create Team",
                                     JOptionPane.QUESTION_MESSAGE));
                             Team newTeam = new Team(name, wins, losses, otLosses);
 
                             if (addTeam(newTeam) == -1) {
-                                JOptionPane.showMessageDialog(frame, "Two teams cannot have the same name",
+                                JOptionPane.showMessageDialog(selectFrame, "Two teams cannot have the same name",
                                         "Create Team", JOptionPane.ERROR_MESSAGE);
                                 return;
                             }
@@ -672,16 +675,17 @@ public class TeamGUI extends Thread {
 
                             // Set selected team and close frame
                             team = newTeam;
-                            frame.dispose();
+                            selectFrame.setVisible(false);
+                            displayTeamGUI();
                             break;
                         } catch (NumberFormatException ex) {
-                            JOptionPane.showMessageDialog(frame, "Please enter a number when prompted",
+                            JOptionPane.showMessageDialog(selectFrame, "Please enter a number when prompted",
                                     "Create Team", JOptionPane.ERROR_MESSAGE);
                         } catch (IOException ex) {
-                            JOptionPane.showMessageDialog(frame, "There was an issue writing to the file. " +
+                            JOptionPane.showMessageDialog(selectFrame, "There was an issue writing to the file. " +
                                     "Please try again", "Create Team", JOptionPane.ERROR_MESSAGE);
                         } catch (Exception ex) {
-                            JOptionPane.showMessageDialog(frame, ex.getMessage(), "Create Team",
+                            JOptionPane.showMessageDialog(selectFrame, ex.getMessage(), "Create Team",
                                     JOptionPane.ERROR_MESSAGE);
                         }
                     }
@@ -689,24 +693,25 @@ public class TeamGUI extends Thread {
                 case JOptionPane.NO_OPTION -> {  // Similar to yes, but only prompt for name
                     while (true) {
                         try {
-                            String name = JOptionPane.showInputDialog(frame, "Enter team name:",
+                            String name = JOptionPane.showInputDialog(selectFrame, "Enter team name:",
                                     "Create Team", JOptionPane.QUESTION_MESSAGE);
 
                             Team newTeam = new Team(name);
 
                             if (addTeam(newTeam) == -1) {
-                                JOptionPane.showMessageDialog(frame, "Two teams cannot have the same name",
+                                JOptionPane.showMessageDialog(selectFrame, "Two teams cannot have the same name",
                                         "Create Team", JOptionPane.ERROR_MESSAGE);
                                 return;
                             }
                             updateFile();
 
                             team = newTeam;
-                            frame.dispose();
+                            selectFrame.setVisible(false);
+                            displayTeamGUI();
 
                             break;
                         } catch (Exception ex) {
-                            JOptionPane.showMessageDialog(frame, ex.getMessage(), "Create Team",
+                            JOptionPane.showMessageDialog(selectFrame, ex.getMessage(), "Create Team",
                                     JOptionPane.ERROR_MESSAGE);
                         }
                     }
@@ -719,7 +724,7 @@ public class TeamGUI extends Thread {
           contain a combo box listing the teams and a button to confirm the selection.
          */
         deleteTeam.addActionListener(e -> {
-            frame.setVisible(false);
+            selectFrame.setVisible(false);
 
             // New Frame
             JFrame deleteFrame = new JFrame("Delete Team");
@@ -732,7 +737,7 @@ public class TeamGUI extends Thread {
             deleteContent.add(deleteButton, BorderLayout.SOUTH);
 
             deleteFrame.pack();
-            deleteFrame.setLocationRelativeTo(frame);
+            deleteFrame.setLocationRelativeTo(selectFrame);
             deleteFrame.setVisible(true);
 
             /*
@@ -743,7 +748,7 @@ public class TeamGUI extends Thread {
             deleteButton.addActionListener(e1 -> {
                 Object o = teamSelection.getSelectedItem();
                 if (o instanceof Team t) {
-                    int finalCheck = JOptionPane.showConfirmDialog(frame, "WARNING: Are you sure you want to " +
+                    int finalCheck = JOptionPane.showConfirmDialog(selectFrame, "WARNING: Are you sure you want to " +
                                     "delete this team (" + t.getName() + ")? This cannot be undone.",
                             "Delete Team", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
                     if (finalCheck == JOptionPane.YES_OPTION) {
@@ -752,7 +757,7 @@ public class TeamGUI extends Thread {
                         try {
                             updateFile();
                         } catch (Exception ex) {
-                            JOptionPane.showMessageDialog(frame, ex.getMessage(), "File Error",
+                            JOptionPane.showMessageDialog(selectFrame, ex.getMessage(), "File Error",
                                     JOptionPane.ERROR_MESSAGE);
                         }
                         deleteFrame.dispose();
@@ -768,10 +773,9 @@ public class TeamGUI extends Thread {
             deleteFrame.addWindowListener(new WindowAdapter() {
                 @Override
                 public void windowClosed(WindowEvent e) {
-                    selectTeamPanel.removeAll();
-                    selectTeamPanel.add(teamSelection);
-                    selectTeamPanel.add(selectTeam);
-                    frame.setVisible(true);
+                    selectContent.remove(0);
+                    createPanel(selectTeamComponents, selectContent, 0);
+                    selectFrame.setVisible(true);
                 }
             });
         });
@@ -781,24 +785,15 @@ public class TeamGUI extends Thread {
             Team sample = createSample();
             int index = addTeam(sample);
             if (index == -1) {
-                JOptionPane.showMessageDialog(frame, "The sample team is still in your list",
+                JOptionPane.showMessageDialog(selectFrame, "The sample team is still in your list",
                         "Restore Sample", JOptionPane.ERROR_MESSAGE);
                 return;
             }
             teamSelection.insertItemAt(sample, index);
         });
 
-        newUsers.addActionListener(e -> JOptionPane.showMessageDialog(frame, newInfo, "New User Information",
+        newUsers.addActionListener(e -> JOptionPane.showMessageDialog(selectFrame, newInfo, "New User Information",
                 JOptionPane.INFORMATION_MESSAGE));
-
-        frame.addWindowListener(new WindowAdapter() {
-            @Override
-            public void windowClosed(WindowEvent e) {
-                if (team != null) {
-                    displayTeamGUI();
-                }
-            }
-        });
     }
 
     public static void main(String[] args) {
