@@ -85,25 +85,11 @@ public class Team implements Serializable {
         this.lossesOT = lossesOT;
     }
 
+    // Getter Methods
+
     public String getName() {
         return name;
     }
-
-    /**
-     * @throws NullPointerException If given name is null
-     * @throws IllegalArgumentException If given name is blank
-     */
-    public void setName(String name) throws NullPointerException, IllegalArgumentException {
-        if (name == null) {
-            throw new NullPointerException("Name cannot be null");
-        }
-        if (name.isBlank()) {
-            throw new IllegalArgumentException("Name cannot be empty");
-        }
-        this.name = name;
-    }
-
-    // Getter Methods
 
     public ArrayList<Skater> getPlayers() {
         return players;
@@ -128,6 +114,51 @@ public class Team implements Serializable {
     public int getLossesOT() {
         return lossesOT;
     }
+
+    /**
+     * @throws NullPointerException If given name is null
+     * @throws IllegalArgumentException If given name is blank
+     */
+    public void setName(String name) throws NullPointerException, IllegalArgumentException {
+        if (name == null) {
+            throw new NullPointerException("Name cannot be null");
+        }
+        if (name.isBlank()) {
+            throw new IllegalArgumentException("Name cannot be empty");
+        }
+        this.name = name;
+    }
+
+    /**
+     * @throws IllegalArgumentException If given stats are negative
+     */
+    public void setWins(int wins) {
+        if (wins < 0) {
+            throw new IllegalArgumentException("Wins value cannot be negative");
+        }
+        this.wins = wins;
+    }
+
+    /**
+     * @throws IllegalArgumentException If given stats are negative
+     */
+    public void setLosses(int losses) {
+        if (losses < 0) {
+            throw new IllegalArgumentException("Losses value cannot be negative");
+        }
+        this.losses = losses;
+    }
+
+    /**
+     * @throws IllegalArgumentException If given stats are negative
+     */
+    public void setLossesOT(int lossesOT) {
+        if (lossesOT < 0) {
+            throw new IllegalArgumentException("Overtime loss value cannot be negative");
+        }
+        this.lossesOT = lossesOT;
+    }
+
 
     // Generates and returns a list containing every OffenseLine in the team
     public ArrayList<OffenseLine> getOffenseLines() {
@@ -160,18 +191,6 @@ public class Team implements Serializable {
             }
         }
         return result;
-    }
-
-    /**
-     * @throws IllegalArgumentException If given stats are negative
-     */
-    public void setRecord(int wins, int losses, int lossesOT) throws IllegalArgumentException {
-        if (wins < 0 || losses < 0 || lossesOT < 0) {
-            throw new IllegalArgumentException("Record cannot have negative values");
-        }
-        this.wins = wins;
-        this.losses = losses;
-        this.lossesOT = lossesOT;
     }
 
     // Increments wins up by 1
@@ -320,10 +339,10 @@ public class Team implements Serializable {
      * @return True if the change was made false otherwise
      */
     public int changePlayer(Skater oldPlayer, Skater newPlayer) {
-        if (!oldPlayer.equals(newPlayer) && players.contains(newPlayer)) return -1;
-        if (!players.remove(oldPlayer)) {
+        if (!newPlayer.equals(oldPlayer) && players.contains(newPlayer)) {
             return -1;
         }
+        players.remove(oldPlayer);
         return addPlayer(newPlayer);
     }
 
@@ -341,13 +360,13 @@ public class Team implements Serializable {
         return addGoalie(newGoalie);
     }
 
-    // Edit a line on the list
-    public boolean changeLine(Line oldLine, Line newLine) {
-        if (!lines.remove(oldLine)) {
-            return false;
+    // Edit a line on the list, works like changePlayer/Goalie for lines
+    public int changeLine(Line oldLine, Line newLine) {
+        if (!oldLine.equals(newLine) && lines.contains(newLine)) {
+            return -1;
         }
-        addLine(newLine);
-        return true;
+        lines.remove(oldLine);
+        return addLine(newLine);
     }
 
     /**
