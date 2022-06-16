@@ -12,7 +12,7 @@ public class Team implements Serializable {
     private final ArrayList<Goalie> goalies;
     private int wins;
     private int losses;
-    private int lossesOT;
+    private int otLosses;
 
     /**
      * Initializes team with given name, empty lists, and a record of 0-0-0
@@ -33,7 +33,7 @@ public class Team implements Serializable {
         this.goalies = new ArrayList<>();
         this.wins = 0;
         this.losses = 0;
-        this.lossesOT = 0;
+        this.otLosses = 0;
     }
 
     /**
@@ -57,7 +57,7 @@ public class Team implements Serializable {
         }
         this.wins = wins;
         this.losses = losses;
-        this.lossesOT = lossesOT;
+        this.otLosses = lossesOT;
     }
 
     /**
@@ -82,7 +82,21 @@ public class Team implements Serializable {
         }
         this.wins = wins;
         this.losses = losses;
-        this.lossesOT = lossesOT;
+        this.otLosses = lossesOT;
+    }
+
+    // Creates shallow copy of the given team
+    public Team(Team team) throws NullPointerException {
+        if (team == null) {
+            throw new NullPointerException("Given team cannot be null");
+        }
+        name = team.getName();
+        wins = team.getWins();
+        losses = team.getLosses();
+        otLosses = team.getOtLosses();
+        players = team.getPlayers();
+        lines = team.getLines();
+        goalies = team.getGoalies();
     }
 
     // Getter Methods
@@ -111,8 +125,8 @@ public class Team implements Serializable {
         return losses;
     }
 
-    public int getLossesOT() {
-        return lossesOT;
+    public int getOtLosses() {
+        return otLosses;
     }
 
     /**
@@ -152,11 +166,11 @@ public class Team implements Serializable {
     /**
      * @throws IllegalArgumentException If given stats are negative
      */
-    public void setLossesOT(int lossesOT) {
-        if (lossesOT < 0) {
+    public void setOtLosses(int otLosses) {
+        if (otLosses < 0) {
             throw new IllegalArgumentException("Overtime loss value cannot be negative");
         }
-        this.lossesOT = lossesOT;
+        this.otLosses = otLosses;
     }
 
 
@@ -205,7 +219,7 @@ public class Team implements Serializable {
 
     // Increments lossesOT up by 1
     public void tie() {
-        lossesOT++;
+        otLosses++;
     }
 
     /**
@@ -457,7 +471,7 @@ public class Team implements Serializable {
         for (Goalie goalie: goalies) {
             totalShots += goalie.getShotsAgainst();
         }
-        int matches = wins + losses + lossesOT;
+        int matches = wins + losses + otLosses;
         if (matches == 0) {
             return 0;
         }
@@ -471,7 +485,7 @@ public class Team implements Serializable {
     public void resetTeamStats() {
         wins = 0;
         losses = 0;
-        lossesOT = 0;
+        otLosses = 0;
         for (Skater player: players) {
             player.resetStats();
         }
@@ -514,7 +528,7 @@ public class Team implements Serializable {
                         Face Off %%: %.2f
                         Power Play %%: %.2f
                         Penalty Kill %%: %.2f
-                        Average Shots Against Per Game: %.2f""", name, wins, losses, lossesOT, getFaceoffPercent(),
+                        Average Shots Against Per Game: %.2f""", name, wins, losses, otLosses, getFaceoffPercent(),
                 getPPSuccess(), getPKSuccess(), getAverageShots());
     }
 

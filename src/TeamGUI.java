@@ -11,7 +11,7 @@ import java.util.ArrayList;
  * a team to manage in the main part of the application. The user can select an existing team, create a new team, delete
  * any existing teams, and view important information if it is their first time using the app.
  */
-public class TeamGUI extends Thread {
+public class TeamGUI implements Runnable {
     // Read in from the stored file, user selects team from this list
     private static final ArrayList<Team> teams = new ArrayList<>();
     private Team team;  // Team that the user chooses to open or creates
@@ -452,12 +452,18 @@ public class TeamGUI extends Thread {
     /**
      * Updates JComponents such as labels and text areas with any changes to the team itself after they are made
      * For example, labels that display the teams record or name
+     * @param index Index of the current team in the array, ensures that it is up-to-date in the combo box teamSelection
+     *              If negative, no changes need to be made to the combo box
      */
-    private void updateTeamComponents() {
+    private void updateTeamComponents(int index) {
         changeTeamWinsLabel.setText(winsString + " (Current: " + team.getWins() + ")");
         changeTeamLossesLabel.setText(lossesString + " (Current: " + team.getLosses() + ")");
-        changeTeamOTLabel.setText(otString + " (Current: " + team.getLossesOT() + ")");
+        changeTeamOTLabel.setText(otString + " (Current: " + team.getOtLosses() + ")");
         changeTeamNameLabel.setText(nameString + " (Current: " + team.getName() + ")");
+        if (index >= 0) {
+            teamSelection.removeItemAt(index);
+            teamSelection.insertItemAt(team, index);
+        }
     }
 
     private void displayTeamGUI() {
@@ -489,7 +495,7 @@ public class TeamGUI extends Thread {
         changeTeamWins = new JTextField(5);
         changeTeamLossesLabel = new JLabel(lossesString + " (Current: " + team.getLosses() + ")");
         changeTeamLosses = new JTextField(5);
-        changeTeamOTLabel = new JLabel(otString + " (Current: " + team.getLossesOT() + ")");
+        changeTeamOTLabel = new JLabel(otString + " (Current: " + team.getOtLosses() + ")");
         changeTeamOT = new JTextField(5);
         updateTeamChanges = new JButton("Update Changes");
 
@@ -499,6 +505,7 @@ public class TeamGUI extends Thread {
         createPanel(new JComponent[]{changeTeamLossesLabel, changeTeamLosses}, editTeam);
         createPanel(new JComponent[]{changeTeamOTLabel, changeTeamOT}, editTeam);
 
+        // Instructions and Button
         createPanel(new JComponent[]{editInstructionsLabel}, editTeam);
         createPanel(new JComponent[]{updateTeamChanges}, editTeam);
 
@@ -511,6 +518,7 @@ public class TeamGUI extends Thread {
                     recordStrings[2].isBlank()) {
                 JOptionPane.showMessageDialog(mainFrame, emptyInputs,
                         "Edit Team", JOptionPane.INFORMATION_MESSAGE);
+                return;
             }
             // Adjust record if necessary
             try {
@@ -523,7 +531,7 @@ public class TeamGUI extends Thread {
                     team.setLosses(record[1]);
                 }
                 if (record[2] != -1) {
-                    team.setLossesOT(record[2]);
+                    team.setOtLosses(record[2]);
                 }
                 // Clear text fields
                 changeTeamWins.setText("");
@@ -539,14 +547,17 @@ public class TeamGUI extends Thread {
                 JOptionPane.showMessageDialog(mainFrame, ex.getMessage(), "Edit Team", JOptionPane.ERROR_MESSAGE);
             }
             if (!name.isBlank()) {
-                Team oldTeam = new Team(team.getName());
-                team.setName(name);
+                Team newTeam = new Team(team);
+                newTeam.setName(name);
                 changeTeamName.setText("");
-                if (TeamGUI.changeTeam(oldTeam, team) == -1) {
+                int index = TeamGUI.changeTeam(team, newTeam);
+                if (index == -1) {
                     JOptionPane.showMessageDialog(mainFrame, "New name cannot be the same name as another team",
                             "Edit Team", JOptionPane.ERROR_MESSAGE);
                     return;
                 }
+                team = newTeam;
+                updateTeamComponents(index);
                 try {
                     TeamGUI.updateFile();
                 } catch (IOException ex) {
@@ -555,15 +566,16 @@ public class TeamGUI extends Thread {
                     JOptionPane.showMessageDialog(mainFrame, ex.getMessage(), "Edit Team",
                             JOptionPane.ERROR_MESSAGE);
                 }
+            } else {
+                updateTeamComponents(-1);
             }
-            updateTeamComponents();
         });
 
         teamTabs.add("Edit Team", editTeam);
 
         mainTabs.add("Manage Teams", teamTabs);
 
-
+        // Sets team to null and re displays SelectTeamGUI when window is closed
         mainFrame.addWindowListener(new WindowAdapter() {
             @Override
             public void windowClosed(WindowEvent e) {
@@ -673,7 +685,7 @@ public class TeamGUI extends Thread {
 
                             updateFile();
 
-                            // Set selected team and close frame
+                            // Set selected team and hide frame
                             team = newTeam;
                             selectFrame.setVisible(false);
                             displayTeamGUI();
