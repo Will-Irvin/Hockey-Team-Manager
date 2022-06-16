@@ -5,11 +5,12 @@ import java.io.*;
 import java.util.ArrayList;
 
 /**
- * SelectTeamGUI
+ * TeamGUI
  *
- * This GUI class serves as the introductory menu of the application. This is where the user will create or select
- * a team to manage in the main part of the application. The user can select an existing team, create a new team, delete
- * any existing teams, and view important information if it is their first time using the app.
+ * This class contains the layout and design of the GUI Interface including the functionality for managing all teams
+ * stored in the app and editing an individual team. Selecting a team contains a very small and simple frame with a few
+ * different options while editing a team contains multiple different tabs for all the different ways to interact
+ * with your team. It also contains the main method of the application.
  */
 public class TeamGUI implements Runnable {
     // Read in from the stored file, user selects team from this list

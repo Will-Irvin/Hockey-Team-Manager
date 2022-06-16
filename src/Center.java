@@ -1,22 +1,20 @@
-import java.io.Serializable;
-
 /**
  * Center
  * Class that extends from skater to include information and methods relevant to a player at Center. This information
  * mostly relates to faceoffs.
  */
 
-public class Center extends Skater implements Serializable {
-    private int faceoffWins;
-    private int faceoffTotal;    // Used to calculate faceoff percentage
+public class Center extends Skater {
+    private int faceOffWins;
+    private int faceOffTotal;    // Used to calculate face off percentage
 
     /**
      * Behaves like basic Skater constructor and initializes stats to 0. Assigns position as CENTER
      */
     public Center(String name, int playerNumber, String stickHand) {
         super(name, playerNumber, stickHand, Position.CENTER);
-        faceoffWins = 0;
-        faceoffTotal = 0;
+        faceOffWins = 0;
+        faceOffTotal = 0;
     }
 
     /**
@@ -34,18 +32,18 @@ public class Center extends Skater implements Serializable {
         if (faceOffTotal < 1) {
             throw new IllegalArgumentException("Face Off Total must be at least 1");
         }
-        faceoffWins = (int) (faceOffTotal * (faceOffPercentage/100));
-        this.faceoffTotal = faceOffTotal;
+        faceOffWins = (int) (faceOffTotal * (faceOffPercentage/100));
+        this.faceOffTotal = faceOffTotal;
     }
 
     // Getter Methods
 
-    public int getFaceoffWins() {
-        return faceoffWins;
+    public int getFaceOffWins() {
+        return faceOffWins;
     }
 
-    public int getFaceoffTotal() {
-        return faceoffTotal;
+    public int getFaceOffTotal() {
+        return faceOffTotal;
     }
 
     /**
@@ -53,18 +51,18 @@ public class Center extends Skater implements Serializable {
      * @return The calculated percentage
      */
     public double getFaceoffPercent() {
-        return ((double) faceoffWins/faceoffTotal) * 100;
+        return ((double) faceOffWins / faceOffTotal) * 100;
     }
 
     // Increments wins and total up by 1
     public void winFaceoff() {
-        faceoffTotal++;
-        faceoffWins++;
+        faceOffTotal++;
+        faceOffWins++;
     }
 
     // Only increments total up by 1
     public void loseFaceoff() {
-        faceoffTotal++;
+        faceOffTotal++;
     }
 
     /**
@@ -79,8 +77,8 @@ public class Center extends Skater implements Serializable {
         } else if (faceoffTotal < 0) {
             throw new IllegalArgumentException("Face Off total cannot be negative");
         } else {
-            faceoffWins = (int)((faceoffPercent/100) * faceoffTotal);
-            this.faceoffTotal = faceoffTotal;
+            faceOffWins = (int)((faceoffPercent/100) * faceoffTotal);
+            this.faceOffTotal = faceoffTotal;
         }
     }
 
@@ -88,8 +86,8 @@ public class Center extends Skater implements Serializable {
     @Override
     public void resetStats() {
         super.resetStats();
-        faceoffTotal = 0;
-        faceoffWins = 0;
+        faceOffTotal = 0;
+        faceOffWins = 0;
     }
 
     /**

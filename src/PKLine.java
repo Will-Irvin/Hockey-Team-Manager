@@ -1,11 +1,9 @@
-import java.io.Serializable;
-
 /**
  * PKLine
  * A class that extends from the line class to be specific to the penalty kill special teams lines.
  */
 
-public class PKLine extends Line implements Serializable {
+public class PKLine extends Line {
     private int numberKilled;
     private int numberAttempts;    // Used to calculate the PK percentage
 

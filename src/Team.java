@@ -411,8 +411,8 @@ public class Team implements Serializable {
         int faceoffWins = 0;
         for (Skater player: players) {
             if (player instanceof Center center) {
-                totalFaceoffs += center.getFaceoffTotal();
-                faceoffWins += center.getFaceoffWins();
+                totalFaceoffs += center.getFaceOffTotal();
+                faceoffWins += center.getFaceOffWins();
             }
         }
         if (totalFaceoffs == 0) {
