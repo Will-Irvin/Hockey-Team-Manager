@@ -254,7 +254,7 @@ public class Team implements Serializable {
             } else {
                 if (i == players.size() - 1) {
                     players.add(player);
-                    return i;
+                    return i + 1;
                 }
                 if (player.getPlayerNumber() < players.get(i + 1).getPlayerNumber()) {
                     players.add(i + 1, player);
@@ -298,7 +298,7 @@ public class Team implements Serializable {
             } else {
                 if (i == goalies.size() - 1) {
                     goalies.add(goalie);
-                    return i;
+                    return i + 1;
                 }
                 if (goalie.getPlayerNumber() < goalies.get(i + i).getPlayerNumber()) {
                     goalies.add(i + 1, goalie);
@@ -333,7 +333,7 @@ public class Team implements Serializable {
             } else {
                 if (i == lines.size() - 1) {
                     lines.add(line);
-                    return i;
+                    return i + 1;
                 }
                 if (line.getName().compareTo(lines.get(i + 1).getName()) <= 0) {
                     lines.add(i + 1, line);
@@ -517,13 +517,20 @@ public class Team implements Serializable {
         return result.substring(0, result.length() - 1);
     }
     /**
-     * @return A string containing every player listed on the team and some of their basic stats
+     * @return A string containing every player listed on the team and some of their basic stats (points, number,
+     * record, etc.)
      */
     public String generateRosterWithStats() {
-        StringBuilder result = new StringBuilder(String.format("%s\nSkaters:\t\t|  #|Pos|  G|  A|Pts|+/-|\n", name));
+        StringBuilder result = new StringBuilder(String.format("%s\nSkaters:\t|  #|Pos|  G|  A|Pts|+/-|\n", name));
 
         for (Skater player : players) {
-            result.append(String.format("%-40s\t|%3d|", player.getName(), player.getPlayerNumber()));
+            int index = player.getName().lastIndexOf(' ');
+            if (index >= 0) {
+                result.append(String.format("%.15s\t|%3d|", player.getName().substring(index),
+                        player.getPlayerNumber()));
+            } else {
+                result.append(String.format("%.15s\t|%3d|", player.getName(), player.getPlayerNumber()));
+            }
             switch (player.getPosition()) {
                 case CENTER -> result.append("  C");
                 case LEFT_WING -> result.append(" LW");
@@ -534,9 +541,12 @@ public class Team implements Serializable {
             result.append(String.format("|%3d|%3d|%3d|%3d|\n", player.getGoals(), player.getAssists(),
                     player.getPoints(), player.getPlusMinus()));
         }
-        result.append("Goalies:\n");
+        result.append("\nGoalies:\t|  #|  W|  L|OT| GAA| Sv%|\n");
         for (Goalie goalie: goalies) {
-            result.append(String.format("%s %d\n", goalie.getName(), goalie.getPlayerNumber()));
+            String lastName = goalie.getName().substring(goalie.getName().lastIndexOf(' '));
+            result.append(String.format("%.15s\t|%3d|%3d|%3d|%3d|%4.2f|%.3f|\n", lastName,
+                    goalie.getPlayerNumber(), goalie.getWins(), goalie.getLosses(), goalie.getOtLosses(),
+                    goalie.getGAA(), goalie.getSavePercent()));
         }
         return result.substring(0, result.length() - 1);
     }

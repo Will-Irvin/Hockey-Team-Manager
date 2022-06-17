@@ -380,7 +380,7 @@ public class TeamGUI implements Runnable {
             } else {
                 if (i == teams.size() - 1) {
                     teams.add(team);
-                    return i;
+                    return i + 1;
                 } else if (team.getName().compareTo(teams.get(i + 1).getName()) <= 0) {
                     teams.add(i + 1, team);
                     return i + 1;
@@ -576,7 +576,7 @@ public class TeamGUI implements Runnable {
                             JOptionPane.ERROR_MESSAGE);
                 }
             } else {
-                updateTeamComponents(null, null, -1);
+                updateTeamComponents(null, team, -1);
             }
         });
 
@@ -667,9 +667,9 @@ public class TeamGUI implements Runnable {
                 selectFrame.setVisible(false);
                 displayTeamGUI();
             } else {
-                JOptionPane.showMessageDialog(selectFrame, "Please ensure that you have selected a team. " +
-                        "If there are no options to select from, please create a new team.", "Team Select",
-                        JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(selectFrame, "Please ensure that you have selected a team in " +
+                                "the box. If there are no options to select from, please create a new team.",
+                        "Team Select", JOptionPane.ERROR_MESSAGE);
             }
         });
 
@@ -698,12 +698,13 @@ public class TeamGUI implements Runnable {
                                     JOptionPane.QUESTION_MESSAGE));
                             Team newTeam = new Team(name, wins, losses, otLosses);
 
-                            if (addTeam(newTeam) == -1) {
+                            int index = addTeam(newTeam);
+                            if (index == -1) {
                                 JOptionPane.showMessageDialog(selectFrame, "Two teams cannot have the same name",
                                         "Create Team", JOptionPane.ERROR_MESSAGE);
                                 return;
                             }
-
+                            teamSelection.insertItemAt(newTeam, index);
                             updateFile();
 
                             // Set selected team and hide frame
@@ -731,7 +732,8 @@ public class TeamGUI implements Runnable {
 
                             Team newTeam = new Team(name);
 
-                            if (addTeam(newTeam) == -1) {
+                            int index = addTeam(newTeam);
+                            if (index == -1) {
                                 JOptionPane.showMessageDialog(selectFrame, "Two teams cannot have the same name",
                                         "Create Team", JOptionPane.ERROR_MESSAGE);
                                 return;
@@ -739,9 +741,9 @@ public class TeamGUI implements Runnable {
                             updateFile();
 
                             team = newTeam;
+                            teamSelection.insertItemAt(team, index);
                             selectFrame.setVisible(false);
                             displayTeamGUI();
-
                             break;
                         } catch (Exception ex) {
                             JOptionPane.showMessageDialog(selectFrame, ex.getMessage(), "Create Team",
@@ -757,6 +759,11 @@ public class TeamGUI implements Runnable {
           contain a combo box listing the teams and a button to confirm the selection.
          */
         deleteTeam.addActionListener(e -> {
+            if (teams.isEmpty()) {
+                JOptionPane.showMessageDialog(selectFrame, "There are no teams to delete.",
+                        "Delete Team", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
             selectFrame.setVisible(false);
 
             // New Frame
@@ -795,10 +802,6 @@ public class TeamGUI implements Runnable {
                         }
                         deleteFrame.dispose();
                     }
-                } else {  // o is null - there was nothing to select
-                    JOptionPane.showMessageDialog(deleteFrame, "There are no teams to delete.",
-                            "Delete Team", JOptionPane.ERROR_MESSAGE);
-                    deleteFrame.dispose();
                 }
             });
 
@@ -823,6 +826,14 @@ public class TeamGUI implements Runnable {
                 return;
             }
             teamSelection.insertItemAt(sample, index);
+            try {
+                updateFile();
+            } catch (IOException ex) {
+                JOptionPane.showMessageDialog(selectFrame, fileError, "Restore Sample", JOptionPane.ERROR_MESSAGE);
+            } catch (Exception ex) {
+                JOptionPane.showMessageDialog(selectFrame, ex.getMessage(), "Restore Sample",
+                        JOptionPane.ERROR_MESSAGE);
+            }
         });
 
         newUsers.addActionListener(e -> JOptionPane.showMessageDialog(selectFrame, newInfo, "New User Information",
