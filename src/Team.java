@@ -407,18 +407,18 @@ public class Team implements Serializable {
      * @return The calculated percentage
      */
     public double getFaceOffPercent() {
-        int totalFaceoffs = 0;
-        int faceoffWins = 0;
+        int totalFaceOffs = 0;
+        int faceOffWins = 0;
         for (Skater player: players) {
             if (player instanceof Center center) {
-                totalFaceoffs += center.getFaceOffTotal();
-                faceoffWins += center.getFaceOffWins();
+                totalFaceOffs += center.getFaceOffTotal();
+                faceOffWins += center.getFaceOffWins();
             }
         }
-        if (totalFaceoffs == 0) {
+        if (totalFaceOffs == 0) {
             return 0;
         }
-        return ((double) faceoffWins / totalFaceoffs) * 100;
+        return ((double) faceOffWins / totalFaceOffs) * 100;
     }
 
     /**

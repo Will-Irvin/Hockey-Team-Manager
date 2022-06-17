@@ -53,6 +53,9 @@ public class TeamGUI implements Runnable {
     private static final String otString = "Enter number of overtime losses or ties:";
     private static final String editInstructions = "<html>Enter changes for the information that you would like to " +
             "change.<br>If a field is left blank, no changes will be made for that information.</html>";
+    private static final String resetStatsWarning = "<html>This button will reset all stats for your team and its" +
+            " players to 0.<br>This action cannot be undone after the fact and their previous stats will be " +
+            "lost.</html>";
     private static final String numberError = "Please enter a number where prompted";
     private static final String fileError = "There was an issue writing to the file. Please close the application " +
             "and try again.";
@@ -97,7 +100,7 @@ public class TeamGUI implements Runnable {
     JTextArea viewTeamStats;
 
     // Reset Stats
-    JLabel resetStatsWarning;
+    JLabel resetStatsWarningLabel;
     JButton resetTeamStats;
 
     // Manage Lines
@@ -456,24 +459,49 @@ public class TeamGUI implements Runnable {
     /**
      * Updates JComponents such as labels and text areas with any changes to the team itself after they are made
      * For example, labels that display the teams record or name
-     * @param index Index of the current team in the array, ensures that it is up-to-date in the combo box teamSelection
-     *              If negative, no changes need to be made to the combo box
+     * @param index Index of the current team in the array, only given when team name has been changed
+     *              If negative, no changes were made to the name
      */
     private void updateTeamComponents(Team oldTeam, Team newTeam, int index) {
         changeTeamWinsLabel.setText(winsString + " (Current: " + team.getWins() + ")");
         changeTeamLossesLabel.setText(lossesString + " (Current: " + team.getLosses() + ")");
         changeTeamOTLabel.setText(otString + " (Current: " + team.getOtLosses() + ")");
-        changeTeamNameLabel.setText(nameString + " (Current: " + newTeam.getName() + ")");
-        String roster = viewRoster.getText();
-        viewRoster.setText(newTeam.getName() + roster.substring(roster.indexOf('\n')));
-        roster = viewRosterWithStats.getText();
-        viewRosterWithStats.setText(newTeam.getName() + roster.substring(roster.indexOf('\n')));
+        String statsString = viewTeamStats.getText();
+        statsString = statsString.substring(statsString.indexOf('\n') + 1);
+        statsString = statsString.substring(statsString.indexOf('\n') + 1);
         if (index >= 0) {
+            changeTeamNameLabel.setText(nameString + " (Current: " + newTeam.getName() + ")");
             teamSelection.removeItem(oldTeam);
             teamSelection.insertItemAt(newTeam, index);
+            viewTeamStats.setText(String.format("%s\nRecord: %d-%d-%d\n%s", newTeam.getName(), team.getWins(),
+                    team.getLosses(), team.getOtLosses(), statsString));
+            statsString = viewRoster.getText();
+            viewRoster.setText(newTeam.getName() + statsString.substring(statsString.indexOf('\n')));
+            statsString = viewRosterWithStats.getText();
+            viewRosterWithStats.setText(newTeam.getName() + statsString.substring(statsString.indexOf('\n')));
+        } else {
+            viewTeamStats.setText(String.format("%s\nRecord: %d-%d-%d\n%s", team.getName(), team.getWins(),
+                    team.getLosses(), team.getOtLosses(), statsString));
         }
     }
 
+    /**
+     * Updates entirety of JComponents that display team info including roster stats. For use after reset team stats or
+     * similar functions.
+     */
+    private void updateEntireTeamComponents() {
+        changeTeamWinsLabel.setText(winsString + " (Current: " + team.getWins() + ")");
+        changeTeamLossesLabel.setText(lossesString + " (Current: " + team.getLosses() + ")");
+        changeTeamOTLabel.setText(otString + " (Current: " + team.getOtLosses() + ")");
+        viewTeamStats.setText(team.displayTeamStats());
+        viewRosterWithStats.setText(team.generateRosterWithStats());
+    }
+
+    /**
+     * This method sets up and displays the GUI for editing an actual team after one has been selected/created from
+     * the selectTeam frame. It is composed of a variety of tabs that encompass the different ways to modify or manage
+     * a team.
+     */
     private void displayTeamGUI() {
         // Setup Frame
         JFrame mainFrame = new JFrame(team.getName());
@@ -545,7 +573,7 @@ public class TeamGUI implements Runnable {
                 changeTeamWins.setText("");
                 changeTeamLosses.setText("");
                 changeTeamOT.setText("");
-                TeamGUI.updateFile();
+                updateFile();
             } catch (NumberFormatException ex) {
                 JOptionPane.showMessageDialog(mainFrame, numberError, "Edit Team", JOptionPane.ERROR_MESSAGE);
                 return;
@@ -568,7 +596,7 @@ public class TeamGUI implements Runnable {
                 team = newTeam;
                 mainFrame.setTitle(team.getName());
                 try {
-                    TeamGUI.updateFile();
+                    updateFile();
                 } catch (IOException ex) {
                     JOptionPane.showMessageDialog(mainFrame, fileError, "Edit Team", JOptionPane.ERROR_MESSAGE);
                 } catch (Exception ex) {
@@ -576,7 +604,7 @@ public class TeamGUI implements Runnable {
                             JOptionPane.ERROR_MESSAGE);
                 }
             } else {
-                updateTeamComponents(null, team, -1);
+                updateTeamComponents(null, null, -1);
             }
         });
 
@@ -593,6 +621,40 @@ public class TeamGUI implements Runnable {
         viewRosterWithStats.setEditable(false);
         JScrollPane viewRosterWithStatsScroll = new JScrollPane(viewRosterWithStats);
         teamTabs.add("View Basic Player Stats", viewRosterWithStatsScroll);
+
+        // Text Area that displays stats for the overall team
+        viewTeamStats = new JTextArea(team.displayTeamStats());
+        viewTeamStats.setEditable(false);
+        JScrollPane viewTeamStatsScroll = new JScrollPane(viewTeamStats);
+        teamTabs.add("View Team Stats", viewTeamStatsScroll);
+
+        // Reset Team Stats
+        resetStatsWarningLabel = new JLabel(resetStatsWarning);
+        resetTeamStats = new JButton("Reset Team Stats");
+        Container resetTeamContent = new Container();
+        resetTeamContent.setLayout(new BoxLayout(resetTeamContent, BoxLayout.X_AXIS));
+        createPanel(new JComponent[]{resetStatsWarningLabel}, resetTeamContent);
+        createPanel(new JComponent[]{resetTeamStats}, resetTeamContent);
+
+        // Resets stats for teams and updates relevant components
+        resetTeamStats.addActionListener(e -> {
+            int response = JOptionPane.showConfirmDialog(mainFrame, "Are you sure that you want to reset " +
+                    "stats for the entire team?", "Reset Team Stats", JOptionPane.YES_NO_OPTION);
+            if (response == JOptionPane.YES_OPTION) {
+                team.resetTeamStats();
+                try {
+                    updateFile();
+                } catch (IOException ex) {
+                    JOptionPane.showMessageDialog(mainFrame, fileError, "Reset Team Stats", JOptionPane.ERROR_MESSAGE);
+                } catch (Exception ex) {
+                    JOptionPane.showMessageDialog(mainFrame, ex.getMessage(), "Reset Team Stats",
+                            JOptionPane.ERROR_MESSAGE);
+                }
+                updateEntireTeamComponents();
+            }
+        });
+
+        teamTabs.add("Reset Team Stats", resetTeamContent);
 
         mainTabs.add("Manage Teams", teamTabs);
 
