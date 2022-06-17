@@ -406,7 +406,7 @@ public class Team implements Serializable {
      * and adding their stats to a running total.
      * @return The calculated percentage
      */
-    public double getFaceoffPercent() {
+    public double getFaceOffPercent() {
         int totalFaceoffs = 0;
         int faceoffWins = 0;
         for (Skater player: players) {
@@ -503,13 +503,36 @@ public class Team implements Serializable {
     }
 
     /**
-     * @return A string containing every player listed on the team
+     * @return A string that lists every player on the team
      */
     public String generateRoster() {
         StringBuilder result = new StringBuilder(String.format("%s\nSkaters:\n", name));
+        for (Skater player: players) {
+            result.append(String.format("%s %d\n", player.getName(), player.getPlayerNumber()));
+        }
+        result.append("Goalies:\n");
+        for (Goalie goalie: goalies) {
+            result.append(String.format("%s %d\n", goalie.getName(), goalie.getPlayerNumber()));
+        }
+        return result.substring(0, result.length() - 1);
+    }
+    /**
+     * @return A string containing every player listed on the team and some of their basic stats
+     */
+    public String generateRosterWithStats() {
+        StringBuilder result = new StringBuilder(String.format("%s\nSkaters:\t\t|  #|Pos|  G|  A|Pts|+/-|\n", name));
 
         for (Skater player : players) {
-            result.append(String.format("%s %d\n", player.getName(), player.getPlayerNumber()));
+            result.append(String.format("%-40s\t|%3d|", player.getName(), player.getPlayerNumber()));
+            switch (player.getPosition()) {
+                case CENTER -> result.append("  C");
+                case LEFT_WING -> result.append(" LW");
+                case RIGHT_WING -> result.append(" RW");
+                case LEFT_DEFENSE -> result.append(" LD");
+                case RIGHT_DEFENSE -> result.append(" RD");
+            }
+            result.append(String.format("|%3d|%3d|%3d|%3d|\n", player.getGoals(), player.getAssists(),
+                    player.getPoints(), player.getPlusMinus()));
         }
         result.append("Goalies:\n");
         for (Goalie goalie: goalies) {
@@ -528,7 +551,7 @@ public class Team implements Serializable {
                         Face Off %%: %.2f
                         Power Play %%: %.2f
                         Penalty Kill %%: %.2f
-                        Average Shots Against Per Game: %.2f""", name, wins, losses, otLosses, getFaceoffPercent(),
+                        Average Shots Against Per Game: %.2f""", name, wins, losses, otLosses, getFaceOffPercent(),
                 getPPSuccess(), getPKSuccess(), getAverageShots());
     }
 

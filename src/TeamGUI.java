@@ -90,6 +90,9 @@ public class TeamGUI implements Runnable {
     // View Roster
     JTextArea viewRoster;
 
+    // View Roster with Basic Stats
+    JTextArea viewRosterWithStats;
+
     // View Stats
     JTextArea viewTeamStats;
 
@@ -121,10 +124,10 @@ public class TeamGUI implements Runnable {
     JButton deleteLine;
 
     // View Lines
-    JTextArea viewLines;
+    JTextPane viewLines;
 
     // Create/Edit Skater/Goalie
-    JTextField playerName;
+    JTextArea playerName;
     JSlider playerNumber;
 
     // Manage Skaters
@@ -456,14 +459,18 @@ public class TeamGUI implements Runnable {
      * @param index Index of the current team in the array, ensures that it is up-to-date in the combo box teamSelection
      *              If negative, no changes need to be made to the combo box
      */
-    private void updateTeamComponents(int index) {
+    private void updateTeamComponents(Team oldTeam, Team newTeam, int index) {
         changeTeamWinsLabel.setText(winsString + " (Current: " + team.getWins() + ")");
         changeTeamLossesLabel.setText(lossesString + " (Current: " + team.getLosses() + ")");
         changeTeamOTLabel.setText(otString + " (Current: " + team.getOtLosses() + ")");
-        changeTeamNameLabel.setText(nameString + " (Current: " + team.getName() + ")");
+        changeTeamNameLabel.setText(nameString + " (Current: " + newTeam.getName() + ")");
+        String roster = viewRoster.getText();
+        viewRoster.setText(newTeam.getName() + roster.substring(roster.indexOf('\n')));
+        roster = viewRosterWithStats.getText();
+        viewRosterWithStats.setText(newTeam.getName() + roster.substring(roster.indexOf('\n')));
         if (index >= 0) {
-            teamSelection.removeItemAt(index);
-            teamSelection.insertItemAt(team, index);
+            teamSelection.removeItem(oldTeam);
+            teamSelection.insertItemAt(newTeam, index);
         }
     }
 
@@ -483,7 +490,7 @@ public class TeamGUI implements Runnable {
 
         // Team Tab
 
-        JTabbedPane teamTabs = new JTabbedPane();
+        teamTabs = new JTabbedPane();
 
         // Edit team
         Container editTeam = new Container();
@@ -552,13 +559,14 @@ public class TeamGUI implements Runnable {
                 newTeam.setName(name);
                 changeTeamName.setText("");
                 int index = TeamGUI.changeTeam(team, newTeam);
+                updateTeamComponents(team, newTeam, index);
                 if (index == -1) {
                     JOptionPane.showMessageDialog(mainFrame, "New name cannot be the same name as another team",
                             "Edit Team", JOptionPane.ERROR_MESSAGE);
                     return;
                 }
                 team = newTeam;
-                updateTeamComponents(index);
+                mainFrame.setTitle(team.getName());
                 try {
                     TeamGUI.updateFile();
                 } catch (IOException ex) {
@@ -568,11 +576,23 @@ public class TeamGUI implements Runnable {
                             JOptionPane.ERROR_MESSAGE);
                 }
             } else {
-                updateTeamComponents(-1);
+                updateTeamComponents(null, null, -1);
             }
         });
 
         teamTabs.add("Edit Team", editTeam);
+
+        // Text Area that displays the teams roster
+        viewRoster = new JTextArea(team.generateRoster());
+        viewRoster.setEditable(false);
+        JScrollPane viewRosterScroll = new JScrollPane(viewRoster);
+        teamTabs.add("View Roster", viewRosterScroll);
+
+        // Text Area that displays slightly more detailed roster
+        viewRosterWithStats = new JTextArea(team.generateRosterWithStats());
+        viewRosterWithStats.setEditable(false);
+        JScrollPane viewRosterWithStatsScroll = new JScrollPane(viewRosterWithStats);
+        teamTabs.add("View Basic Player Stats", viewRosterWithStatsScroll);
 
         mainTabs.add("Manage Teams", teamTabs);
 
