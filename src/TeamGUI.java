@@ -67,6 +67,7 @@ public class TeamGUI implements Runnable {
     JLabel editInstructionsLabel;
 
     // Team Lists
+    JLabel currentLineLabel;
     JComboBox<Line> lineOptions;
     JComboBox<Skater> skaterOptions;
     JComboBox<Center> centerOptions;
@@ -219,86 +220,102 @@ public class TeamGUI implements Runnable {
      * @return The generated sample team containing data from the 2015 Chicago Blackhawks Regular Season.
      */
     public static Team createSample() {
-        Team blackhawks = new Team("Sample Team: Chicago Blackhawks - 2015 Regular Season", 47, 26,
-                9);
+        Team blackhawks = new Team("Sample Team: Chicago Blackhawks - 2014-15 Regular Season", 48, 28,
+                6);
         blackhawks.addPlayer(new Skater("Patrick Kane", 88, "Left", Position.RIGHT_WING,
-                46, 60, 17, 37, 30));
-        blackhawks.addPlayer(new Center("Artem Anisimov", 15, "Left", 20, 22,
-                8, 53, 12, 44.16, 1148));
+                27, 37, 10, 22, 10));
         blackhawks.addPlayer(new Skater("Kyle Baun", 39, "Right", Position.LEFT_WING,
-                0, 0, 0, 3, 0));
+                0, 0, -1, 12, 0));
         blackhawks.addPlayer(new Skater("Bryan Bickell", 29, "Left", Position.LEFT_WING,
-                0, 2, -5, 58, 2));
-        blackhawks.addGoalie(new Goalie("Corey Crawford", 50, .924, 1718,
-                35, 18, 5, 7));
-        blackhawks.addPlayer(new Defenseman("Trevor Daley", 6, "Left",
-                Position.LEFT_DEFENSE, 0, 6, 1, 19, 8, 19));
-        blackhawks.addPlayer(new Center("Phillip Danault", 24, "Left", 1, 4,
-                -3, 33, 6, 44.2, 369));
-        blackhawks.addPlayer(new Center("Marko Dano", 56, "Left", 1, 1,
-                0, 15, 2, 25, 4));
-        blackhawks.addGoalie(new Goalie("Scott Darling", 33, .915, 784, 12,
-                8, 4, 1));
-        blackhawks.addPlayer(new Skater("Andrew Desjardins", 11, "Left", Position.LEFT_WING,
-                8, 5, -8, 30, 102));
-        blackhawks.addPlayer(new Defenseman("Christian Ehrhoff", 55, "Left",
-                Position.LEFT_DEFENSE, 0, 2, -1, 5, 2, 7));
-        blackhawks.addPlayer(new Skater("Tomas Fleischmann", 12, "Left", Position.LEFT_WING,
-                4, 1, -7, 10, 4));
-        blackhawks.addPlayer(new Center("Ryan Garbutt", 28, "Left", 2, 4,
-                -7, 94, 27, 0, 2));
-        blackhawks.addPlayer(new Defenseman("Erik Gustafsson", 52, "Left",
-                Position.LEFT_DEFENSE, 0, 14, 11, 29, 4, 37));
+                14, 14, 5, 205, 38));
+        blackhawks.addGoalie(new Goalie("Corey Crawford", 50, .924, 1661,
+                32, 20, 5, 2));
+        blackhawks.addPlayer(new Center("Phillip Danault", 24, "Left", 0, 0,
+                0, 3, 0, 30, 20));
+        blackhawks.addGoalie(new Goalie("Scott Darling", 33, .936, 419, 9,
+                4, 0, 1));
+        blackhawks.addPlayer(new Center("Andrew Desjardins", 11, "Left", 0, 2,
+                1, 32, 7, 63.2, 19));
         blackhawks.addPlayer(new Skater("Ryan Hartman", 38, "Right", Position.RIGHT_WING,
-                0, 1, -1, 5, 0));
-        blackhawks.addPlayer(new Center("Vinnie Hinostroza", 48, "Right", 0, 0,
-                -1, 13, 6, 40.6, 32));
+                0, 0, -1, 11, 2));
         blackhawks.addPlayer(new Defenseman("Niklas Hjalmarsson", 4, "Left",
-                Position.LEFT_DEFENSE, 2, 22, 13, 32, 32, 151));
+                Position.LEFT_DEFENSE, 3, 16, 25, 39, 44, 127));
         blackhawks.addPlayer(new Skater("Marian Hossa", 81, "Left", Position.RIGHT_WING,
-                13, 20, 10, 37, 24));
+                22, 39, 17, 62, 32));
         blackhawks.addPlayer(new Defenseman("Duncan Keith", 2, "Left",
-                Position.LEFT_DEFENSE, 9, 34, 13, 16, 26, 116));
-        blackhawks.addPlayer(new Skater("Tanner Kero", 67, "Left", Position.RIGHT_WING,
-                1, 2, -2, 19, 2));
-        blackhawks.addPlayer(new Center("Markus Kruger", 22, "Left", 0, 4,
-                -5, 25, 24, 49.2, 674));
-        blackhawks.addPlayer(new Skater("Andrew Ladd", 16, "Left", Position.LEFT_WING,
-                8, 4, -3, 29, 6));
-        blackhawks.addPlayer(new Skater("Brandon Mashinter", 53, "Left", Position.LEFT_WING,
-                4, 1, -7, 62, 23));
-        blackhawks.addPlayer(new Skater("Mark McNeill", 41, "Right", Position.RIGHT_WING,
-                0, 0, 0, 3, 0));
-        blackhawks.addPlayer(new Skater("Artemi Panarin", 72, "Right", Position.LEFT_WING,
-                30, 47, 8, 46, 32));
-        blackhawks.addPlayer(new Skater("Richard Panik", 14, "Left", Position.RIGHT_WING,
-                6, 2, 4, 54, 6));
-        blackhawks.addPlayer(new Center("Dennis Rasmussen", 70, "Right", 4, 5,
-                9, 36, 4, 46.9, 207));
+                Position.LEFT_DEFENSE, 10, 35, 12, 16, 20, 113));
+        blackhawks.addPlayer(new Center("Markus Kruger", 22, "Left", 7, 10,
+                -5, 29, 32, 53.3, 770));
         blackhawks.addPlayer(new Defenseman("Michal Rozsival", 32, "Right",
-                Position.RIGHT_DEFENSE, 1, 12, 3, 81, 33, 63));
+                Position.RIGHT_DEFENSE, 1, 12, 0, 103, 22, 87));
         blackhawks.addPlayer(new Defenseman("David Rundblad", 5, "Right",
-                Position.RIGHT_DEFENSE, 0, 2, -2, 3, 6, 3));
-        blackhawks.addPlayer(new Defenseman("Rob Scuderi", 47, "Left",
-                Position.LEFT_DEFENSE, 0, 0, -6, 7, 0, 10));
+                Position.RIGHT_DEFENSE, 3, 11, 17, 23, 12, 38));
         blackhawks.addPlayer(new Defenseman("Brent Seabrook", 7, "Right",
-                Position.RIGHT_DEFENSE, 14, 35, 6, 121, 32, 150));
-        blackhawks.addPlayer(new Skater("Jiri Sekac", 34, "Left", Position.LEFT_WING,
-                0, 1, -1, 7, 2));
-        blackhawks.addPlayer(new Skater("Andrew Shaw", 65, "Right", Position.RIGHT_WING,
-                14, 20, 11, 148, 69));
-        blackhawks.addPlayer(new Defenseman("Viktor Svedberg", 43, "Left",
-                Position.LEFT_DEFENSE, 2, 2, -5, 11, 4, 28));
-        blackhawks.addPlayer(new Center("Teuvo Teravainen", 86, "Left", 13, 22,
-                -2, 24, 20, 40.5, 209));
-        blackhawks.addPlayer(new Skater("Viktor Tikhonov", 14, "Right",
-                Position.RIGHT_WING, 0, 0, -4, 19, 6));
-        blackhawks.addPlayer(new Center("Jonathan Toews", 19, "Left", 28, 30,
-                16, 81, 62, 58.6, 1573));
+                Position.RIGHT_DEFENSE, 8, 23, -3, 135, 27, 141));
+        blackhawks.addPlayer(new Center("Andrew Shaw", 65, "Right",
+                15, 11, -8, 127, 67, 50.1, 712));
+        blackhawks.addPlayer(new Skater("Teuvo Teravainen", 86, "Left", Position.LEFT_WING,
+                4, 5, 4, 11, 2));
+        blackhawks.addPlayer(new Center("Jonathan Toews", 19, "Left", 28, 38,
+                30, 56, 36, 56.5, 1675));
         blackhawks.addPlayer(new Defenseman("Trevor van Riemsdyk", 57, "Right",
-                Position.RIGHT_DEFENSE, 3, 11, -5, 44, 31, 155));
-        blackhawks.addPlayer(new Skater("Dale Weise", 25, "Right", Position.RIGHT_WING,
-                0, 1, 4, 19, 2));
+                Position.RIGHT_DEFENSE, 0, 1, 0, 4, 2, 15));
+        blackhawks.addPlayer(new Skater("Brandon Saad", 20, "Left", Position.LEFT_WING,
+                23, 29, 7, 53, 12));
+        blackhawks.addPlayer(new Skater("Patrick Sharp", 10, "Right", Position.LEFT_WING,
+                16, 27, -8, 74, 33));
+        blackhawks.addPlayer(new Center("Brad Richards", 91, "Left", 12, 225,
+                3, 74, 12, 48.4, 825));
+        blackhawks.addPlayer(new Skater("Kris Versteeg", 23, "Right", Position.LEFT_WING,
+                14, 20, 11, 31, 35));
+        blackhawks.addPlayer(new Defenseman("Johnny Oduya", 27, "Left", Position.LEFT_DEFENSE,
+                2, 8, 5, 69, 26, 123));
+        blackhawks.addPlayer(new Skater("Ben Smith", 28, "Right", Position.RIGHT_WING,
+                5, 4, -1, 49, 2));
+        blackhawks.addPlayer(new Skater("Daniel Carcillo", 13, "Left", Position.LEFT_WING,
+                4, 4, 3, 36, 54));
+        blackhawks.addPlayer(new Center("Antoine Vermette", 80, "Left", 0, 3,
+                -2, 9, 6, 50, 196));
+        blackhawks.addPlayer(new Center("Joakim Nordstrom", 42, "Left", 0, 3,
+                -5, 73, 4, 20, 10));
+        blackhawks.addLine(new OffenseLine("Saad-Toews-Hossa", (Center) blackhawks.getPlayers().get(7),
+                blackhawks.getPlayers().get(8), blackhawks.getPlayers().get(22)));
+        blackhawks.addLine(new OffenseLine("Kane-Richards-Versteeg", (Center) blackhawks.getPlayers().get(25),
+                blackhawks.getPlayers().get(24), blackhawks.getPlayers().get(10)));
+        blackhawks.addLine(new OffenseLine("Nordstrom-Kruger-Smith", (Center) blackhawks.getPlayers().get(9),
+                blackhawks.getPlayers().get(18), blackhawks.getPlayers().get(13)));
+        blackhawks.addLine(new OffenseLine("Hossa-Toews-Versteeg", (Center) blackhawks.getPlayers().get(7),
+                blackhawks.getPlayers().get(22), blackhawks.getPlayers().get(10)));
+        blackhawks.addLine(new OffenseLine("Sharp-Richards-Kane", (Center) blackhawks.getPlayers().get(25),
+                blackhawks.getPlayers().get(4), blackhawks.getPlayers().get(24)));
+        blackhawks.addLine(new OffenseLine("Sharp-Shaw-Bickell", (Center) blackhawks.getPlayers().get(20),
+                blackhawks.getPlayers().get(4), blackhawks.getPlayers().get(14)));
+        blackhawks.addLine(new OffenseLine("Sharp-Toews-Hossa", (Center) blackhawks.getPlayers().get(7),
+                blackhawks.getPlayers().get(4), blackhawks.getPlayers().get(22)));
+        blackhawks.addLine(new OffenseLine("Carcillo-Kruger-Smith", (Center) blackhawks.getPlayers().get(9),
+                blackhawks.getPlayers().get(6), blackhawks.getPlayers().get(13)));
+        blackhawks.addLine(new OffenseLine("Teravainen-Shaw-Bickell", (Center) blackhawks.getPlayers().get(20),
+                blackhawks.getPlayers().get(23), blackhawks.getPlayers().get(14)));
+        blackhawks.addLine(new OffenseLine("Carcillo-Shaw-Bickell", (Center) blackhawks.getPlayers().get(20),
+                blackhawks.getPlayers().get(6), blackhawks.getPlayers().get(14)));
+        blackhawks.addLine(new DefenseLine("Hjalmarsson-Oduya", (Defenseman) blackhawks.getPlayers().get(1),
+                (Defenseman) blackhawks.getPlayers().get(12)));
+        blackhawks.addLine(new DefenseLine("Keith-Seabrook", (Defenseman) blackhawks.getPlayers().get(0),
+                (Defenseman) blackhawks.getPlayers().get(3)));
+        blackhawks.addLine(new DefenseLine("Keith-Rosival", (Defenseman) blackhawks.getPlayers().get(0),
+                (Defenseman) blackhawks.getPlayers().get(15)));
+        blackhawks.addLine(new DefenseLine("Hjalmarsson-Seabrook", (Defenseman) blackhawks.getPlayers().get(1),
+                (Defenseman) blackhawks.getPlayers().get(3)));
+        blackhawks.addLine(new DefenseLine("Keith-Hjalmarsson", (Defenseman) blackhawks.getPlayers().get(0),
+                (Defenseman) blackhawks.getPlayers().get(1)));
+        blackhawks.addLine(new DefenseLine("Keith-Rundblad", (Defenseman) blackhawks.getPlayers().get(0),
+                (Defenseman) blackhawks.getPlayers().get(2)));
+        blackhawks.addLine(new DefenseLine("Oduya-Seabrook", (Defenseman) blackhawks.getPlayers().get(12),
+                (Defenseman) blackhawks.getPlayers().get(3)));
+        blackhawks.addLine(new DefenseLine("Oduya-Rozsival", (Defenseman) blackhawks.getPlayers().get(12),
+                (Defenseman) blackhawks.getPlayers().get(15)));
+        blackhawks.addLine(new DefenseLine("Rozsival-Van Reimsdyk", (Defenseman) blackhawks.getPlayers().get(15),
+                (Defenseman) blackhawks.getPlayers().get(19)));
         return blackhawks;
     }
 
@@ -420,6 +437,21 @@ public class TeamGUI implements Runnable {
             panel.add(component);
         }
         container.add(panel);
+    }
+
+    /**
+     * Creates a panel containing each of the given components, adds to given border layout container at the specified
+     * location
+     * @param components Components being added
+     * @param container Container where the panel will be added
+     * @param layoutString Border layout location specifier
+     */
+    private void createPanel(JComponent[] components, Container container, String layoutString) {
+        JPanel panel = new JPanel();
+        for (JComponent component: components) {
+            panel.add(component);
+        }
+        container.add(panel, layoutString);
     }
 
     /**
@@ -658,6 +690,20 @@ public class TeamGUI implements Runnable {
 
         mainTabs.add("Manage Teams", teamTabs);
 
+        // Line Tabs
+
+        Container mainLineContainer = new Container();
+        mainLineContainer.setLayout(new BorderLayout());
+        lineTabs = new JTabbedPane();
+        currentLineLabel = new JLabel("Selected Line:");
+        lineOptions = new JComboBox<Line>();
+        for (Line line: team.getLines()) {
+            lineOptions.addItem(line);
+        }
+        createPanel(new JComponent[]{lineTabs}, mainLineContainer, BorderLayout.CENTER);
+        createPanel(new JComponent[]{currentLineLabel, lineOptions}, mainLineContainer, BorderLayout.NORTH);
+
+        mainTabs.add("Manage Lines", mainLineContainer);
         // Sets team to null and re displays SelectTeamGUI when window is closed
         mainFrame.addWindowListener(new WindowAdapter() {
             @Override

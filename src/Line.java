@@ -6,7 +6,7 @@ import java.io.Serializable;
  * two defensemen.
  */
 
-public class Line implements Serializable {
+public abstract class Line implements Serializable {
     private String name;
     private Center center;
     private Skater leftWing;
