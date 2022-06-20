@@ -3,44 +3,35 @@
  * A class that extends from the line class to be specific to the penalty kill special teams lines.
  */
 
-public class PKLine extends Line {
-    private int numberKilled;
-    private int numberAttempts;    // Used to calculate the PK percentage
+public class PKLine extends SpecialTeamsLine {
+    private Skater offense1;
+    private Skater offense2;
+    private Defenseman leftDe;
+    private Defenseman rightDe;
+
+    // Error String
+    private static final String centerError = "Cannot choose center for a penalty kill line. Choose a wing instead.";
 
     /**
-     * Assigns given arguments to their respective instance variables, initializes Center to null and stats to 0
+     * Assigns given arguments to their respective instance variables, assigns numberKilled/numberAttempts to 0
      * @throws NullPointerException Thrown if any of the given players are null
+     * @throws IllegalArgumentException If the same player is given as two different arguments
      */
-    public PKLine(String name, Skater winger1, Skater winger2, Defenseman leftDe, Defenseman rightDe)
+    public PKLine(String name, Skater offense1, Skater offense2, Defenseman leftDe, Defenseman rightDe)
             throws NullPointerException {
-        super(name, null, winger1, winger2, leftDe, rightDe);
-        if (winger1 == null || winger2 == null || leftDe == null || rightDe == null) {
-            throw new NullPointerException("Penalty Kill positions cannot be empty");
+        super(name);
+        if (offense1 == null || offense2 == null || leftDe == null || rightDe == null) {
+            throw new NullPointerException(Line.nullError);
         }
-        numberKilled = 0;
-        numberAttempts = 0;
-    }
+        if (offense1.equals(offense2) || offense1.equals(leftDe) || offense1.equals(rightDe) || offense2.equals(leftDe)
+                || offense2.equals(rightDe) || leftDe.equals(rightDe)) {
+            throw new IllegalArgumentException(Line.duplicatesError);
+        }
 
-    /**
-     * Assigns given arguments to their respective instance variables, initializes Center to null
-     * @throws NullPointerException Thrown if any of the given players are null
-     * @throws IllegalArgumentException Thrown if any of the given stats are negative
-     */
-    public PKLine(String name, Skater winger1, Skater winger2, Defenseman leftDe, Defenseman rightDe,
-                  int numberKilled, int numberAttempts) throws NullPointerException, IllegalArgumentException {
-        super(name, null, winger1, winger2, leftDe, rightDe);
-        if (winger1 == null || winger2 == null || leftDe == null || rightDe == null) {
-            throw new NullPointerException("Penalty Kill positions cannot be empty");
-        }
-        if (numberKilled < 0 || numberAttempts < 0) {
-            throw new IllegalArgumentException("Given totals cannot be negative");
-        }
-        if (numberKilled > numberAttempts) {
-            throw new IllegalArgumentException("Number of successfully killed penalties cannot be greater than " +
-                    "number of penalties the line has faced");
-        }
-        this.numberKilled = numberKilled;
-        this.numberAttempts = numberAttempts;
+        this.offense1 = offense1;
+        this.offense2 = offense2;
+        this.leftDe = leftDe;
+        this.rightDe = rightDe;
     }
 
     /**
@@ -49,84 +40,79 @@ public class PKLine extends Line {
      * @throws NullPointerException If any of the given players are null
      * @throws IllegalArgumentException If the percentage is not in a valid range or if numberAttempts is negative
      */
-    public PKLine(String name, Skater winger1, Skater winger2, Defenseman leftDe, Defenseman rightDe, double pkPercent,
+    public PKLine(String name, Skater offense1, Skater offense2, Defenseman leftDe, Defenseman rightDe, double pkPercent,
                   int numberAttempts) throws NullPointerException, IllegalArgumentException {
-        super(name, null, winger1, winger2, leftDe, rightDe);
-        if (winger1 == null || winger2 == null || leftDe == null || rightDe == null) {
-            throw new NullPointerException("Penalty Kill positions cannot be empty");
+        super(name, pkPercent, numberAttempts);
+        if (offense1 == null || offense2 == null || leftDe == null || rightDe == null) {
+            throw new NullPointerException(Line.nullError);
         }
-        if (pkPercent < 0 || pkPercent > 100) {
-            throw new IllegalArgumentException("Percentage must be between 0-100");
-        }
-        if (numberAttempts < 0) {
-            throw new IllegalArgumentException("Number of attempts cannot be negative");
+        if (offense1.equals(offense2) || offense1.equals(leftDe) || offense1.equals(rightDe) || offense2.equals(leftDe)
+                || offense2.equals(rightDe) || leftDe.equals(rightDe)) {
+            throw new IllegalArgumentException(Line.duplicatesError);
         }
 
-        numberKilled = (int) ((pkPercent / 100) * numberAttempts);
-        this.numberAttempts = numberAttempts;
+        this.offense1 = offense1;
+        this.offense2 = offense2;
+        this.leftDe = leftDe;
+        this.rightDe = rightDe;
     }
 
-    // Getter methods
+    // Setter Methods
 
-    public int getNumberKilled() {
-        return numberKilled;
-    }
-
-    public int getNumberAttempts() {
-        return numberAttempts;
+    /**
+     * @throws NullPointerException If a null argument is given
+     * @throws IllegalArgumentException If a player at another position is the same as the given player
+     */
+    public void setOffense1(Skater offense1) throws NullPointerException, IllegalArgumentException {
+        if (offense1 == null) {
+            throw new NullPointerException(Line.nullError);
+        }
+        if (offense1.equals(offense2) || offense1.equals(leftDe) || offense1.equals(rightDe)) {
+            throw new IllegalArgumentException(Line.duplicatesError);
+        }
+        this.offense1 = offense1;
     }
 
     /**
-     * Calculates percentage of penalties that have successfully been killed based off numberKilled and numberAttempts
-     * @return The calculated percentage
+     * @throws NullPointerException If a null argument is given
+     * @throws IllegalArgumentException If a player at another position is the same as the given player
      */
-    public double getKillPercent() {
-        if (numberAttempts == 0) {
-            return 0;
+    public void setOffense2(Skater offense2) throws NullPointerException, IllegalArgumentException {
+        if (offense2 == null) {
+            throw new NullPointerException(Line.nullError);
         }
-        return (double) numberKilled / numberAttempts * 100;
+        if (offense2.equals(offense1) || offense2.equals(leftDe) || offense2.equals(rightDe)) {
+            throw new IllegalArgumentException(Line.duplicatesError);
+        }
+        this.offense2 = offense2;
     }
 
     /**
-     * @throws IllegalArgumentException Thrown if numberKilled is larger than numberAttempts or if either value is
-     * negative
+     * @throws NullPointerException If a null argument is given
+     * @throws IllegalArgumentException If a player at another position is the same as the given player
      */
-    public void setKillStats(int numberKilled, int numberAttempts) throws IllegalArgumentException {
-        if (numberKilled > numberAttempts) {
-            throw new IllegalArgumentException("Number of successfully killed penalties cannot be greater than " +
-                    "number of penalties the line has faced");
+    public void setLeftDe(Defenseman leftDe) throws NullPointerException, IllegalArgumentException {
+        if (leftDe == null) {
+            throw new NullPointerException(Line.nullError);
         }
-        if (numberAttempts < 0 || numberKilled < 0) {
-            throw new IllegalArgumentException("Given totals cannot be negative");
+        if (leftDe.equals(offense2) || leftDe.equals(offense1) || leftDe.equals(rightDe)) {
+            throw new IllegalArgumentException(Line.duplicatesError);
         }
-        this.numberKilled = numberKilled;
-        this.numberAttempts = numberAttempts;
+        this.leftDe = leftDe;
     }
 
     /**
-     * Uses a percentage to calculate and assign numberKilled
-     * @throws IllegalArgumentException Thrown if successPercent is not a valid percent or if numberAttempts is negative
+     * @throws NullPointerException If a null argument is given
+     * @throws IllegalArgumentException If a player at another position is the same as the given player
      */
-    public void setKillStatsWithPercentage(double successPercent, int numberAttempts) throws IllegalArgumentException {
-        if (successPercent < 0 || successPercent > 100) {
-            throw new IllegalArgumentException("Percentage must be in the range 0-100");
+    public void setRightDe(Defenseman rightDe) {
+        if (rightDe == null) {
+            throw new NullPointerException(Line.nullError);
         }
-        if (numberAttempts < 0) {
-            throw new IllegalArgumentException("Number of attempts cannot be negative");
+        if (rightDe.equals(offense2) || rightDe.equals(offense1) || rightDe.equals(leftDe)) {
+            throw new IllegalArgumentException(Line.duplicatesError);
         }
-        numberKilled = (int) ((successPercent / 100) * numberAttempts);
-        this.numberAttempts = numberAttempts;
-    }
-
-    // Increments numberKilled and numberAttempts up by 1
-    public void killedPenalty() {
-        numberKilled++;
-        numberAttempts++;
-    }
-
-    // Increments only numberAttempts up by 1
-    public void scoredOn() {
-        numberAttempts++;
+        this.rightDe = rightDe;
     }
 
     /**
@@ -134,12 +120,49 @@ public class PKLine extends Line {
      */
     @Override
     public String lineRoster() {
-        return String.format("%s\n" +
-                "Offense: %s\n" +
-                "Offense: %s\n" +
-                "Left Defense: %s\n" +
-                "Right Defense: %s\n" +
-                "PK%%: %.2f\n", getName(), getLeftWing().getName(), getRightWing().getName(),
-                getLeftDe().getName(), getRightDe().getName(), getKillPercent());
+        return String.format("""
+                        %s
+                        Offense: %s
+                        Offense: %s
+                        Left Defense: %s
+                        Right Defense: %s
+                        PK%%: %.2f
+                        """, getName(), offense1.getName(), offense2.getName(),
+                leftDe.getName(), rightDe.getName(), getSuccessPercent());
+    }
+
+    @Override
+    public void score(Position position, DefenseLine deLine) {
+        if (position == Position.CENTER) {
+            throw new IllegalArgumentException(centerError);
+        }
+        if (position == Position.LEFT_WING) {
+            offense1.score();
+        } else {
+            offense1.scoredOnIce();
+        }
+        if (position == Position.RIGHT_WING) {
+            offense2.score();
+        } else {
+            offense2.scoredOnIce();
+        }
+        if (position == Position.LEFT_DEFENSE) {
+            leftDe.score();
+        } else {
+            leftDe.scoredOnIce();
+        }
+        if (position == Position.RIGHT_DEFENSE) {
+            rightDe.score();
+        } else {
+            rightDe.scoredOnIce();
+        }
+    }
+
+    public void lineScoredOn() {
+        offense1.scoredAgainst();
+        offense2.scoredAgainst();
+        leftDe.scoredAgainst();
+        rightDe.scoredAgainst();
+        failure();
     }
 }

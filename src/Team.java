@@ -430,9 +430,9 @@ public class Team implements Serializable {
         int tryTotal = 0;
         double successTotal = 0;
         for (Line line: lines) {
-            if (line instanceof PKLine) {
-                tryTotal += ((PKLine) line).getNumberAttempts();
-                successTotal += ((PKLine) line).getNumberKilled();
+            if (line instanceof PKLine pk) {
+                tryTotal += pk.getAttempts();
+                successTotal += pk.getSuccesses();
             }
         }
         if (tryTotal == 0) {

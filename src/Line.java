@@ -8,22 +8,17 @@ import java.io.Serializable;
 
 public abstract class Line implements Serializable {
     private String name;
-    private Center center;
-    private Skater leftWing;
-    private Skater rightWing;
-    private Defenseman leftDe;
-    private Defenseman rightDe;
 
-    // Error message for score methods
-    private static final String scoreError = "A given position is not assigned to this line";
+    // Error messages
+    public static final String nullError = "Positions cannot be left empty";
+    public static final String duplicatesError = "The same player cannot be at two different positions";
 
     /**
      * Initializes instance variables with their respective arguments. A player can be left null if the user so chooses.
      * @throws NullPointerException Thrown if the given name is null
      * @throws IllegalArgumentException Thrown if the given name is blank
      */
-    public Line(String name, Center center, Skater leftWing, Skater rightWing, Defenseman leftDe, Defenseman rightDe)
-            throws NullPointerException, IllegalArgumentException {
+    public Line(String name) throws NullPointerException, IllegalArgumentException {
         if (name == null) {
             throw new NullPointerException("Name cannot be null");
         }
@@ -31,37 +26,12 @@ public abstract class Line implements Serializable {
             throw new IllegalArgumentException("Name cannot be blank");
         }
         this.name = name;
-        this.center = center;
-        this.leftWing = leftWing;
-        this.rightWing = rightWing;
-        this.leftDe = leftDe;
-        this.rightDe = rightDe;
     }
 
     // Getter Methods
 
     public String getName() {
         return name;
-    }
-
-    public Center getCenter() {
-        return center;
-    }
-
-    public Skater getLeftWing() {
-        return leftWing;
-    }
-
-    public Skater getRightWing() {
-        return rightWing;
-    }
-
-    public Defenseman getLeftDe() {
-        return leftDe;
-    }
-
-    public Defenseman getRightDe() {
-        return rightDe;
     }
 
     /**
@@ -80,32 +50,12 @@ public abstract class Line implements Serializable {
 
     // Position setter methods
 
-    public void setCenter(Center center) {
-        this.center = center;
-    }
-
-    public void setLeftWing(Skater leftWing) {
-        this.leftWing = leftWing;
-    }
-
-    public void setRightWing(Skater rightWing) {
-        this.rightWing = rightWing;
-    }
-
-    public void setLeftDe(Defenseman leftDe) {
-        this.leftDe = leftDe;
-    }
-
-    public void setRightDe(Defenseman rightDe) {
-        this.rightDe = rightDe;
-    }
-
     /**
      * Updates the stats for each player on the line after a goal is scored.
      * @param position Position of the player who scored the goal.
      * @throws IllegalArgumentException Thrown if the given position is not assigned to the line
      */
-    public void score(Position position) throws IllegalArgumentException {
+    public void score(Position position, DefenseLine deLine) throws IllegalArgumentException {
         if (center == null && position == Position.CENTER ) {
             throw new IllegalArgumentException(scoreError);
         }
