@@ -1,42 +1,31 @@
-public class PPLine extends Line {
-    private int numberScored;  // Successful power plays
-    private int numberOpps;    // Total power play attempts (opportunities)
+
+public class PPLine extends SpecialTeamsLine {
+    private Center center;
+    private Skater leftWing;
+    private Skater rightWing;
+    private Defenseman leftDe;
+    private Defenseman rightDe;
 
     /**
      * Initializes given arguments in their respective variables, sets stats to 0
      * @throws NullPointerException Thrown if any of the given players are null
      */
     public PPLine(String name, Center center, Skater leftWing, Skater rightWing, Defenseman leftDe, Defenseman rightDe)
-            throws NullPointerException {
-        super(name, center, leftWing, rightWing, leftDe, rightDe);
+            throws NullPointerException, IllegalArgumentException {
+        super(name);
         if (center == null || leftWing == null || rightWing == null || leftDe == null || rightDe == null) {
-            throw new NullPointerException("All positions must be filled for a Power Play line");
+            throw new NullPointerException(nullError);
         }
-        numberScored = 0;
-        numberOpps = 0;
-    }
-
-    /**
-     * Initializes given arguments in their respective variables
-     * @throws NullPointerException Thrown if any of the given players are null
-     * @throws IllegalArgumentException Thrown if the given stats are negative or if numberScored is greater than
-     * numberOpps
-     */
-    public PPLine(String name, Center center, Skater leftWing, Skater rightWing, Defenseman leftDe, Defenseman rightDe,
-                  int numberScored, int numberOpps) throws NullPointerException, IllegalArgumentException {
-        super(name, center, leftWing, rightWing, leftDe, rightDe);
-        if (center == null || leftWing == null || rightWing == null || leftDe == null || rightDe == null) {
-            throw new NullPointerException("All positions must be filled for a Power Play line");
+        if (center.equals(leftWing) || center.equals(rightWing) || leftWing.equals(rightWing) ||
+                leftWing.equals(rightDe) || leftWing.equals(leftDe) || rightWing.equals(rightDe) ||
+                rightWing.equals(leftDe) || leftDe.equals(rightDe)) {
+            throw new IllegalArgumentException(playerDuplicatesError);
         }
-        if (numberScored < 0 || numberOpps < 0) {
-            throw new IllegalArgumentException("The given stats cannot be negative");
-        }
-        if (numberScored > numberOpps) {
-            throw new IllegalArgumentException("The number of successes must be fewer than the number of attempts");
-        }
-
-        this.numberScored = numberScored;
-        this.numberOpps = numberOpps;
+        this.center = center;
+        this.leftWing = leftWing;
+        this.rightWing = rightWing;
+        this.leftDe = leftDe;
+        this.rightDe = rightDe;
     }
 
     /**
@@ -46,28 +35,94 @@ public class PPLine extends Line {
      */
     public PPLine(String name, Center center, Skater leftWing, Skater rightWing, Defenseman leftDe, Defenseman rightDe,
                   double ppPercent, int numberOpps) throws NullPointerException, IllegalArgumentException {
-        super(name, center, leftWing, rightWing, leftDe, rightDe);
+        super(name, ppPercent, numberOpps);
         if (center == null || leftWing == null || rightWing == null || leftDe == null || rightDe == null) {
-            throw new NullPointerException("All positions must be filled for a Power Play line");
+            throw new NullPointerException(nullError);
         }
-        if (ppPercent < 0 || ppPercent > 100) {
-            throw new IllegalArgumentException("Percentage must be between 0-100");
+        if (center.equals(leftWing) || center.equals(rightWing) || leftWing.equals(rightWing) ||
+                leftWing.equals(rightDe) || leftWing.equals(leftDe) || rightWing.equals(rightDe) ||
+                rightWing.equals(leftDe) || leftDe.equals(rightDe)) {
+            throw new IllegalArgumentException(playerDuplicatesError);
         }
-        if (numberOpps < 0) {
-            throw new IllegalArgumentException("Number of opportunities cannot be negative");
-        }
-        numberScored = (int) ((ppPercent / 100) * numberOpps);
-        this.numberOpps = numberOpps;
+        this.center = center;
+        this.leftWing = leftWing;
+        this.rightWing = rightWing;
+        this.leftDe = leftDe;
+        this.rightDe = rightDe;
     }
 
-    // Getter Methods
+    // Setter Methods
 
-    public int getNumberScored() {
-        return numberScored;
+    /**
+     * @throws NullPointerException If given argument is null
+     * @throws IllegalArgumentException If given argument is the same as another player
+     */
+    public void setCenter(Center center) throws NullPointerException, IllegalArgumentException {
+        if (center == null) {
+            throw new NullPointerException(nullError);
+        }
+        if (center.equals(leftWing) || center.equals(rightWing)) {
+            throw new IllegalArgumentException(playerDuplicatesError);
+        }
+        this.center = center;
     }
 
-    public int getNumberOpps() {
-        return numberOpps;
+    /**
+     * @throws NullPointerException If given argument is null
+     * @throws IllegalArgumentException If given argument is the same as another player
+     */
+    public void setLeftWing(Skater leftWing) throws NullPointerException, IllegalArgumentException {
+        if (leftWing == null) {
+            throw new NullPointerException(nullError);
+        }
+        if (leftWing.equals(center) || leftWing.equals(rightWing) || leftWing.equals(leftDe) ||
+                leftWing.equals(rightDe)) {
+            throw new IllegalArgumentException(playerDuplicatesError);
+        }
+        this.leftWing = leftWing;
+    }
+
+    /**
+     * @throws NullPointerException If given argument is null
+     * @throws IllegalArgumentException If given argument is the same as another player
+     */
+    public void setRightWing(Skater rightWing) throws NullPointerException, IllegalArgumentException {
+        if (rightWing == null) {
+            throw new NullPointerException(nullError);
+        }
+        if (rightWing.equals(center) || rightWing.equals(leftWing) || rightWing.equals(rightDe) ||
+                rightWing.equals(leftDe)) {
+            throw new IllegalArgumentException(playerDuplicatesError);
+        }
+        this.rightWing = rightWing;
+    }
+
+    /**
+     * @throws NullPointerException If given argument is null
+     * @throws IllegalArgumentException If given argument is the same as another player
+     */
+    public void setLeftDe(Defenseman leftDe) throws NullPointerException, IllegalArgumentException {
+        if (leftDe == null) {
+            throw new NullPointerException(nullError);
+        }
+        if (leftDe.equals(leftWing) || leftDe.equals(rightWing) || leftDe.equals(rightDe)) {
+            throw new IllegalArgumentException(playerDuplicatesError);
+        }
+        this.leftDe = leftDe;
+    }
+
+    /**
+     * @throws NullPointerException If given argument is null
+     * @throws IllegalArgumentException If given argument is the same as another player
+     */
+    public void setRightDe(Defenseman rightDe) throws NullPointerException, IllegalArgumentException {
+        if (rightDe == null) {
+            throw new NullPointerException(nullError);
+        }
+        if (rightDe.equals(leftWing) || rightDe.equals(rightWing) || rightDe.equals(leftDe)) {
+            throw new IllegalArgumentException(playerDuplicatesError);
+        }
+        this.rightDe = rightDe;
     }
 
     /**
@@ -76,86 +131,162 @@ public class PPLine extends Line {
      * @throws IllegalArgumentException See super class
      */
     @Override
-    public void score(Position position) throws IllegalArgumentException {
-        super.score(position);
-        numberScored++;
-        numberOpps++;
+    public void score(Position position) throws NullPointerException, IllegalArgumentException {
+        if (position == null) {
+            throw new NullPointerException(nullError);
+        }
+        if (position == Position.CENTER) {
+            center.score();
+        } else {
+            center.scoredOnIce();
+        }
+        if (position == Position.LEFT_WING) {
+            leftWing.score();
+        } else {
+            leftWing.scoredOnIce();
+        }
+        if (position == Position.RIGHT_WING) {
+            rightWing.score();
+        } else {
+            rightWing.scoredOnIce();
+        }
+        if (position == Position.LEFT_DEFENSE) {
+            leftDe.score();
+        } else {
+            leftDe.scoredOnIce();
+        }
+        if (position == Position.RIGHT_DEFENSE) {
+            rightDe.score();
+        } else {
+            rightDe.scoredOnIce();
+        }
+        success();
     }
 
     /**
      * Utilize Line methods to apply stats to players, also updates numberScored and numberOpps
-     * @param score Position of the player who scored the goal
+     * @param scorer Position of the player who scored the goal
      * @param assist The position of the player who assisted the goal
      * @throws IllegalArgumentException See super class
      */
     @Override
-    public void score(Position score, Position assist) throws IllegalArgumentException {
-        super.score(score, assist);
-        numberScored++;
-        numberOpps++;
+    public void score(Position scorer, Position assist) throws NullPointerException, IllegalArgumentException {
+        if (scorer == null || assist == null) {
+            throw new NullPointerException(nullError);
+        }
+        if (scorer == assist) {
+            throw new IllegalArgumentException(Line.positionDuplicatesError);
+        }
+
+        if (scorer == Position.CENTER) {
+            center.score();
+        } else if (assist == Position.CENTER) {
+            center.assist();
+        } else {
+            center.scoredOnIce();
+        }
+
+        if (scorer == Position.LEFT_WING) {
+            leftWing.score();
+        } else if (assist == Position.LEFT_WING) {
+            leftWing.assist();
+        } else {
+            leftWing.scoredOnIce();
+        }
+
+        if (scorer == Position.RIGHT_WING) {
+            rightWing.score();
+        } else if (assist == Position.RIGHT_WING) {
+            rightWing.assist();
+        } else {
+            rightWing.scoredOnIce();
+        }
+
+        if (scorer == Position.RIGHT_DEFENSE) {
+            rightDe.score();
+        } else if (assist == Position.RIGHT_DEFENSE) {
+            rightDe.assist();
+        } else {
+            rightDe.scoredOnIce();
+        }
+
+        if (scorer == Position.LEFT_DEFENSE) {
+            leftDe.score();
+        } else if (assist == Position.LEFT_DEFENSE) {
+            leftDe.assist();
+        } else {
+            leftDe.scoredOnIce();
+        }
+
+        success();
     }
 
     /**
      * Utilize Line methods to apply stats to players, also updates numberScored and numberOpps
-     * @param score Position of the player who scored the goal
+     * @param scorer Position of the player who scored the goal
      * @param assist1 Position of player who assisted the goal
      * @param assist2 Position of other player who assisted the goal
      * @throws IllegalArgumentException See super class
      */
     @Override
-    public void score(Position score, Position assist1, Position assist2) throws IllegalArgumentException {
-        super.score(score, assist1, assist2);
-        numberScored++;
-        numberOpps++;
+    public void score(Position scorer, Position assist1, Position assist2) throws NullPointerException,
+            IllegalArgumentException {
+        if (scorer == null || assist1 == null || assist2 == null) {
+            throw new NullPointerException(nullError);
+        }
+        if (scorer == assist1 || scorer == assist2 || assist1 == assist2) {
+            throw new IllegalArgumentException(Line.positionDuplicatesError);
+        }
+
+        if (scorer == Position.CENTER) {
+            center.score();
+        } else if (assist1 == Position.CENTER || assist2 == Position.CENTER) {
+            center.assist();
+        } else {
+            center.scoredOnIce();
+        }
+
+        if (scorer == Position.LEFT_WING) {
+            leftWing.score();
+        } else if (assist1 == Position.LEFT_WING || assist2 == Position.LEFT_WING) {
+            leftWing.assist();
+        } else {
+            leftWing.scoredOnIce();
+        }
+
+        if (scorer == Position.RIGHT_WING) {
+            rightWing.score();
+        } else if (assist1 == Position.RIGHT_WING || assist2 == Position.RIGHT_WING) {
+            rightWing.assist();
+        } else {
+            rightWing.scoredOnIce();
+        }
+
+        if (scorer == Position.RIGHT_DEFENSE) {
+            rightDe.score();
+        } else if (assist1 == Position.RIGHT_DEFENSE || assist2 == Position.RIGHT_DEFENSE) {
+            rightDe.assist();
+        } else {
+            rightDe.scoredOnIce();
+        }
+
+        if (scorer == Position.LEFT_DEFENSE) {
+            leftDe.score();
+        } else if (assist1 == Position.LEFT_DEFENSE || assist2 == Position.LEFT_DEFENSE) {
+            leftDe.assist();
+        } else {
+            leftDe.scoredOnIce();
+        }
+
+        success();
     }
 
-    // Only increments numberOpps
-    public void missedOpp() {
-        numberOpps++;
-    }
-
-    /**
-     * Calculates power player percentage using numberScored and numberOpps
-     * @return The calculated percentage
-     */
-    public double getSuccessRate() {
-        if (numberOpps == 0) {
-            return 0;
-        }
-        return (double) numberScored / numberOpps * 100;
-    }
-
-    /**
-     * @param numberScored Updated number scored
-     * @param numberOpps Updated number of opportunities
-     * @throws IllegalArgumentException Thrown if given stats are negative or if numberScored is greater than numberOpps
-     */
-    public void setStats(int numberScored, int numberOpps) throws IllegalArgumentException {
-        if (numberScored < 0 || numberOpps < 0) {
-            throw new IllegalArgumentException("The given stats cannot be negative");
-        }
-        if (numberScored > numberOpps) {
-            throw new IllegalArgumentException("The number of successes must be fewer than the number of attempts");
-        }
-        this.numberScored = numberScored;
-        this.numberOpps = numberOpps;
-    }
-
-    /**
-     * Updates numberScored stat using given percentage
-     * @param successPercent Given power play percentage
-     * @param numberOpps Updated number of opportunities
-     * @throws IllegalArgumentException Thrown if given percentage is invalive or if numberOpps is negative
-     */
-    public void setStatsWithPercentage(double successPercent, int numberOpps) throws IllegalArgumentException {
-        if (successPercent < 0 || successPercent > 100) {
-            throw new IllegalArgumentException("Percentage must be in range 0-100");
-        }
-        if (numberOpps < 0) {
-            throw new IllegalArgumentException("Number of opportunities cannot be negative");
-        }
-        numberScored = (int) ((successPercent / 100) * numberOpps);
-        this.numberOpps = numberOpps;
+    public void lineScoredOn() {
+        center.scoredAgainst();
+        leftWing.scoredAgainst();
+        rightWing.scoredAgainst();
+        leftDe.scoredAgainst();
+        rightDe.scoredAgainst();
     }
 
     /**
@@ -163,8 +294,15 @@ public class PPLine extends Line {
      */
     @Override
     public String lineRoster() {
-        String result = super.lineRoster();
-        result += String.format("PP%%: %.2f", getSuccessRate());
-        return result;
+        return String.format("""
+                        %s
+                        Center: %s
+                        Left Wing: %s
+                        Right Wing: %s
+                        Left Defense: %s
+                        Right Defense: %s
+                        PP%%: %.2f
+                        """, getName(), center.getName(), leftWing.getName(), rightWing.getName(), leftDe.getName(),
+                rightDe.getName(), getSuccessPercent());
     }
 }

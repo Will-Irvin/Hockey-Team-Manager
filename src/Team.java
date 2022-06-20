@@ -450,9 +450,9 @@ public class Team implements Serializable {
         int tryTotal = 0;
         double successTotal = 0;
         for (Line line: lines) {
-            if (line instanceof PPLine) {
-                tryTotal += ((PPLine) line).getNumberOpps();
-                successTotal += ((PPLine) line).getNumberScored();
+            if (line instanceof PPLine pp) {
+                tryTotal += pp.getAttempts();
+                successTotal += pp.getSuccesses();
             }
         }
         if (tryTotal == 0) {
@@ -493,11 +493,8 @@ public class Team implements Serializable {
             goalie.resetStats();
         }
         for (Line line: lines) {
-            if (line instanceof PKLine pk) {
-                pk.setKillStatsWithPercentage(0, 0);
-            }
-            if (line instanceof PPLine pp) {
-                pp.setStatsWithPercentage(0, 0);
+            if (line instanceof SpecialTeamsLine specialTeams) {
+                specialTeams.setSuccessStats(0, 0);
             }
         }
     }

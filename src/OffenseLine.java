@@ -6,14 +6,22 @@
  */
 
 public class OffenseLine extends Line {
+    private Center center;
+    private Skater leftWing;
+    private Skater rightWing;
+
     /**
      * Assigns given name to the line and given players to their respective positions, leaves defensive positions null.
      * @throws NullPointerException If any of the given players are null
      */
-    public OffenseLine(String name, Center center, Skater leftWing, Skater rightWing) throws NullPointerException {
-        super(name, center, leftWing, rightWing, null, null);
+    public OffenseLine(String name, Center center, Skater leftWing, Skater rightWing) throws NullPointerException,
+            IllegalArgumentException {
+        super(name);
         if (leftWing == null || center == null || rightWing == null) {
-            throw new NullPointerException("Players in an offense line cannot be left empty");
+            throw new NullPointerException(nullError);
+        }
+        if (center.equals(leftWing) || center.equals(rightWing) || rightWing.equals(leftWing)) {
+            throw new IllegalArgumentException(playerDuplicatesError);
         }
     }
 
@@ -30,21 +38,21 @@ public class OffenseLine extends Line {
         }
 
         if (scorer == Position.CENTER) {
-            getCenter().score();
+            center.score();
         } else {
-            getCenter().scoredOnIce();
+            center.scoredOnIce();
         }
 
         if (scorer == Position.LEFT_WING) {
-            getLeftWing().score();
+            leftWing.score();
         } else {
-            getLeftWing().scoredOnIce();
+            leftWing.scoredOnIce();
         }
 
         if (scorer == Position.RIGHT_WING) {
-            getRightWing().score();
+            rightWing.score();
         } else {
-            getRightWing().scoredOnIce();
+            rightWing.scoredOnIce();
         }
 
         if (scorer == Position.RIGHT_DEFENSE) {
@@ -75,27 +83,27 @@ public class OffenseLine extends Line {
         }
 
         if (scorer == Position.CENTER) {
-            getCenter().score();
+            center.score();
         } else if (assist == Position.CENTER) {
-            getCenter().assist();
+            center.assist();
         } else {
-            getCenter().scoredOnIce();
+            center.scoredOnIce();
         }
 
         if (scorer == Position.LEFT_WING) {
-            getLeftWing().score();
+            leftWing.score();
         } else if (assist == Position.LEFT_WING) {
-            getLeftWing().assist();
+            leftWing.assist();
         } else {
-            getLeftWing().scoredOnIce();
+            leftWing.scoredOnIce();
         }
 
         if (scorer == Position.RIGHT_WING) {
-            getRightWing().score();
+            rightWing.score();
         } else if (assist == Position.RIGHT_WING) {
-            getRightWing().assist();
+            rightWing.assist();
         } else {
-            getRightWing().scoredOnIce();
+            rightWing.scoredOnIce();
         }
 
         if (scorer == Position.RIGHT_DEFENSE) {
@@ -130,27 +138,27 @@ public class OffenseLine extends Line {
         }
 
         if (scorer == Position.CENTER) {
-            getCenter().score();
+            center.score();
         } else if (assist1 == Position.CENTER || assist2 == Position.CENTER) {
-            getCenter().assist();
+            center.assist();
         } else {
-            getCenter().scoredOnIce();
+            center.scoredOnIce();
         }
 
         if (scorer == Position.LEFT_WING) {
-            getLeftWing().score();
+            leftWing.score();
         } else if (assist1 == Position.LEFT_WING || assist2 == Position.LEFT_WING) {
-            getLeftWing().assist();
+            leftWing.assist();
         } else {
-            getLeftWing().scoredOnIce();
+            leftWing.scoredOnIce();
         }
 
         if (scorer == Position.RIGHT_WING) {
-            getRightWing().score();
+            rightWing.score();
         } else if (assist1 == Position.RIGHT_WING || assist2 == Position.RIGHT_WING) {
-            getRightWing().assist();
+            rightWing.assist();
         } else {
-            getRightWing().scoredOnIce();
+            rightWing.scoredOnIce();
         }
 
         if (scorer == Position.RIGHT_DEFENSE) {
@@ -170,12 +178,19 @@ public class OffenseLine extends Line {
         }
     }
 
-    // Same purpose as original Line method (reduces plusMinus stat of each person on the line)
-    public void lineScoredOn(DefenseLine de) {
-        getRightWing().scoredAgainst();
-        getCenter().scoredAgainst();
-        getLeftWing().scoredAgainst();
-        de.getLeftDe().scoredAgainst();
-        de.getRightDe().scoredAgainst();
+    @Override
+    public void lineScoredOn() {
+        rightWing.scoredAgainst();
+        center.scoredAgainst();
+        leftWing.scoredAgainst();
+    }
+
+    @Override
+    public String lineRoster() {
+        return String.format("""
+                %s
+                Center: %s
+                Left Wing: %s
+                Right Wing: %s""", getName(), center.getName(), leftWing.getName(), rightWing.getName());
     }
 }

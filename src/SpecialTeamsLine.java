@@ -68,4 +68,12 @@ public abstract class SpecialTeamsLine extends Line {
     public void failure() {
         attempts++;
     }
+
+    // Score Methods
+
+    public abstract void score(Position position);
+
+    public abstract void score(Position scorer, Position assist);
+
+    public abstract void score(Position scorer, Position assist1, Position assist2);
 }
