@@ -697,7 +697,7 @@ public class TeamGUI implements Runnable {
         lineTabs = new JTabbedPane();
         currentLineLabel = new JLabel("Selected Line:");
         lineOptions = new JComboBox<Line>();
-        for (Line line: team.getLines()) {
+        for (Line line: team.getRegLines()) {
             lineOptions.addItem(line);
         }
         createPanel(new JComponent[]{lineTabs}, mainLineContainer, BorderLayout.CENTER);
