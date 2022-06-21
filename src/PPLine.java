@@ -1,4 +1,7 @@
-
+/**
+ * PPLine
+ * A class that extends from the SpecialTeamLine class to be specific to a power play line.
+ */
 public class PPLine extends SpecialTeamsLine {
     private Center center;
     private Skater leftWing;
@@ -9,6 +12,7 @@ public class PPLine extends SpecialTeamsLine {
     /**
      * Initializes given arguments in their respective variables, sets stats to 0
      * @throws NullPointerException Thrown if any of the given players are null
+     * @throws IllegalArgumentException If any of the given players are the same
      */
     public PPLine(String name, Center center, Skater leftWing, Skater rightWing, Defenseman leftDe, Defenseman rightDe)
             throws NullPointerException, IllegalArgumentException {
@@ -29,9 +33,10 @@ public class PPLine extends SpecialTeamsLine {
     }
 
     /**
-     * Works almost identically to previous constructor, but initializes numberScored using the given percentage
+     * Initializes given arguments to their respective variables, initializes successes using a percentage
      * @throws NullPointerException Thrown if given players are null
-     * @throws IllegalArgumentException Thrown if given percentage is invalid or if numberOpps is negative
+     * @throws IllegalArgumentException Thrown if given percentage is invalid, if numberOpps is negative, or if any of
+     *                                  the players are the same
      */
     public PPLine(String name, Center center, Skater leftWing, Skater rightWing, Defenseman leftDe, Defenseman rightDe,
                   double ppPercent, int numberOpps) throws NullPointerException, IllegalArgumentException {
@@ -126,12 +131,12 @@ public class PPLine extends SpecialTeamsLine {
     }
 
     /**
-     * Utilize Line methods to apply stats to players, also updates numberScored and numberOpps
+     * Updates stats for every player on the line when a goal is scored
      * @param position Position of the player who scored the goal.
-     * @throws IllegalArgumentException See super class
+     * @throws NullPointerException If given position is null
      */
     @Override
-    public void score(Position position) throws NullPointerException, IllegalArgumentException {
+    public void score(Position position) throws NullPointerException {
         if (position == null) {
             throw new NullPointerException(nullError);
         }
@@ -164,10 +169,11 @@ public class PPLine extends SpecialTeamsLine {
     }
 
     /**
-     * Utilize Line methods to apply stats to players, also updates numberScored and numberOpps
+     * Updates stats for every player when a goal is scored
      * @param scorer Position of the player who scored the goal
      * @param assist The position of the player who assisted the goal
-     * @throws IllegalArgumentException See super class
+     * @throws NullPointerException If given arguments are null
+     * @throws IllegalArgumentException If given positions are equal
      */
     @Override
     public void score(Position scorer, Position assist) throws NullPointerException, IllegalArgumentException {
@@ -222,11 +228,12 @@ public class PPLine extends SpecialTeamsLine {
     }
 
     /**
-     * Utilize Line methods to apply stats to players, also updates numberScored and numberOpps
+     * Updates stats for every player when a goal is scored
      * @param scorer Position of the player who scored the goal
      * @param assist1 Position of player who assisted the goal
      * @param assist2 Position of other player who assisted the goal
-     * @throws IllegalArgumentException See super class
+     * @throws NullPointerException If given arguments are null
+     * @throws IllegalArgumentException If given positions are equal
      */
     @Override
     public void score(Position scorer, Position assist1, Position assist2) throws NullPointerException,
@@ -281,6 +288,7 @@ public class PPLine extends SpecialTeamsLine {
         success();
     }
 
+    // Updates stats for every player when they are scored on
     public void lineScoredOn() {
         center.scoredAgainst();
         leftWing.scoredAgainst();

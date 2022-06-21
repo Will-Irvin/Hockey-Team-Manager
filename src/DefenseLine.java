@@ -1,10 +1,8 @@
 /**
  * DefenseLine
  *
- * A class specifically composed of two defenseman. Coaches will often have offensive lines and defensive pairs that do
- * not necessarily match up for the entirety of play.
+ * A class specifically composed of two defenseman. Methods will manipulate the stats for both players.
  */
-
 public class DefenseLine extends Line {
     private Defenseman leftDe;
     private Defenseman rightDe;
@@ -12,8 +10,10 @@ public class DefenseLine extends Line {
     /**
      * Assigns given players to their position and given name
      * @throws NullPointerException If any of the given players are null
+     * @throws IllegalArgumentException If the given players are equal
      */
-    public DefenseLine(String name, Defenseman leftDe, Defenseman rightDe) throws NullPointerException {
+    public DefenseLine(String name, Defenseman leftDe, Defenseman rightDe) throws NullPointerException,
+            IllegalArgumentException {
         super(name);
         if (leftDe == null || rightDe == null) {
             throw new NullPointerException(nullError);
@@ -65,12 +65,16 @@ public class DefenseLine extends Line {
         this.rightDe = rightDe;
     }
 
+    // Updates stats for the entire line when they are scored on
     @Override
     public void lineScoredOn() {
         leftDe.scoredAgainst();
         rightDe.scoredAgainst();
     }
 
+    /**
+     * @return A formatted String containing the players on the line and the power play success percentage of the line
+     */
     @Override
     public String lineRoster() {
         return String.format("""

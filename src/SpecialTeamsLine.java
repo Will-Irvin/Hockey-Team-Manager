@@ -1,4 +1,10 @@
-
+/**
+ * SpecialTeamsLine
+ *
+ * This class serves the basis for a special teams line (power play or penalty kill). These lines are evaluated based
+ * on their success percentage (scored on a power play or killed a penalty) and this class contains variables and
+ * methods to monitor this percentage.
+ */
 public abstract class SpecialTeamsLine extends Line {
     private int successes;
     private int attempts;
@@ -7,13 +13,19 @@ public abstract class SpecialTeamsLine extends Line {
     private final static String percentRangeError = "Percentage must be in the range 0-100";
     private final static String attemptsError = "Number of attempts cannot be negative";
 
+    // Sets name as given by argument and sets stats to 0
     public SpecialTeamsLine(String name) {
         super(name);
         successes = 0;
         attempts = 0;
     }
 
-    public SpecialTeamsLine(String name, double successPercent, int attempts) {
+    /**
+     * Assigns given parameters to their respective variables. Assigns successes by taking the given percentage and
+     * multiplying it by the number of attempts.
+     * @throws IllegalArgumentException If the percentage is not in a valid range, or if attempts is negative
+     */
+    public SpecialTeamsLine(String name, double successPercent, int attempts) throws IllegalArgumentException {
         super(name);
         if (successPercent < 0 || successPercent > 100) {
             throw new IllegalArgumentException(percentRangeError);
@@ -35,6 +47,7 @@ public abstract class SpecialTeamsLine extends Line {
         return attempts;
     }
 
+    // Returns percentage of successful uses of the line by dividing successes by attempts
     public double getSuccessPercent() {
         if (attempts == 0) {
             return 0;
@@ -42,9 +55,8 @@ public abstract class SpecialTeamsLine extends Line {
         return (double) successes / attempts;
     }
 
-    // Setter Method
-
     /**
+     * Sets attempts with the given argument, and sets successes by multiplying the given percentage by attempts
      * @throws IllegalArgumentException If successPercent is not within valid range, or attempts is negative
      */
     public void setSuccessStats(double successPercent, int attempts) throws IllegalArgumentException {
@@ -69,7 +81,7 @@ public abstract class SpecialTeamsLine extends Line {
         attempts++;
     }
 
-    // Score Methods
+    // Score Abstract Methods
 
     public abstract void score(Position position);
 

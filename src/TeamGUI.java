@@ -217,7 +217,7 @@ public class TeamGUI implements Runnable {
     /**
      * Creates a sample team that is pre-generated for a user who has no file. Allows the user to get accustomed to the
      * app and its features before creating their own team if they so choose.
-     * @return The generated sample team containing data from the 2015 Chicago Blackhawks Regular Season.
+     * @return The generated sample team loosely based on data from the 2015 Chicago Blackhawks Regular Season.
      */
     public static Team createSample() {
         Team blackhawks = new Team("Sample Team: Chicago Blackhawks - 2014-15 Regular Season", 48, 28,
@@ -316,6 +316,20 @@ public class TeamGUI implements Runnable {
                 (Defenseman) blackhawks.getPlayers().get(15)));
         blackhawks.addLine(new DefenseLine("Rozsival-Van Reimsdyk", (Defenseman) blackhawks.getPlayers().get(15),
                 (Defenseman) blackhawks.getPlayers().get(19)));
+        blackhawks.addLine(new PPLine("Power Play 1", (Center) blackhawks.getPlayers().get(7),
+                blackhawks.getPlayers().get(25), blackhawks.getPlayers().get(24),
+                (Defenseman) blackhawks.getPlayers().get(0), (Defenseman) blackhawks.getPlayers().get(3),
+                17.69, 130));
+        blackhawks.addLine(new PPLine("Power Play 2", (Center) blackhawks.getPlayers().get(9),
+                blackhawks.getPlayers().get(8), blackhawks.getPlayers().get(22),
+                (Defenseman) blackhawks.getPlayers().get(1), (Defenseman) blackhawks.getPlayers().get(15),
+                17.69, 130));
+        blackhawks.addLine(new PKLine("Penalty Kill 1", blackhawks.getPlayers().get(7), blackhawks.getPlayers().get(24),
+                (Defenseman) blackhawks.getPlayers().get(0), (Defenseman) blackhawks.getPlayers().get(3),
+                83.41, 106));
+        blackhawks.addLine(new PKLine("Penalty Kill 2", blackhawks.getPlayers().get(22),
+                blackhawks.getPlayers().get(14), (Defenseman) blackhawks.getPlayers().get(1),
+                (Defenseman) blackhawks.getPlayers().get(12), 83.41, 105));
         return blackhawks;
     }
 

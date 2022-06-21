@@ -2,10 +2,8 @@ import java.io.Serializable;
 
 /**
  * Line
- * Class that stores information and methods to manipulate a line containing five players, a center, two wingers, and
- * two defensemen.
+ * Class that serves as a baseline for any Line class. Only variable is name which will be built on in subclasses.
  */
-
 public abstract class Line implements Serializable {
     private String name;
 
@@ -49,6 +47,8 @@ public abstract class Line implements Serializable {
         }
         this.name = name;
     }
+
+    // Abstract methods
 
     public abstract void lineScoredOn();
 

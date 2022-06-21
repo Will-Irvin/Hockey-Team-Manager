@@ -1,8 +1,7 @@
 /**
  * PKLine
- * A class that extends from the line class to be specific to the penalty kill special teams lines.
+ * A class that extends from the SpecialTeamLine class to be specific to a penalty kill line.
  */
-
 public class PKLine extends SpecialTeamsLine {
     private Skater offense1;
     private Skater offense2;
@@ -35,8 +34,7 @@ public class PKLine extends SpecialTeamsLine {
     }
 
     /**
-     * Works almost identically to previous constructor, but uses a percentage to initialize the numberKilled instead of
-     * the specific number
+     * Assigns given arguments to their respective variables, sets successes using a percentage
      * @throws NullPointerException If any of the given players are null
      * @throws IllegalArgumentException If the percentage is not in a valid range or if numberAttempts is negative
      */
@@ -115,6 +113,12 @@ public class PKLine extends SpecialTeamsLine {
         this.rightDe = rightDe;
     }
 
+    /**
+     * Properly updates stats of every player on the line after a goal is scored.
+     * @param position The position of the player who scored on the line
+     * @throws NullPointerException If given position is null
+     * @throws IllegalArgumentException If given position is the Center
+     */
     @Override
     public void score(Position position) throws NullPointerException, IllegalArgumentException {
         if (position == null) {
@@ -123,6 +127,7 @@ public class PKLine extends SpecialTeamsLine {
         if (position == Position.CENTER) {
             throw new IllegalArgumentException(centerError);
         }
+
         if (position == Position.LEFT_WING) {
             offense1.score();
         } else {
@@ -145,6 +150,14 @@ public class PKLine extends SpecialTeamsLine {
         }
     }
 
+    /**
+     * Properly updates stats of every player on the line after a goal is scored.
+     * @param scorer The position of the player who scored.
+     * @param assist The position of the player who assisted the scorer
+     * @throws NullPointerException If either of the given positions are null
+     * @throws IllegalArgumentException If the positions given are the same or if either of the given positions are
+     *                                  center
+     */
     @Override
     public void score(Position scorer, Position assist) throws NullPointerException, IllegalArgumentException {
         if (scorer == null || assist == null) {
@@ -190,6 +203,15 @@ public class PKLine extends SpecialTeamsLine {
         }
     }
 
+    /**
+     * Properly updates stats of every player on the line after a goal is scored.
+     * @param scorer The position of the player who scored.
+     * @param assist1 The position of the player who assisted the scorer
+     * @param assist2 The position of the second assist
+     * @throws NullPointerException If any of the given positions are null
+     * @throws IllegalArgumentException If the positions given are the same or if any of the given positions are
+     *                                  center
+     */
     @Override
     public void score(Position scorer, Position assist1, Position assist2) throws NullPointerException,
             IllegalArgumentException {
@@ -236,6 +258,7 @@ public class PKLine extends SpecialTeamsLine {
         }
     }
 
+    // Updates stats for when the line is scored on
     @Override
     public void lineScoredOn() {
         offense1.scoredAgainst();
