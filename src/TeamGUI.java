@@ -45,7 +45,7 @@ public class TeamGUI implements Runnable {
 
     JButton newUsers;
 
-    // MainGUI String Variables/Components
+    // MainGUI Constants/Components
     // Reused String expressions
     private static final String nameString = "Enter name:";
     private static final String winsString = "Enter number of wins:";
@@ -60,6 +60,10 @@ public class TeamGUI implements Runnable {
     private static final String fileError = "There was an issue writing to the file. Please close the application " +
             "and try again.";
     private static final String emptyInputs = "Please enter a value in at least one of the boxes";
+
+    // Numeric Constants
+    private static final int enterNameSize = 30;
+    private static final int enterStatSize = 5;
 
     // JComponents
 
@@ -113,22 +117,34 @@ public class TeamGUI implements Runnable {
     JComboBox<Defenseman> pickRightDe;
 
     // Create Line
+    JLabel enterLineNameLabel;  // TODO
     JTextField lineName;
+    ButtonGroup lineTypeGroup;
+    JRadioButton[] lineType;  // Offense, Defense, PP, PK
+    JToggleButton enterStats;  // For special Teams
     JButton createLine;
 
     // Edit Line
     JTextField changeLineName;
+    JButton changeSuccessPercent;  // For special teams
     JButton changeLinePlayers;
-
-    // Edit Special Teams
-    JComboBox<Line> specialTeamsOptions;
-    JButton changeSuccessPercent;
 
     // Delete Line
     JButton deleteLine;
 
     // View Lines
-    JTextPane viewLines;
+    JTextArea viewLines;
+
+    // Manage Special Teams
+
+    // Create Special Teams
+    JTextField specialTeamsName;
+    JToggleButton ppPkChoice;
+    JButton createSpecialTeams;
+
+    // Edit Special Teams
+    JTextField changeSpecialName;
+    JButton changeSpecialPlayers;
 
     // Create/Edit Skater/Goalie
     JTextArea playerName;
@@ -278,58 +294,58 @@ public class TeamGUI implements Runnable {
                 -2, 9, 6, 50, 196));
         blackhawks.addPlayer(new Center("Joakim Nordstrom", 42, "Left", 0, 3,
                 -5, 73, 4, 20, 10));
-        blackhawks.addLine(new OffenseLine("Saad-Toews-Hossa", (Center) blackhawks.getPlayers().get(7),
-                blackhawks.getPlayers().get(8), blackhawks.getPlayers().get(22)));
-        blackhawks.addLine(new OffenseLine("Kane-Richards-Versteeg", (Center) blackhawks.getPlayers().get(25),
-                blackhawks.getPlayers().get(24), blackhawks.getPlayers().get(10)));
-        blackhawks.addLine(new OffenseLine("Nordstrom-Kruger-Smith", (Center) blackhawks.getPlayers().get(9),
-                blackhawks.getPlayers().get(18), blackhawks.getPlayers().get(13)));
-        blackhawks.addLine(new OffenseLine("Hossa-Toews-Versteeg", (Center) blackhawks.getPlayers().get(7),
-                blackhawks.getPlayers().get(22), blackhawks.getPlayers().get(10)));
-        blackhawks.addLine(new OffenseLine("Sharp-Richards-Kane", (Center) blackhawks.getPlayers().get(25),
-                blackhawks.getPlayers().get(4), blackhawks.getPlayers().get(24)));
-        blackhawks.addLine(new OffenseLine("Sharp-Shaw-Bickell", (Center) blackhawks.getPlayers().get(20),
-                blackhawks.getPlayers().get(4), blackhawks.getPlayers().get(14)));
-        blackhawks.addLine(new OffenseLine("Sharp-Toews-Hossa", (Center) blackhawks.getPlayers().get(7),
-                blackhawks.getPlayers().get(4), blackhawks.getPlayers().get(22)));
-        blackhawks.addLine(new OffenseLine("Carcillo-Kruger-Smith", (Center) blackhawks.getPlayers().get(9),
-                blackhawks.getPlayers().get(6), blackhawks.getPlayers().get(13)));
-        blackhawks.addLine(new OffenseLine("Teravainen-Shaw-Bickell", (Center) blackhawks.getPlayers().get(20),
-                blackhawks.getPlayers().get(23), blackhawks.getPlayers().get(14)));
-        blackhawks.addLine(new OffenseLine("Carcillo-Shaw-Bickell", (Center) blackhawks.getPlayers().get(20),
-                blackhawks.getPlayers().get(6), blackhawks.getPlayers().get(14)));
-        blackhawks.addLine(new DefenseLine("Hjalmarsson-Oduya", (Defenseman) blackhawks.getPlayers().get(1),
-                (Defenseman) blackhawks.getPlayers().get(12)));
-        blackhawks.addLine(new DefenseLine("Keith-Seabrook", (Defenseman) blackhawks.getPlayers().get(0),
-                (Defenseman) blackhawks.getPlayers().get(3)));
-        blackhawks.addLine(new DefenseLine("Keith-Rosival", (Defenseman) blackhawks.getPlayers().get(0),
-                (Defenseman) blackhawks.getPlayers().get(15)));
-        blackhawks.addLine(new DefenseLine("Hjalmarsson-Seabrook", (Defenseman) blackhawks.getPlayers().get(1),
-                (Defenseman) blackhawks.getPlayers().get(3)));
-        blackhawks.addLine(new DefenseLine("Keith-Hjalmarsson", (Defenseman) blackhawks.getPlayers().get(0),
-                (Defenseman) blackhawks.getPlayers().get(1)));
-        blackhawks.addLine(new DefenseLine("Keith-Rundblad", (Defenseman) blackhawks.getPlayers().get(0),
-                (Defenseman) blackhawks.getPlayers().get(2)));
-        blackhawks.addLine(new DefenseLine("Oduya-Seabrook", (Defenseman) blackhawks.getPlayers().get(12),
-                (Defenseman) blackhawks.getPlayers().get(3)));
-        blackhawks.addLine(new DefenseLine("Oduya-Rozsival", (Defenseman) blackhawks.getPlayers().get(12),
-                (Defenseman) blackhawks.getPlayers().get(15)));
-        blackhawks.addLine(new DefenseLine("Rozsival-Van Reimsdyk", (Defenseman) blackhawks.getPlayers().get(15),
-                (Defenseman) blackhawks.getPlayers().get(19)));
-        blackhawks.addLine(new PPLine("Power Play 1", (Center) blackhawks.getPlayers().get(7),
-                blackhawks.getPlayers().get(25), blackhawks.getPlayers().get(24),
-                (Defenseman) blackhawks.getPlayers().get(0), (Defenseman) blackhawks.getPlayers().get(3),
+        blackhawks.addLine(new OffenseLine("Saad-Toews-Hossa", (Center) blackhawks.getPlayers()[7],
+                blackhawks.getPlayers()[8], blackhawks.getPlayers()[22]));
+        blackhawks.addLine(new OffenseLine("Kane-Richards-Versteeg", (Center) blackhawks.getPlayers()[25],
+                blackhawks.getPlayers()[24], blackhawks.getPlayers()[10]));
+        blackhawks.addLine(new OffenseLine("Nordstrom-Kruger-Smith", (Center) blackhawks.getPlayers()[9],
+                blackhawks.getPlayers()[18], blackhawks.getPlayers()[13]));
+        blackhawks.addLine(new OffenseLine("Hossa-Toews-Versteeg", (Center) blackhawks.getPlayers()[7],
+                blackhawks.getPlayers()[22], blackhawks.getPlayers()[10]));
+        blackhawks.addLine(new OffenseLine("Sharp-Richards-Kane", (Center) blackhawks.getPlayers()[25],
+                blackhawks.getPlayers()[4], blackhawks.getPlayers()[24]));
+        blackhawks.addLine(new OffenseLine("Sharp-Shaw-Bickell", (Center) blackhawks.getPlayers()[20],
+                blackhawks.getPlayers()[4], blackhawks.getPlayers()[14]));
+        blackhawks.addLine(new OffenseLine("Sharp-Toews-Hossa", (Center) blackhawks.getPlayers()[7],
+                blackhawks.getPlayers()[4], blackhawks.getPlayers()[22]));
+        blackhawks.addLine(new OffenseLine("Carcillo-Kruger-Smith", (Center) blackhawks.getPlayers()[9],
+                blackhawks.getPlayers()[6], blackhawks.getPlayers()[13]));
+        blackhawks.addLine(new OffenseLine("Teravainen-Shaw-Bickell", (Center) blackhawks.getPlayers()[20],
+                blackhawks.getPlayers()[23], blackhawks.getPlayers()[14]));
+        blackhawks.addLine(new OffenseLine("Carcillo-Shaw-Bickell", (Center) blackhawks.getPlayers()[20],
+                blackhawks.getPlayers()[6], blackhawks.getPlayers()[14]));
+        blackhawks.addLine(new DefenseLine("Hjalmarsson-Oduya", (Defenseman) blackhawks.getPlayers()[1],
+                (Defenseman) blackhawks.getPlayers()[12]));
+        blackhawks.addLine(new DefenseLine("Keith-Seabrook", (Defenseman) blackhawks.getPlayers()[0],
+                (Defenseman) blackhawks.getPlayers()[3]));
+        blackhawks.addLine(new DefenseLine("Keith-Rosival", (Defenseman) blackhawks.getPlayers()[0],
+                (Defenseman) blackhawks.getPlayers()[15]));
+        blackhawks.addLine(new DefenseLine("Hjalmarsson-Seabrook", (Defenseman) blackhawks.getPlayers()[1],
+                (Defenseman) blackhawks.getPlayers()[3]));
+        blackhawks.addLine(new DefenseLine("Keith-Hjalmarsson", (Defenseman) blackhawks.getPlayers()[0],
+                (Defenseman) blackhawks.getPlayers()[1]));
+        blackhawks.addLine(new DefenseLine("Keith-Rundblad", (Defenseman) blackhawks.getPlayers()[0],
+                (Defenseman) blackhawks.getPlayers()[2]));
+        blackhawks.addLine(new DefenseLine("Oduya-Seabrook", (Defenseman) blackhawks.getPlayers()[12],
+                (Defenseman) blackhawks.getPlayers()[3]));
+        blackhawks.addLine(new DefenseLine("Oduya-Rozsival", (Defenseman) blackhawks.getPlayers()[12],
+                (Defenseman) blackhawks.getPlayers()[15]));
+        blackhawks.addLine(new DefenseLine("Rozsival-Van Reimsdyk", (Defenseman) blackhawks.getPlayers()[15],
+                (Defenseman) blackhawks.getPlayers()[19]));
+        blackhawks.addLine(new PPLine("Power Play 1", (Center) blackhawks.getPlayers()[7],
+                blackhawks.getPlayers()[25], blackhawks.getPlayers()[24],
+                (Defenseman) blackhawks.getPlayers()[0], (Defenseman) blackhawks.getPlayers()[3],
                 17.69, 130));
-        blackhawks.addLine(new PPLine("Power Play 2", (Center) blackhawks.getPlayers().get(9),
-                blackhawks.getPlayers().get(8), blackhawks.getPlayers().get(22),
-                (Defenseman) blackhawks.getPlayers().get(1), (Defenseman) blackhawks.getPlayers().get(15),
+        blackhawks.addLine(new PPLine("Power Play 2", (Center) blackhawks.getPlayers()[9],
+                blackhawks.getPlayers()[8], blackhawks.getPlayers()[22],
+                (Defenseman) blackhawks.getPlayers()[1], (Defenseman) blackhawks.getPlayers()[15],
                 17.69, 130));
-        blackhawks.addLine(new PKLine("Penalty Kill 1", blackhawks.getPlayers().get(7), blackhawks.getPlayers().get(24),
-                (Defenseman) blackhawks.getPlayers().get(0), (Defenseman) blackhawks.getPlayers().get(3),
+        blackhawks.addLine(new PKLine("Penalty Kill 1", blackhawks.getPlayers()[7], blackhawks.getPlayers()[24],
+                (Defenseman) blackhawks.getPlayers()[0], (Defenseman) blackhawks.getPlayers()[3],
                 83.41, 106));
-        blackhawks.addLine(new PKLine("Penalty Kill 2", blackhawks.getPlayers().get(22),
-                blackhawks.getPlayers().get(14), (Defenseman) blackhawks.getPlayers().get(1),
-                (Defenseman) blackhawks.getPlayers().get(12), 83.41, 105));
+        blackhawks.addLine(new PKLine("Penalty Kill 2", blackhawks.getPlayers()[22],
+                blackhawks.getPlayers()[14], (Defenseman) blackhawks.getPlayers()[1],
+                (Defenseman) blackhawks.getPlayers()[12], 83.41, 105));
         return blackhawks;
     }
 
@@ -572,13 +588,13 @@ public class TeamGUI implements Runnable {
 
         // Labels, text fields, and button
         changeTeamNameLabel = new JLabel(nameString + " (Current: " + team.getName() + ")");
-        changeTeamName = new JTextField(30);
+        changeTeamName = new JTextField(enterNameSize);
         changeTeamWinsLabel = new JLabel(winsString + " (Current: " + team.getWins() + ")");
-        changeTeamWins = new JTextField(5);
+        changeTeamWins = new JTextField(enterStatSize);
         changeTeamLossesLabel = new JLabel(lossesString + " (Current: " + team.getLosses() + ")");
-        changeTeamLosses = new JTextField(5);
+        changeTeamLosses = new JTextField(enterStatSize);
         changeTeamOTLabel = new JLabel(otString + " (Current: " + team.getOtLosses() + ")");
-        changeTeamOT = new JTextField(5);
+        changeTeamOT = new JTextField(enterStatSize);
         updateTeamChanges = new JButton("Update Changes");
 
         // Panels for each different instance variable (name, wins, losses, ot losses)
@@ -711,13 +727,21 @@ public class TeamGUI implements Runnable {
         lineTabs = new JTabbedPane();
         currentLineLabel = new JLabel("Selected Line:");
         lineOptions = new JComboBox<Line>();
-        for (Line line: team.getRegLines()) {
+        for (Line line: team.getLines()) {
             lineOptions.addItem(line);
         }
         createPanel(new JComponent[]{lineTabs}, mainLineContainer, BorderLayout.CENTER);
         createPanel(new JComponent[]{currentLineLabel, lineOptions}, mainLineContainer, BorderLayout.NORTH);
 
+        // Create Line
+
+        Container createLineContent = new Container();
+        createLineContent.setLayout(new BoxLayout(createLineContent, BoxLayout.Y_AXIS));
+        enterLineNameLabel = new JLabel("Enter Line Name:");
+        lineName = new JTextField(enterNameSize);
+
         mainTabs.add("Manage Lines", mainLineContainer);
+
         // Sets team to null and re displays SelectTeamGUI when window is closed
         mainFrame.addWindowListener(new WindowAdapter() {
             @Override

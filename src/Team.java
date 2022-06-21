@@ -1,5 +1,6 @@
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Team
@@ -8,8 +9,7 @@ import java.util.ArrayList;
 public class Team implements Serializable {
     private String name;
     private final ArrayList<Skater> players;
-    private final ArrayList<Line> regLines;
-    private final ArrayList<SpecialTeamsLine> specialTeams;
+    private final ArrayList<Line> lines;
     private final ArrayList<Goalie> goalies;
     private int wins;
     private int losses;
@@ -30,8 +30,7 @@ public class Team implements Serializable {
         }
         this.name = name;
         this.players = new ArrayList<>();
-        this.regLines = new ArrayList<>();
-        this.specialTeams = new ArrayList<>();
+        this.lines = new ArrayList<>();
         this.goalies = new ArrayList<>();
         this.wins = 0;
         this.losses = 0;
@@ -52,8 +51,7 @@ public class Team implements Serializable {
         }
         this.name = name;
         this.players = new ArrayList<>();
-        this.regLines = new ArrayList<>();
-        this.specialTeams = new ArrayList<>();
+        this.lines = new ArrayList<>();
         this.goalies = new ArrayList<>();
         if (wins < 0 || losses < 0 || lossesOT < 0) {
             throw new IllegalArgumentException("Win and loss totals cannot be negative");
@@ -68,8 +66,8 @@ public class Team implements Serializable {
      * @throws NullPointerException Thrown if given name or lists are null
      * @throws IllegalArgumentException Thrown if name is blank or given stats are negative
      */
-    public Team(String name, ArrayList<Skater> players, ArrayList<Line> lines, ArrayList<SpecialTeamsLine> specialTeams,
-                ArrayList<Goalie> goalies, int wins, int losses, int lossesOT)
+    public Team(String name, ArrayList<Skater> players, ArrayList<Line> lines, ArrayList<Goalie> goalies, int wins,
+                int losses, int lossesOT)
             throws NullPointerException, IllegalArgumentException {
         if (name == null || players == null || lines == null || goalies == null) {
             throw new NullPointerException("Given arguments cannot be null");
@@ -79,8 +77,7 @@ public class Team implements Serializable {
         }
         this.name = name;
         this.players = players;
-        this.regLines = lines;
-        this.specialTeams = specialTeams;
+        this.lines = lines;
         this.goalies = goalies;
         if (wins < 0 || losses < 0 || lossesOT < 0) {
             throw new IllegalArgumentException("Win and loss totals cannot be negative");
@@ -99,10 +96,9 @@ public class Team implements Serializable {
         wins = team.getWins();
         losses = team.getLosses();
         otLosses = team.getOtLosses();
-        players = team.getPlayers();
-        regLines = team.getRegLines();
-        specialTeams = team.getSpecialTeams();
-        goalies = team.getGoalies();
+        players = new ArrayList<>(List.of(team.getPlayers()));
+        lines = new ArrayList<>(List.of(team.getLines()));
+        goalies = new ArrayList<>(List.of(team.getGoalies()));
     }
 
     // Getter Methods
@@ -111,20 +107,16 @@ public class Team implements Serializable {
         return name;
     }
 
-    public ArrayList<Skater> getPlayers() {
-        return players;
+    public Skater[] getPlayers() {
+        return players.toArray(new Skater[]{});
     }
 
-    public ArrayList<Line> getRegLines() {
-        return regLines;
+    public Line[] getLines() {
+        return lines.toArray(new Line[]{});
     }
 
-    public ArrayList<SpecialTeamsLine> getSpecialTeams() {
-        return specialTeams;
-    }
-
-    public ArrayList<Goalie> getGoalies() {
-        return goalies;
+    public Goalie[] getGoalies() {
+        return goalies.toArray(new Goalie[]{});
     }
 
     public int getWins() {
@@ -187,7 +179,7 @@ public class Team implements Serializable {
     // Generates and returns a list containing every OffenseLine in the team
     public ArrayList<OffenseLine> getOffenseLines() {
         ArrayList<OffenseLine> result = new ArrayList<>();
-        for (Line line: regLines) {
+        for (Line line: lines) {
             if (line instanceof OffenseLine offense) {
                 result.add(offense);
             }
@@ -198,7 +190,7 @@ public class Team implements Serializable {
     // Generates and returns a list containing every DefenseLine in the team
     public ArrayList<DefenseLine> getDefenseLines() {
         ArrayList<DefenseLine> result = new ArrayList<>();
-        for (Line line: regLines) {
+        for (Line line: lines) {
             if (line instanceof DefenseLine de) {
                 result.add(de);
             }
@@ -311,68 +303,34 @@ public class Team implements Serializable {
 
     // Adds a line to the teams list, applies same method as addPlayer/addGoalie
     public int addLine(Line line) {
-        if (line instanceof SpecialTeamsLine specialTeam) {
-            if (specialTeams.contains(line)) {
-                return -1;
-            }
-            if (specialTeams.size() == 0) {
-                specialTeams.add(specialTeam);
-                return 0;
-            }
-            int low = 0;
-            int high = specialTeams.size();
-            while (true) {
-                int i = (low + high) / 2;
-                if (line.getName().compareTo(specialTeams.get(i).getName()) <= 0) {
-                    if (i == 0 || line.getName().compareTo(specialTeams.get(i - 1).getName()) >= 0) {
-                        specialTeams.add(i, specialTeam);
-                        return i;
-                    } else {
-                        high = i;
-                    }
+        if (lines.contains(line)) {
+            return -1;
+        }
+        if (lines.size() == 0) {
+            lines.add(line);
+            return 0;
+        }
+        int low = 0;
+        int high = lines.size();
+        while (true) {
+            int i = (low + high) / 2;
+            if (line.getName().compareTo(lines.get(i).getName()) <= 0) {
+                if (i == 0 || line.getName().compareTo(lines.get(i - 1).getName()) >= 0) {
+                    lines.add(i, line);
+                    return i;
                 } else {
-                    if (i == specialTeams.size() - 1) {
-                        specialTeams.add(specialTeam);
-                        return i + 1;
-                    }
-                    if (line.getName().compareTo(specialTeams.get(i + 1).getName()) <= 0) {
-                        specialTeams.add(i + 1, specialTeam);
-                        return i + 1;
-                    } else {
-                        low = i;
-                    }
+                    high = i;
                 }
-            }
-        } else {
-            if (regLines.contains(line)) {
-                return -1;
-            }
-            if (regLines.size() == 0) {
-                regLines.add(line);
-                return 0;
-            }
-            int low = 0;
-            int high = regLines.size();
-            while (true) {
-                int i = (low + high) / 2;
-                if (line.getName().compareTo(regLines.get(i).getName()) <= 0) {
-                    if (i == 0 || line.getName().compareTo(regLines.get(i - 1).getName()) >= 0) {
-                        regLines.add(i, line);
-                        return i;
-                    } else {
-                        high = i;
-                    }
+            } else {
+                if (i == lines.size() - 1) {
+                    lines.add(line);
+                    return i + 1;
+                }
+                if (line.getName().compareTo(lines.get(i + 1).getName()) <= 0) {
+                    lines.add(i + 1, line);
+                    return i + 1;
                 } else {
-                    if (i == regLines.size() - 1) {
-                        regLines.add(line);
-                        return i + 1;
-                    }
-                    if (line.getName().compareTo(regLines.get(i + 1).getName()) <= 0) {
-                        regLines.add(i + 1, line);
-                        return i + 1;
-                    } else {
-                        low = i;
-                    }
+                    low = i;
                 }
             }
         }
@@ -409,10 +367,10 @@ public class Team implements Serializable {
 
     // Edit a line on the list, works like changePlayer/Goalie for lines
     public int changeLine(Line oldLine, Line newLine) {
-        if (!oldLine.equals(newLine) && regLines.contains(newLine)) {
+        if (!oldLine.equals(newLine) && lines.contains(newLine)) {
             return -1;
         }
-        regLines.remove(oldLine);
+        lines.remove(oldLine);
         return addLine(newLine);
     }
 
@@ -431,7 +389,7 @@ public class Team implements Serializable {
 
     // Like removePlayer but for lines
     public boolean removeLine(Line line) {
-        return regLines.remove(line);
+        return lines.remove(line);
     }
 
     /**
@@ -462,10 +420,10 @@ public class Team implements Serializable {
     public double getPKSuccess() {
         int tryTotal = 0;
         double successTotal = 0;
-        for (SpecialTeamsLine line: specialTeams) {
-            if (line instanceof PKLine) {
-                tryTotal += line.getAttempts();
-                successTotal += line.getSuccesses();
+        for (Line line: lines) {
+            if (line instanceof PKLine pk) {
+                tryTotal += pk.getAttempts();
+                successTotal += pk.getSuccesses();
             }
         }
         if (tryTotal == 0) {
@@ -482,10 +440,10 @@ public class Team implements Serializable {
     public double getPPSuccess() {
         int tryTotal = 0;
         double successTotal = 0;
-        for (SpecialTeamsLine line: specialTeams) {
-            if (line instanceof PPLine) {
-                tryTotal += line.getAttempts();
-                successTotal += line.getSuccesses();
+        for (Line line: lines) {
+            if (line instanceof PPLine pp) {
+                tryTotal += pp.getAttempts();
+                successTotal += pp.getSuccesses();
             }
         }
         if (tryTotal == 0) {
@@ -525,7 +483,7 @@ public class Team implements Serializable {
         for (Goalie goalie: goalies) {
             goalie.resetStats();
         }
-        for (Line line: regLines) {
+        for (Line line: lines) {
             if (line instanceof SpecialTeamsLine specialTeams) {
                 specialTeams.setSuccessStats(0, 0);
             }
