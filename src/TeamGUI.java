@@ -119,8 +119,16 @@ public class TeamGUI implements Runnable {
     // Create Line
     JLabel enterLineNameLabel;  // TODO
     JTextField lineName;
+    JLabel lineTypeLabel;
     ButtonGroup lineTypeGroup;
     JRadioButton[] lineType;  // Offense, Defense, PP, PK
+    JLabel selectCenterLabel;
+    JLabel selectLWLabel;
+    JLabel selectRWLabel;
+    JLabel selectLDLabel;
+    JLabel selectRDLabel;
+    JLabel selectO1Label;
+    JLabel selectO2Label;
     JToggleButton enterStats;  // For special Teams
     JButton createLine;
 
@@ -560,6 +568,14 @@ public class TeamGUI implements Runnable {
     }
 
     /**
+     * @return An array of JRadioButtons that each correspond to a different subclass of lines for when the user is
+     * creating a line
+     */
+    private JRadioButton[] initializeLineType() {
+        return new JRadioButton[]{new JRadioButton("Offense Line"), new JRadioButton("Defense Pair"),
+                new JRadioButton("Power Play Line"), new JRadioButton("Penalty Kill Line")};
+    }
+    /**
      * This method sets up and displays the GUI for editing an actual team after one has been selected/created from
      * the selectTeam frame. It is composed of a variety of tabs that encompass the different ways to modify or manage
      * a team.
@@ -718,7 +734,7 @@ public class TeamGUI implements Runnable {
 
         teamTabs.add("Reset Team Stats", resetTeamContent);
 
-        mainTabs.add("Manage Teams", teamTabs);
+        mainTabs.add("Manage Team", teamTabs);
 
         // Line Tabs
 
@@ -739,6 +755,75 @@ public class TeamGUI implements Runnable {
         createLineContent.setLayout(new BoxLayout(createLineContent, BoxLayout.Y_AXIS));
         enterLineNameLabel = new JLabel("Enter Line Name:");
         lineName = new JTextField(enterNameSize);
+        createPanel(new JComponent[]{enterLineNameLabel, lineName}, createLineContent);
+
+        lineTypeLabel = new JLabel("Select Type of Line:");
+        lineTypeGroup = new ButtonGroup();
+        lineType = initializeLineType();
+        for (JRadioButton button: lineType) {
+            lineTypeGroup.add(button);
+        }
+
+        createPanel(new JComponent[]{lineTypeLabel}, createLineContent);
+        createPanel(lineType, createLineContent);
+
+        // Center
+        JPanel selectCenterPanel = new JPanel();
+        centerOptions = new JComboBox<>();
+        for (Skater player: team.getPlayers()) {
+            if (player instanceof Center center) {
+                centerOptions.addItem(center);
+            }
+        }
+        selectCenterLabel = new JLabel("Center:");
+        selectCenterPanel.add(selectCenterLabel);
+        selectCenterPanel.add(centerOptions);
+
+        // Left Wing
+
+        // Right Wing
+
+        // Left De
+
+        // Right De
+
+        // Offense Line
+        lineType[0].addActionListener(e -> {
+            if (e.getActionCommand().equals(Action.SELECTED_KEY)) {
+                createLineContent.add(selectCenterPanel);
+            } else {
+
+            }
+        });
+
+        // Defense Pair
+        lineType[1].addActionListener(e -> {
+            if (e.getActionCommand().equals(Action.SELECTED_KEY)) {
+
+            } else {
+
+            }
+        });
+
+        // PP Line
+        lineType[2].addActionListener(e -> {
+            if (e.getActionCommand().equals(Action.SELECTED_KEY)) {
+
+            } else {
+
+            }
+        });
+
+        // PK Line
+        lineType[3].addActionListener(e -> {
+            if (e.getActionCommand().equals(Action.SELECTED_KEY)) {
+
+            } else {
+
+            }
+        });
+
+        lineTabs.add("Create Line", createLineContent);
 
         mainTabs.add("Manage Lines", mainLineContainer);
 
