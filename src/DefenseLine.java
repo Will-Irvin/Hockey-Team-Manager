@@ -16,10 +16,10 @@ public class DefenseLine extends Line {
             IllegalArgumentException {
         super(name);
         if (leftDe == null || rightDe == null) {
-            throw new NullPointerException(nullError);
+            throw new NullPointerException(NULL_ERROR);
         }
         if (leftDe.equals(rightDe)) {
-            throw new NullPointerException(playerDuplicatesError);
+            throw new NullPointerException(PLAYER_DUPLICATES_ERROR);
         }
         this.leftDe = leftDe;
         this.rightDe = rightDe;
@@ -43,10 +43,10 @@ public class DefenseLine extends Line {
      */
     public void setLeftDe(Defenseman leftDe) throws NullPointerException, IllegalArgumentException {
         if (leftDe == null) {
-            throw new NullPointerException(nullError);
+            throw new NullPointerException(NULL_ERROR);
         }
         if (leftDe.equals(rightDe)) {
-            throw new IllegalArgumentException(playerDuplicatesError);
+            throw new IllegalArgumentException(PLAYER_DUPLICATES_ERROR);
         }
         this.leftDe = leftDe;
     }
@@ -57,10 +57,10 @@ public class DefenseLine extends Line {
      */
     public void setRightDe(Defenseman rightDe) throws NullPointerException, IllegalArgumentException {
         if (rightDe == null) {
-            throw new NullPointerException(nullError);
+            throw new NullPointerException(NULL_ERROR);
         }
         if (rightDe.equals(leftDe)) {
-            throw new IllegalArgumentException(playerDuplicatesError);
+            throw new IllegalArgumentException(PLAYER_DUPLICATES_ERROR);
         }
         this.rightDe = rightDe;
     }

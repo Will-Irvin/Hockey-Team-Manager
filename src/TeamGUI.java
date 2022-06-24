@@ -18,14 +18,14 @@ public class TeamGUI implements Runnable {
     private Team team;  // Team that the user chooses to open or creates
 
     // Select GUI Strings/Components
-    private static final String fileName = "TeamManagerData";  // Designated name for file storing data
-    private static final String newInfo = "Thank you for using Team Manager! Here are a few things to note as you get" +
+    private static final String FILE_NAME = "TeamManagerData";  // Designated name for file storing data
+    private static final String NEW_INFO = "Thank you for using Team Manager! Here are a few things to note as you get" +
             " started:\n" +
             "If this is your first time launching the application you will notice that the app comes preloaded with" +
             " a sample team. This is included as a way to ease yourself into the application.\n" +
             "Feel free to view or change it in any way you like, and use it to take some time to get used to how the " +
             "application works.\n" +
-            "All data related to the teams that you create in this application is stored in a file called \"" + fileName
+            "All data related to the teams that you create in this application is stored in a file called \"" + FILE_NAME
             + "\" which was automatically created when you first launched this application.\n" +
             "This file is not readable nor transferable between most devices. The file is automatically updated and " +
             "saved every time a change is made, and changes cannot be undone.\n" +
@@ -47,23 +47,27 @@ public class TeamGUI implements Runnable {
 
     // MainGUI Constants/Components
     // Reused String expressions
-    private static final String nameString = "Enter name:";
-    private static final String winsString = "Enter number of wins:";
-    private static final String lossesString = "Enter number of losses:";
-    private static final String otString = "Enter number of overtime losses or ties:";
-    private static final String editInstructions = "<html>Enter changes for the information that you would like to " +
+    private static final String NAME_STRING = "Enter name:";
+    private static final String WINS_STRING = "Enter number of wins:";
+    private static final String LOSSES_STRING = "Enter number of losses:";
+    private static final String OT_STRING = "Enter number of overtime losses or ties:";
+    private static final String EDIT_INSTRUCTIONS = "<html>Enter changes for the information that you would like to " +
             "change.<br>If a field is left blank, no changes will be made for that information.</html>";
-    private static final String resetStatsWarning = "<html>This button will reset all stats for your team and its" +
+    private static final String RESET_STATS_WARNING = "<html>This button will reset all stats for your team and its" +
             " players to 0.<br>This action cannot be undone after the fact and their previous stats will be " +
             "lost.</html>";
-    private static final String numberError = "Please enter a number where prompted";
-    private static final String fileError = "There was an issue writing to the file. Please close the application " +
+    private static final String NUMBER_ERROR = "Please enter a number where prompted";
+    private static final String FILE_ERROR = "There was an issue writing to the file. Please close the application " +
             "and try again.";
-    private static final String emptyInputs = "Please enter a value in at least one of the boxes";
+    private static final String EMPTY_INPUTS = "Please enter a value in at least one of the boxes";
+    private static final String OFFENSE_LINE = "Offense Line";
+    private static final String DEFENSE_LINE = "Defense Pair";
+    private static final String PP_LINE = "Power Play Line";
+    private static final String PK_LINE = "Penalty Kill Line";
 
     // Numeric Constants
-    private static final int enterNameSize = 30;
-    private static final int enterStatSize = 5;
+    private static final int ENTER_NAME_SIZE = 30;
+    private static final int ENTER_STAT_SIZE = 5;
 
     // JComponents
 
@@ -127,9 +131,13 @@ public class TeamGUI implements Runnable {
     JLabel selectRWLabel;
     JLabel selectLDLabel;
     JLabel selectRDLabel;
-    JLabel selectO1Label;
-    JLabel selectO2Label;
-    JToggleButton enterStats;  // For special Teams
+    // For Special Teams
+    JToggleButton enterStatsToggle;
+    JLabel enterSuccessPercentageLabel;
+    JTextField enterSuccessPercentage;
+    JLabel enterNumOppsLabel;
+    JTextField enterNumOpps;
+
     JButton createLine;
 
     // Edit Line
@@ -366,7 +374,7 @@ public class TeamGUI implements Runnable {
      * @throws Exception If there is an unexpected error with the file
      */
     public void openFile() throws IOException, ClassNotFoundException, Exception {
-        File f = new File(fileName);
+        File f = new File(FILE_NAME);
         if (!f.exists()) {
             if (!f.createNewFile()) throw new Exception("An unexpected error occurred - openFile 1");
             ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(f));
@@ -394,7 +402,7 @@ public class TeamGUI implements Runnable {
      * @throws Exception For unexpected errors with the file
      */
     public static void updateFile() throws IOException, Exception {
-        File f = new File(fileName);
+        File f = new File(FILE_NAME);
         if (!f.exists()) {
             if (!f.createNewFile()) throw new Exception("An unexpected error occurred - updateFile");
         }
@@ -533,14 +541,14 @@ public class TeamGUI implements Runnable {
      *              If negative, no changes were made to the name
      */
     private void updateTeamComponents(Team oldTeam, Team newTeam, int index) {
-        changeTeamWinsLabel.setText(winsString + " (Current: " + team.getWins() + ")");
-        changeTeamLossesLabel.setText(lossesString + " (Current: " + team.getLosses() + ")");
-        changeTeamOTLabel.setText(otString + " (Current: " + team.getOtLosses() + ")");
+        changeTeamWinsLabel.setText(WINS_STRING + " (Current: " + team.getWins() + ")");
+        changeTeamLossesLabel.setText(LOSSES_STRING + " (Current: " + team.getLosses() + ")");
+        changeTeamOTLabel.setText(OT_STRING + " (Current: " + team.getOtLosses() + ")");
         String statsString = viewTeamStats.getText();
         statsString = statsString.substring(statsString.indexOf('\n') + 1);
         statsString = statsString.substring(statsString.indexOf('\n') + 1);
         if (index >= 0) {
-            changeTeamNameLabel.setText(nameString + " (Current: " + newTeam.getName() + ")");
+            changeTeamNameLabel.setText(NAME_STRING + " (Current: " + newTeam.getName() + ")");
             teamSelection.removeItem(oldTeam);
             teamSelection.insertItemAt(newTeam, index);
             viewTeamStats.setText(String.format("%s\nRecord: %d-%d-%d\n%s", newTeam.getName(), team.getWins(),
@@ -560,9 +568,9 @@ public class TeamGUI implements Runnable {
      * similar functions.
      */
     private void updateEntireTeamComponents() {
-        changeTeamWinsLabel.setText(winsString + " (Current: " + team.getWins() + ")");
-        changeTeamLossesLabel.setText(lossesString + " (Current: " + team.getLosses() + ")");
-        changeTeamOTLabel.setText(otString + " (Current: " + team.getOtLosses() + ")");
+        changeTeamWinsLabel.setText(WINS_STRING + " (Current: " + team.getWins() + ")");
+        changeTeamLossesLabel.setText(LOSSES_STRING + " (Current: " + team.getLosses() + ")");
+        changeTeamOTLabel.setText(OT_STRING + " (Current: " + team.getOtLosses() + ")");
         viewTeamStats.setText(team.displayTeamStats());
         viewRosterWithStats.setText(team.generateRosterWithStats());
     }
@@ -572,8 +580,8 @@ public class TeamGUI implements Runnable {
      * creating a line
      */
     private JRadioButton[] initializeLineType() {
-        return new JRadioButton[]{new JRadioButton("Offense Line"), new JRadioButton("Defense Pair"),
-                new JRadioButton("Power Play Line"), new JRadioButton("Penalty Kill Line")};
+        return new JRadioButton[]{new JRadioButton(OFFENSE_LINE), new JRadioButton(DEFENSE_LINE),
+                new JRadioButton(PP_LINE), new JRadioButton(PK_LINE)};
     }
     /**
      * This method sets up and displays the GUI for editing an actual team after one has been selected/created from
@@ -592,7 +600,7 @@ public class TeamGUI implements Runnable {
         mainTabs = new JTabbedPane();
         mainContent.add(mainTabs);
 
-        editInstructionsLabel = new JLabel(editInstructions);
+        editInstructionsLabel = new JLabel(EDIT_INSTRUCTIONS);
 
         // Team Tab
 
@@ -603,14 +611,14 @@ public class TeamGUI implements Runnable {
         editTeam.setLayout(new BoxLayout(editTeam, BoxLayout.Y_AXIS));
 
         // Labels, text fields, and button
-        changeTeamNameLabel = new JLabel(nameString + " (Current: " + team.getName() + ")");
-        changeTeamName = new JTextField(enterNameSize);
-        changeTeamWinsLabel = new JLabel(winsString + " (Current: " + team.getWins() + ")");
-        changeTeamWins = new JTextField(enterStatSize);
-        changeTeamLossesLabel = new JLabel(lossesString + " (Current: " + team.getLosses() + ")");
-        changeTeamLosses = new JTextField(enterStatSize);
-        changeTeamOTLabel = new JLabel(otString + " (Current: " + team.getOtLosses() + ")");
-        changeTeamOT = new JTextField(enterStatSize);
+        changeTeamNameLabel = new JLabel(NAME_STRING + " (Current: " + team.getName() + ")");
+        changeTeamName = new JTextField(ENTER_NAME_SIZE);
+        changeTeamWinsLabel = new JLabel(WINS_STRING + " (Current: " + team.getWins() + ")");
+        changeTeamWins = new JTextField(ENTER_STAT_SIZE);
+        changeTeamLossesLabel = new JLabel(LOSSES_STRING + " (Current: " + team.getLosses() + ")");
+        changeTeamLosses = new JTextField(ENTER_STAT_SIZE);
+        changeTeamOTLabel = new JLabel(OT_STRING + " (Current: " + team.getOtLosses() + ")");
+        changeTeamOT = new JTextField(ENTER_STAT_SIZE);
         updateTeamChanges = new JButton("Update Changes");
 
         // Panels for each different instance variable (name, wins, losses, ot losses)
@@ -630,7 +638,7 @@ public class TeamGUI implements Runnable {
 
             if (name.isBlank() && recordStrings[0].isBlank() && recordStrings[1].isBlank() &&
                     recordStrings[2].isBlank()) {
-                JOptionPane.showMessageDialog(mainFrame, emptyInputs,
+                JOptionPane.showMessageDialog(mainFrame, EMPTY_INPUTS,
                         "Edit Team", JOptionPane.INFORMATION_MESSAGE);
                 return;
             }
@@ -653,10 +661,10 @@ public class TeamGUI implements Runnable {
                 changeTeamOT.setText("");
                 updateFile();
             } catch (NumberFormatException ex) {
-                JOptionPane.showMessageDialog(mainFrame, numberError, "Edit Team", JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(mainFrame, NUMBER_ERROR, "Edit Team", JOptionPane.ERROR_MESSAGE);
                 return;
             } catch (IOException ex) {
-                JOptionPane.showMessageDialog(mainFrame, fileError, "Edit Team", JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(mainFrame, FILE_ERROR, "Edit Team", JOptionPane.ERROR_MESSAGE);
             } catch (Exception ex) {
                 JOptionPane.showMessageDialog(mainFrame, ex.getMessage(), "Edit Team", JOptionPane.ERROR_MESSAGE);
             }
@@ -676,7 +684,7 @@ public class TeamGUI implements Runnable {
                 try {
                     updateFile();
                 } catch (IOException ex) {
-                    JOptionPane.showMessageDialog(mainFrame, fileError, "Edit Team", JOptionPane.ERROR_MESSAGE);
+                    JOptionPane.showMessageDialog(mainFrame, FILE_ERROR, "Edit Team", JOptionPane.ERROR_MESSAGE);
                 } catch (Exception ex) {
                     JOptionPane.showMessageDialog(mainFrame, ex.getMessage(), "Edit Team",
                             JOptionPane.ERROR_MESSAGE);
@@ -707,7 +715,7 @@ public class TeamGUI implements Runnable {
         teamTabs.add("View Team Stats", viewTeamStatsScroll);
 
         // Reset Team Stats
-        resetStatsWarningLabel = new JLabel(resetStatsWarning);
+        resetStatsWarningLabel = new JLabel(RESET_STATS_WARNING);
         resetTeamStats = new JButton("Reset Team Stats");
         Container resetTeamContent = new Container();
         resetTeamContent.setLayout(new BoxLayout(resetTeamContent, BoxLayout.X_AXIS));
@@ -723,7 +731,7 @@ public class TeamGUI implements Runnable {
                 try {
                     updateFile();
                 } catch (IOException ex) {
-                    JOptionPane.showMessageDialog(mainFrame, fileError, "Reset Team Stats", JOptionPane.ERROR_MESSAGE);
+                    JOptionPane.showMessageDialog(mainFrame, FILE_ERROR, "Reset Team Stats", JOptionPane.ERROR_MESSAGE);
                 } catch (Exception ex) {
                     JOptionPane.showMessageDialog(mainFrame, ex.getMessage(), "Reset Team Stats",
                             JOptionPane.ERROR_MESSAGE);
@@ -739,93 +747,217 @@ public class TeamGUI implements Runnable {
         // Line Tabs
 
         Container mainLineContainer = new Container();
-        mainLineContainer.setLayout(new BorderLayout());
+        mainLineContainer.setLayout(new BoxLayout(mainLineContainer, BoxLayout.Y_AXIS));
         lineTabs = new JTabbedPane();
         currentLineLabel = new JLabel("Selected Line:");
         lineOptions = new JComboBox<Line>();
         for (Line line: team.getLines()) {
             lineOptions.addItem(line);
         }
-        createPanel(new JComponent[]{lineTabs}, mainLineContainer, BorderLayout.CENTER);
-        createPanel(new JComponent[]{currentLineLabel, lineOptions}, mainLineContainer, BorderLayout.NORTH);
+
+        createPanel(new JComponent[]{currentLineLabel, lineOptions}, mainLineContainer);
+        createPanel(new JComponent[]{lineTabs}, mainLineContainer);
+
+        JScrollPane lineContainerScroll = new JScrollPane(mainLineContainer);
 
         // Create Line
 
         Container createLineContent = new Container();
         createLineContent.setLayout(new BoxLayout(createLineContent, BoxLayout.Y_AXIS));
         enterLineNameLabel = new JLabel("Enter Line Name:");
-        lineName = new JTextField(enterNameSize);
+        lineName = new JTextField(ENTER_NAME_SIZE);
         createPanel(new JComponent[]{enterLineNameLabel, lineName}, createLineContent);
-
+        createLine = new JButton("Create Line");
+        createPanel(new JComponent[]{createLine}, createLineContent);
+        
         lineTypeLabel = new JLabel("Select Type of Line:");
         lineTypeGroup = new ButtonGroup();
         lineType = initializeLineType();
         for (JRadioButton button: lineType) {
             lineTypeGroup.add(button);
         }
+        final boolean[] selectedLine = {false, false, false, false};
 
         createPanel(new JComponent[]{lineTypeLabel}, createLineContent);
         createPanel(lineType, createLineContent);
 
-        // Center
-        JPanel selectCenterPanel = new JPanel();
+
+
+        // Set up Combo Boxes
         centerOptions = new JComboBox<>();
         for (Skater player: team.getPlayers()) {
             if (player instanceof Center center) {
                 centerOptions.addItem(center);
             }
         }
+
+        pickLeftWing = new JComboBox<>();
+        pickRightWing = new JComboBox<>();
+        for (Skater player: team.getPlayers()) {
+            pickLeftWing.addItem(player);
+            pickRightWing.addItem(player);
+        }
+
+        pickLeftDe = new JComboBox<>();
+        pickRightDe = new JComboBox<>();
+        for (Skater player: team.getPlayers()) {
+            if (player instanceof Defenseman de) {
+                pickLeftDe.addItem(de);
+                pickRightDe.addItem(de);
+            }
+        }
+
+        // Center
+        JPanel selectCenterPanel = new JPanel();
         selectCenterLabel = new JLabel("Center:");
         selectCenterPanel.add(selectCenterLabel);
         selectCenterPanel.add(centerOptions);
 
         // Left Wing
+        JPanel selectLWPanel = new JPanel();
+        selectLWLabel = new JLabel("Left Wing:");
+        selectLWPanel.add(selectLWLabel);
+        selectLWPanel.add(pickLeftWing);
 
         // Right Wing
+        JPanel selectRWPanel = new JPanel();
+        selectRWLabel = new JLabel("Right Wing:");
+        selectRWPanel.add(selectRWLabel);
+        selectRWPanel.add(pickRightWing);
 
         // Left De
+        JPanel selectLDPanel = new JPanel();
+        selectLDLabel = new JLabel("Left Defense:");
+        selectLDPanel.add(selectLDLabel);
+        selectLDPanel.add(pickLeftDe);
 
         // Right De
+        JPanel selectRDPanel = new JPanel();
+        selectRDLabel = new JLabel("Right Defense:");
+        selectRDPanel.add(selectRDLabel);
+        selectRDPanel.add(pickRightDe);
 
-        // Offense Line
-        lineType[0].addActionListener(e -> {
-            if (e.getActionCommand().equals(Action.SELECTED_KEY)) {
+        // Special Teams Stats
+        JPanel statsTogglePanel = new JPanel();
+        enterStatsToggle = new JToggleButton("Click to enter a starting Success %");
+        statsTogglePanel.add(enterStatsToggle);
+
+        JPanel enterSuccessPercentagePanel = new JPanel();
+        enterSuccessPercentageLabel = new JLabel("Enter Success Percentage:");
+        enterSuccessPercentage = new JTextField(ENTER_STAT_SIZE);
+        enterSuccessPercentagePanel.add(enterSuccessPercentageLabel);
+        enterSuccessPercentagePanel.add(enterSuccessPercentage);
+
+        JPanel enterNumOppsPanel = new JPanel();
+        enterNumOppsLabel = new JLabel("Enter Number of PP/PK Opportunities:");
+        enterNumOpps = new JTextField(ENTER_STAT_SIZE);
+        enterNumOppsPanel.add(enterNumOppsLabel);
+        enterNumOppsPanel.add(enterNumOpps);
+
+        // Displays text fields to enter success percentage and number of opportunities for the newly created line
+        enterStatsToggle.addActionListener(e -> {
+            if (enterStatsToggle.isSelected()) {
+                createLineContent.add(enterSuccessPercentagePanel);
+                createLineContent.add(enterNumOppsPanel);
+            } else {
+                createLineContent.remove(enterSuccessPercentagePanel);
+                createLineContent.remove(enterNumOppsPanel);
+            }
+            mainFrame.repaint();
+        });
+
+        // Action Listener for the Radio Buttons (lineType)
+        ActionListener lineTypeListener = e -> {
+            if (e.getActionCommand().equals(OFFENSE_LINE)) {  // Set up Offense
+                selectedLine[0] = true;
                 createLineContent.add(selectCenterPanel);
-            } else {
-
+                createLineContent.add(selectLWPanel);
+                createLineContent.add(selectRWPanel);
+            } else if (selectedLine[0]) {
+                selectedLine[0] = false;
+                createLineContent.remove(selectCenterPanel);
+                createLineContent.remove(selectLWPanel);
+                createLineContent.remove(selectRWPanel);
             }
-        });
 
-        // Defense Pair
-        lineType[1].addActionListener(e -> {
-            if (e.getActionCommand().equals(Action.SELECTED_KEY)) {
-
-            } else {
-
+            if (e.getActionCommand().equals(DEFENSE_LINE)) {  // Set up Defense
+                selectedLine[1] = true;
+                createLineContent.add(selectLDPanel);
+                createLineContent.add(selectRDPanel);
+            } else if (selectedLine[1]) {
+                selectedLine[1] = false;
+                createLineContent.remove(selectLDPanel);
+                createLineContent.remove(selectRDPanel);
             }
-        });
 
-        // PP Line
-        lineType[2].addActionListener(e -> {
-            if (e.getActionCommand().equals(Action.SELECTED_KEY)) {
-
-            } else {
-
+            if (e.getActionCommand().equals(PP_LINE)) {  // Set up PP
+                selectedLine[2] = true;
+                createLineContent.add(selectCenterPanel);
+                createLineContent.add(selectLWPanel);
+                createLineContent.add(selectRWPanel);
+                createLineContent.add(selectLDPanel);
+                createLineContent.add(selectRDPanel);
+                createLineContent.add(statsTogglePanel);
+            } else if (selectedLine[2]) {
+                selectedLine[2] = false;
+                if (!selectedLine[0]) {
+                    createLineContent.remove(selectCenterPanel);
+                    createLineContent.remove(selectLWPanel);
+                    createLineContent.remove(selectRWPanel);
+                }
+                if (!selectedLine[1]) {
+                    createLineContent.remove(selectLDPanel);
+                    createLineContent.remove(selectRDPanel);
+                }
+                createLineContent.remove(statsTogglePanel);
+                if (enterStatsToggle.isSelected()) {
+                    createLineContent.remove(enterSuccessPercentagePanel);
+                    createLineContent.remove(enterNumOppsPanel);
+                    enterStatsToggle.setSelected(false);
+                }
             }
-        });
 
-        // PK Line
-        lineType[3].addActionListener(e -> {
-            if (e.getActionCommand().equals(Action.SELECTED_KEY)) {
-
-            } else {
-
+            if (e.getActionCommand().equals(PK_LINE)) {  // Set up PK
+                selectedLine[3] = true;
+                selectLWLabel.setText("Offense 1:");
+                selectRWLabel.setText("Offense 2:");
+                createLineContent.add(selectLWPanel);
+                createLineContent.add(selectRWPanel);
+                createLineContent.add(selectLDPanel);
+                createLineContent.add(selectRDPanel);
+                createLineContent.add(statsTogglePanel);
+            } else if (selectedLine[3]) {
+                selectedLine[3] = false;
+                selectLWLabel.setText("Left Wing:");
+                selectRWLabel.setText("Right Wing:");
+                if (!selectedLine[2]) {
+                    if (!selectedLine[0]) {
+                        createLineContent.remove(selectLWPanel);
+                        createLineContent.remove(selectRWPanel);
+                    }
+                    if (!selectedLine[1]) {
+                        createLineContent.remove(selectLDPanel);
+                        createLineContent.remove(selectRDPanel);
+                    }
+                    createLineContent.remove(statsTogglePanel);
+                }
+                if (enterStatsToggle.isSelected()) {
+                    createLineContent.remove(enterSuccessPercentagePanel);
+                    createLineContent.remove(enterNumOppsPanel);
+                    enterStatsToggle.setSelected(false);
+                }
             }
-        });
+            mainFrame.repaint();
+        };
+
+        // Adding action listeners to radio buttons
+        for (JRadioButton type : lineType) {
+            type.addActionListener(lineTypeListener);
+        }
 
         lineTabs.add("Create Line", createLineContent);
 
-        mainTabs.add("Manage Lines", mainLineContainer);
+        mainTabs.add("Manage Lines", lineContainerScroll);
 
         // Sets team to null and re displays SelectTeamGUI when window is closed
         mainFrame.addWindowListener(new WindowAdapter() {
@@ -1060,14 +1192,14 @@ public class TeamGUI implements Runnable {
             try {
                 updateFile();
             } catch (IOException ex) {
-                JOptionPane.showMessageDialog(selectFrame, fileError, "Restore Sample", JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(selectFrame, FILE_ERROR, "Restore Sample", JOptionPane.ERROR_MESSAGE);
             } catch (Exception ex) {
                 JOptionPane.showMessageDialog(selectFrame, ex.getMessage(), "Restore Sample",
                         JOptionPane.ERROR_MESSAGE);
             }
         });
 
-        newUsers.addActionListener(e -> JOptionPane.showMessageDialog(selectFrame, newInfo, "New User Information",
+        newUsers.addActionListener(e -> JOptionPane.showMessageDialog(selectFrame, NEW_INFO, "New User Information",
                 JOptionPane.INFORMATION_MESSAGE));
     }
 

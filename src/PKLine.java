@@ -20,11 +20,11 @@ public class PKLine extends SpecialTeamsLine {
             throws NullPointerException {
         super(name);
         if (offense1 == null || offense2 == null || leftDe == null || rightDe == null) {
-            throw new NullPointerException(Line.nullError);
+            throw new NullPointerException(Line.NULL_ERROR);
         }
         if (offense1.equals(offense2) || offense1.equals(leftDe) || offense1.equals(rightDe) || offense2.equals(leftDe)
                 || offense2.equals(rightDe) || leftDe.equals(rightDe)) {
-            throw new IllegalArgumentException(Line.playerDuplicatesError);
+            throw new IllegalArgumentException(Line.PLAYER_DUPLICATES_ERROR);
         }
 
         this.offense1 = offense1;
@@ -42,11 +42,11 @@ public class PKLine extends SpecialTeamsLine {
                   int numberAttempts) throws NullPointerException, IllegalArgumentException {
         super(name, pkPercent, numberAttempts);
         if (offense1 == null || offense2 == null || leftDe == null || rightDe == null) {
-            throw new NullPointerException(Line.nullError);
+            throw new NullPointerException(Line.NULL_ERROR);
         }
         if (offense1.equals(offense2) || offense1.equals(leftDe) || offense1.equals(rightDe) || offense2.equals(leftDe)
                 || offense2.equals(rightDe) || leftDe.equals(rightDe)) {
-            throw new IllegalArgumentException(Line.playerDuplicatesError);
+            throw new IllegalArgumentException(Line.PLAYER_DUPLICATES_ERROR);
         }
 
         this.offense1 = offense1;
@@ -63,10 +63,10 @@ public class PKLine extends SpecialTeamsLine {
      */
     public void setOffense1(Skater offense1) throws NullPointerException, IllegalArgumentException {
         if (offense1 == null) {
-            throw new NullPointerException(Line.nullError);
+            throw new NullPointerException(Line.NULL_ERROR);
         }
         if (offense1.equals(offense2) || offense1.equals(leftDe) || offense1.equals(rightDe)) {
-            throw new IllegalArgumentException(Line.playerDuplicatesError);
+            throw new IllegalArgumentException(Line.PLAYER_DUPLICATES_ERROR);
         }
         this.offense1 = offense1;
     }
@@ -77,10 +77,10 @@ public class PKLine extends SpecialTeamsLine {
      */
     public void setOffense2(Skater offense2) throws NullPointerException, IllegalArgumentException {
         if (offense2 == null) {
-            throw new NullPointerException(Line.nullError);
+            throw new NullPointerException(Line.NULL_ERROR);
         }
         if (offense2.equals(offense1) || offense2.equals(leftDe) || offense2.equals(rightDe)) {
-            throw new IllegalArgumentException(Line.playerDuplicatesError);
+            throw new IllegalArgumentException(Line.PLAYER_DUPLICATES_ERROR);
         }
         this.offense2 = offense2;
     }
@@ -91,10 +91,10 @@ public class PKLine extends SpecialTeamsLine {
      */
     public void setLeftDe(Defenseman leftDe) throws NullPointerException, IllegalArgumentException {
         if (leftDe == null) {
-            throw new NullPointerException(Line.nullError);
+            throw new NullPointerException(Line.NULL_ERROR);
         }
         if (leftDe.equals(offense2) || leftDe.equals(offense1) || leftDe.equals(rightDe)) {
-            throw new IllegalArgumentException(Line.playerDuplicatesError);
+            throw new IllegalArgumentException(Line.PLAYER_DUPLICATES_ERROR);
         }
         this.leftDe = leftDe;
     }
@@ -105,10 +105,10 @@ public class PKLine extends SpecialTeamsLine {
      */
     public void setRightDe(Defenseman rightDe) {
         if (rightDe == null) {
-            throw new NullPointerException(Line.nullError);
+            throw new NullPointerException(Line.NULL_ERROR);
         }
         if (rightDe.equals(offense2) || rightDe.equals(offense1) || rightDe.equals(leftDe)) {
-            throw new IllegalArgumentException(Line.playerDuplicatesError);
+            throw new IllegalArgumentException(Line.PLAYER_DUPLICATES_ERROR);
         }
         this.rightDe = rightDe;
     }
@@ -122,7 +122,7 @@ public class PKLine extends SpecialTeamsLine {
     @Override
     public void score(Position position) throws NullPointerException, IllegalArgumentException {
         if (position == null) {
-            throw new NullPointerException(nullError);
+            throw new NullPointerException(NULL_ERROR);
         }
         if (position == Position.CENTER) {
             throw new IllegalArgumentException(centerError);
@@ -161,13 +161,13 @@ public class PKLine extends SpecialTeamsLine {
     @Override
     public void score(Position scorer, Position assist) throws NullPointerException, IllegalArgumentException {
         if (scorer == null || assist == null) {
-            throw new NullPointerException(nullError);
+            throw new NullPointerException(NULL_ERROR);
         }
         if (scorer == Position.CENTER || assist == Position.CENTER) {
             throw new IllegalArgumentException(centerError);
         }
         if (scorer == assist) {
-            throw new IllegalArgumentException(Line.positionDuplicatesError);
+            throw new IllegalArgumentException(Line.POSITION_DUPLICATES_ERROR);
         }
 
         if (scorer == Position.LEFT_WING) {
@@ -216,13 +216,13 @@ public class PKLine extends SpecialTeamsLine {
     public void score(Position scorer, Position assist1, Position assist2) throws NullPointerException,
             IllegalArgumentException {
         if (scorer == null || assist1 == null || assist2 == null) {
-            throw new NullPointerException(nullError);
+            throw new NullPointerException(NULL_ERROR);
         }
         if (scorer == Position.CENTER || assist1 == Position.CENTER || assist2 == Position.CENTER) {
             throw new IllegalArgumentException(centerError);
         }
         if (scorer == assist1 || scorer == assist2 || assist1 == assist2) {
-            throw new IllegalArgumentException(Line.positionDuplicatesError);
+            throw new IllegalArgumentException(Line.POSITION_DUPLICATES_ERROR);
         }
 
         if (scorer == Position.LEFT_WING) {

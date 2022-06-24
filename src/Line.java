@@ -8,9 +8,9 @@ public abstract class Line implements Serializable {
     private String name;
 
     // Error messages
-    public static final String nullError = "Positions cannot be left empty";
-    public static final String playerDuplicatesError = "The same player cannot be at two different positions";
-    public static final String positionDuplicatesError = "Given positions must be different";
+    public static final String NULL_ERROR = "Positions cannot be left empty";
+    public static final String PLAYER_DUPLICATES_ERROR = "The same player cannot be at two different positions";
+    public static final String POSITION_DUPLICATES_ERROR = "Given positions must be different";
 
     /**
      * Initializes instance variables with their respective arguments. A player can be left null if the user so chooses.

@@ -18,10 +18,10 @@ public class OffenseLine extends Line {
             IllegalArgumentException {
         super(name);
         if (leftWing == null || center == null || rightWing == null) {
-            throw new NullPointerException(nullError);
+            throw new NullPointerException(NULL_ERROR);
         }
         if (center.equals(leftWing) || center.equals(rightWing) || rightWing.equals(leftWing)) {
-            throw new IllegalArgumentException(playerDuplicatesError);
+            throw new IllegalArgumentException(PLAYER_DUPLICATES_ERROR);
         }
         this.center = center;
         this.leftWing = leftWing;
@@ -36,10 +36,10 @@ public class OffenseLine extends Line {
      */
     public void setCenter(Center center) throws NullPointerException, IllegalArgumentException {
         if (center == null) {
-            throw new NullPointerException(nullError);
+            throw new NullPointerException(NULL_ERROR);
         }
         if (center.equals(leftWing) || center.equals(rightWing)) {
-            throw new IllegalArgumentException(playerDuplicatesError);
+            throw new IllegalArgumentException(PLAYER_DUPLICATES_ERROR);
         }
         this.center = center;
     }
@@ -50,10 +50,10 @@ public class OffenseLine extends Line {
      */
     public void setLeftWing(Skater leftWing) throws NullPointerException, IllegalArgumentException {
         if (leftWing == null) {
-            throw new NullPointerException(nullError);
+            throw new NullPointerException(NULL_ERROR);
         }
         if (leftWing.equals(center) || leftWing.equals(rightWing)) {
-            throw new NullPointerException(playerDuplicatesError);
+            throw new NullPointerException(PLAYER_DUPLICATES_ERROR);
         }
         this.leftWing = leftWing;
     }
@@ -64,10 +64,10 @@ public class OffenseLine extends Line {
      */
     public void setRightWing(Skater rightWing) throws NullPointerException, IllegalArgumentException {
         if (rightWing == null) {
-            throw new NullPointerException(nullError);
+            throw new NullPointerException(NULL_ERROR);
         }
         if (leftWing.equals(center) || leftWing.equals(rightWing)) {
-            throw new IllegalArgumentException(playerDuplicatesError);
+            throw new IllegalArgumentException(PLAYER_DUPLICATES_ERROR);
         }
         this.rightWing = rightWing;
     }
@@ -125,10 +125,10 @@ public class OffenseLine extends Line {
     public void score(Position scorer, Position assist, DefenseLine de) throws NullPointerException,
             IllegalArgumentException {
         if (de == null || scorer == null || assist == null) {
-            throw new NullPointerException(nullError);
+            throw new NullPointerException(NULL_ERROR);
         }
         if (scorer == assist) {
-            throw new IllegalArgumentException(positionDuplicatesError);
+            throw new IllegalArgumentException(POSITION_DUPLICATES_ERROR);
         }
 
         if (scorer == Position.CENTER) {
@@ -184,10 +184,10 @@ public class OffenseLine extends Line {
     public void score(Position scorer, Position assist1, Position assist2, DefenseLine de) throws NullPointerException,
             IllegalArgumentException {
         if (de == null || scorer == null || assist1 == null || assist2 == null) {
-            throw new NullPointerException(nullError);
+            throw new NullPointerException(NULL_ERROR);
         }
         if (scorer == assist1 || scorer == assist2 || assist1 == assist2) {
-            throw new IllegalArgumentException(positionDuplicatesError);
+            throw new IllegalArgumentException(POSITION_DUPLICATES_ERROR);
         }
 
         if (scorer == Position.CENTER) {
