@@ -15,6 +15,8 @@ public class Team implements Serializable {
     private int losses;
     private int otLosses;
 
+    private static final int NUM_BASIC_STATS = 7;
+
     /**
      * Initializes team with given name, empty lists, and a record of 0-0-0
      * @param name Given name
@@ -537,6 +539,46 @@ public class Team implements Serializable {
                     goalie.getGAA(), goalie.getSavePercent()));
         }
         return result.substring(0, result.length() - 1);
+    }
+
+    // TODO documentation
+    public Object[][] generateSkaterRosterWithStats() {
+        Object[][] result = new Object[players.size()][NUM_BASIC_STATS];
+        for (int i = 0; i < players.size(); i++) {
+            Skater currentPlayer = players.get(i);
+            Object[] currentRow = result[i];
+            currentRow[0] = currentPlayer.getName();
+            currentRow[1] = currentPlayer.getPlayerNumber();
+            switch (currentPlayer.getPosition()) {
+                case CENTER -> currentRow[2] = "C";
+                case LEFT_WING -> currentRow[2] = "LW";
+                case RIGHT_WING -> currentRow[2] = "RW";
+                case LEFT_DEFENSE -> currentRow[2] = "LD";
+                case RIGHT_DEFENSE -> currentRow[2] = "RD";
+            }
+            currentRow[3] = currentPlayer.getGoals();
+            currentRow[4] = currentPlayer.getAssists();
+            currentRow[5] = currentPlayer.getPoints();
+            currentRow[6] = currentPlayer.getPlusMinus();
+        }
+        return result;
+    }
+
+    // TODO documentation
+    public Object[][] generateGoalieRosterWithStats() {
+        Object[][] result = new Object[goalies.size()][NUM_BASIC_STATS];
+        for (int i = 0; i < goalies.size(); i++) {
+            Goalie currentGoalie = goalies.get(i);
+            Object[] currentRow = result[i];
+            currentRow[0] = currentGoalie.getName();
+            currentRow[1] = currentGoalie.getPlayerNumber();
+            currentRow[2] = currentGoalie.getWins();
+            currentRow[3] = currentGoalie.getLosses();
+            currentRow[4] = currentGoalie.getOtLosses();
+            currentRow[5] = currentGoalie.getGAA();
+            currentRow[6] = currentGoalie.getSavePercent();
+        }
+        return result;
     }
 
     /**

@@ -1,4 +1,5 @@
 import javax.swing.*;
+import javax.swing.table.AbstractTableModel;
 import java.awt.*;
 import java.awt.event.*;
 import java.io.*;
@@ -64,6 +65,10 @@ public class TeamGUI implements Runnable {
     private static final String DEFENSE_LINE = "Defense Pair";
     private static final String PP_LINE = "Power Play Line";
     private static final String PK_LINE = "Penalty Kill Line";
+    private static final String[] SKATER_STATS_COLUMNS = {"Skater Name", "#", "Position", "Goals", "Assists", "Points",
+            "Plus Minus"};
+    private static final String[] GOALIE_STATS_COLUMNS = {"Goalie Name", "#", "Wins", "Losses", "OT Losses/Ties", "GAA",
+            "SV%"};
 
     // Numeric Constants
     private static final int ENTER_NAME_SIZE = 30;
@@ -103,7 +108,8 @@ public class TeamGUI implements Runnable {
     JTextArea viewRoster;
 
     // View Roster with Basic Stats
-    JTextArea viewRosterWithStats;
+    JTable viewRosterStatsSkaters;
+    JTable viewRosterStatsGoalies;
 
     // View Stats
     JTextArea viewTeamStats;
@@ -190,7 +196,7 @@ public class TeamGUI implements Runnable {
     JButton deletePlayer;
 
     // View Stats
-    JTextArea viewPlayerStats;
+    JTextArea viewSkaterStats;
 
     // Reset Stats
     JButton resetPlayerStats;
@@ -555,8 +561,6 @@ public class TeamGUI implements Runnable {
                     team.getLosses(), team.getOtLosses(), statsString));
             statsString = viewRoster.getText();
             viewRoster.setText(newTeam.getName() + statsString.substring(statsString.indexOf('\n')));
-            statsString = viewRosterWithStats.getText();
-            viewRosterWithStats.setText(newTeam.getName() + statsString.substring(statsString.indexOf('\n')));
         } else {
             viewTeamStats.setText(String.format("%s\nRecord: %d-%d-%d\n%s", team.getName(), team.getWins(),
                     team.getLosses(), team.getOtLosses(), statsString));
@@ -572,7 +576,6 @@ public class TeamGUI implements Runnable {
         changeTeamLossesLabel.setText(LOSSES_STRING + " (Current: " + team.getLosses() + ")");
         changeTeamOTLabel.setText(OT_STRING + " (Current: " + team.getOtLosses() + ")");
         viewTeamStats.setText(team.displayTeamStats());
-        viewRosterWithStats.setText(team.generateRosterWithStats());
     }
 
     /**
@@ -703,9 +706,20 @@ public class TeamGUI implements Runnable {
         teamTabs.add("View Roster", viewRosterScroll);
 
         // Text Area that displays slightly more detailed roster
-        viewRosterWithStats = new JTextArea(team.generateRosterWithStats());
-        viewRosterWithStats.setEditable(false);
-        JScrollPane viewRosterWithStatsScroll = new JScrollPane(viewRosterWithStats);
+        Container viewRosterWithStatsContent = new Container();
+        viewRosterWithStatsContent.setLayout(new BoxLayout(viewRosterWithStatsContent, BoxLayout.Y_AXIS));
+        JScrollPane viewRosterWithStatsScroll = new JScrollPane(viewRosterWithStatsContent);
+
+        viewRosterStatsSkaters = new JTable(new StatsTableModel(team.generateSkaterRosterWithStats(),
+                SKATER_STATS_COLUMNS));
+        viewRosterStatsGoalies = new JTable(new StatsTableModel(team.generateGoalieRosterWithStats(),
+                GOALIE_STATS_COLUMNS));
+
+        createPanel(new JComponent[]{viewRosterStatsSkaters.getTableHeader()}, viewRosterWithStatsContent);
+        createPanel(new JComponent[]{viewRosterStatsSkaters}, viewRosterWithStatsContent);
+        createPanel(new JComponent[]{viewRosterStatsGoalies.getTableHeader()}, viewRosterWithStatsContent);
+        createPanel(new JComponent[]{viewRosterStatsGoalies}, viewRosterWithStatsContent);
+
         teamTabs.add("View Basic Player Stats", viewRosterWithStatsScroll);
 
         // Text Area that displays stats for the overall team
@@ -713,6 +727,7 @@ public class TeamGUI implements Runnable {
         viewTeamStats.setEditable(false);
         JScrollPane viewTeamStatsScroll = new JScrollPane(viewTeamStats);
         teamTabs.add("View Team Stats", viewTeamStatsScroll);
+
 
         // Reset Team Stats
         resetStatsWarningLabel = new JLabel(RESET_STATS_WARNING);
@@ -1297,5 +1312,33 @@ public class TeamGUI implements Runnable {
 
     public static void main(String[] args) {
         SwingUtilities.invokeLater(new TeamGUI());
+    }
+}
+
+class StatsTableModel extends AbstractTableModel {
+    private final String[] columnNames;
+    private final Object[][] stats;
+
+    public StatsTableModel(Object[][] stats, String[] columnNames) {
+        this.stats = stats;
+        this.columnNames = columnNames;
+    }
+
+    public int getColumnCount() {
+        return columnNames.length;
+    }
+
+    public int getRowCount() {
+        return stats.length;
+    }
+
+    @Override
+    public Object getValueAt(int rowIndex, int columnIndex) {
+        return stats[rowIndex][columnIndex];
+    }
+
+    @Override
+    public String getColumnName(int column) {
+        return columnNames[column];
     }
 }
