@@ -764,12 +764,14 @@ public class TeamGUI implements Runnable {
 
         Container createLineContent = new Container();
         createLineContent.setLayout(new BoxLayout(createLineContent, BoxLayout.Y_AXIS));
+
         enterLineNameLabel = new JLabel("Enter Line Name:");
         lineName = new JTextField(ENTER_NAME_SIZE);
         createPanel(new JComponent[]{enterLineNameLabel, lineName}, createLineContent);
+
         createLine = new JButton("Create Line");
         createPanel(new JComponent[]{createLine}, createLineContent);
-        
+
         lineTypeLabel = new JLabel("Select Type of Line:");
         lineTypeGroup = new ButtonGroup();
         lineType = initializeLineType();
@@ -777,11 +779,8 @@ public class TeamGUI implements Runnable {
             lineTypeGroup.add(button);
         }
         final boolean[] selectedLine = {false, false, false, false};
-
         createPanel(new JComponent[]{lineTypeLabel}, createLineContent);
         createPanel(lineType, createLineContent);
-
-
 
         // Set up Combo Boxes
         centerOptions = new JComboBox<>();
@@ -950,10 +949,103 @@ public class TeamGUI implements Runnable {
             mainFrame.repaint();
         };
 
-        // Adding action listeners to radio buttons
+        // Adding action listener to radio buttons for the different line types
         for (JRadioButton type : lineType) {
             type.addActionListener(lineTypeListener);
         }
+
+        createLine.addActionListener(e -> {
+            Line newLine = null;
+            if (lineType[0].isSelected()) {
+                try {
+                    newLine = new OffenseLine(lineName.getText(), (Center) centerOptions.getSelectedItem(),
+                            (Skater) pickLeftWing.getSelectedItem(), (Skater) pickRightWing.getSelectedItem());
+                    
+                } catch (IllegalArgumentException | NullPointerException ex) {
+                    JOptionPane.showMessageDialog(mainFrame, ex.getMessage(), "Create Line", 
+                            JOptionPane.ERROR_MESSAGE);
+                    return;
+                }
+            } else if (lineType[1].isSelected()) {
+                try {
+                    newLine = new DefenseLine(lineName.getText(), (Defenseman) pickLeftDe.getSelectedItem(),
+                            (Defenseman) pickRightDe.getSelectedItem());
+                } catch (IllegalArgumentException | NullPointerException ex) {
+                    JOptionPane.showMessageDialog(mainFrame, ex.getMessage(), "Create Line", 
+                            JOptionPane.ERROR_MESSAGE);
+                    return;
+                }
+            } else if (lineType[2].isSelected()) {
+                try {
+                    if (enterStatsToggle.isSelected()) {
+                        double ppPercentage = Double.parseDouble(enterSuccessPercentage.getText());
+                        int numOpps = Integer.parseInt(enterNumOpps.getText());
+                        newLine = new PPLine(lineName.getText(), (Center) centerOptions.getSelectedItem(), 
+                                (Skater) pickLeftWing.getSelectedItem(), (Skater) pickRightWing.getSelectedItem(),
+                                (Defenseman) pickLeftDe.getSelectedItem(), (Defenseman) pickRightDe.getSelectedItem(),
+                                ppPercentage, numOpps);
+                    } else {
+                        newLine = new PPLine(lineName.getText(), (Center) centerOptions.getSelectedItem(),
+                                (Skater) pickLeftWing.getSelectedItem(), (Skater) pickRightWing.getSelectedItem(),
+                                (Defenseman) pickLeftDe.getSelectedItem(), (Defenseman) pickRightDe.getSelectedItem());
+                    }
+                } catch (NumberFormatException ex) {
+                    JOptionPane.showMessageDialog(mainFrame, NUMBER_ERROR, "Create Team", 
+                            JOptionPane.ERROR_MESSAGE);
+                    return;
+                } catch (IllegalArgumentException | NullPointerException ex) {
+                    JOptionPane.showMessageDialog(mainFrame, ex.getMessage(), "Create Team", 
+                            JOptionPane.ERROR_MESSAGE);
+                    return;
+                }
+            } else if (lineType[3].isSelected()) {
+                try {
+                    if (enterStatsToggle.isSelected()) {
+                        double pkPercentage = Double.parseDouble(enterSuccessPercentage.getText());
+                        int numOpps = Integer.parseInt(enterNumOpps.getText());
+                        newLine = new PKLine(lineName.getText(), (Skater) pickLeftWing.getSelectedItem(), 
+                                (Skater) pickRightWing.getSelectedItem(), (Defenseman) pickLeftDe.getSelectedItem(),
+                                (Defenseman) pickRightDe.getSelectedItem(), pkPercentage, numOpps);
+                    } else {
+                        newLine = new PKLine(lineName.getText(), (Skater) pickLeftWing.getSelectedItem(),
+                                (Skater) pickRightWing.getSelectedItem(), (Defenseman) pickLeftDe.getSelectedItem(),
+                                (Defenseman) pickRightDe.getSelectedItem());
+                    }
+                } catch (NumberFormatException ex) {
+                    JOptionPane.showMessageDialog(mainFrame, NUMBER_ERROR, "Create Team",
+                            JOptionPane.ERROR_MESSAGE);
+                    return;
+                } catch (IllegalArgumentException | NullPointerException ex) {
+                    JOptionPane.showMessageDialog(mainFrame, ex.getMessage(), "Create Team",
+                            JOptionPane.ERROR_MESSAGE);
+                    return;
+                }
+            } else {
+                JOptionPane.showMessageDialog(mainFrame, "Please select a line type to assign players to " +
+                        "your line", "Create Line", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+            int index = team.addLine(newLine);
+            if (index == -1) {
+                JOptionPane.showMessageDialog(mainFrame, "New Line cannot share the same name as another line",
+                        "Create Line", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+
+            lineName.setText("");
+            enterSuccessPercentage.setText("");
+            enterNumOpps.setText("");
+
+            lineOptions.insertItemAt(newLine, index);
+            try {
+                updateFile();
+            } catch (IOException ex) {
+                JOptionPane.showMessageDialog(mainFrame, FILE_ERROR, "Create Team", JOptionPane.ERROR_MESSAGE);
+            } catch (Exception ex) {
+                JOptionPane.showMessageDialog(mainFrame, ex.getMessage(), "Create Team", 
+                        JOptionPane.ERROR_MESSAGE);
+            }
+        });
 
         lineTabs.add("Create Line", createLineContent);
 
