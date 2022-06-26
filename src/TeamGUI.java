@@ -53,7 +53,7 @@ public class TeamGUI implements Runnable {
     private static final String LOSSES_STRING = "Enter number of losses:";
     private static final String OT_STRING = "Enter number of overtime losses or ties:";
     private static final String EDIT_INSTRUCTIONS = "<html>Enter changes for the information that you would like to " +
-            "change.<br>If a field is left blank, no changes will be made for that information.</html>";
+            "change.<br>If a field is left blank, no changes will be made for that stat.</html>";
     private static final String RESET_STATS_WARNING = "<html>This button will reset all stats for your team and its" +
             " players to 0.<br>This action cannot be undone after the fact and their previous stats will be " +
             "lost.</html>";
@@ -65,14 +65,15 @@ public class TeamGUI implements Runnable {
     private static final String DEFENSE_LINE = "Defense Pair";
     private static final String PP_LINE = "Power Play Line";
     private static final String PK_LINE = "Penalty Kill Line";
-    private static final String[] SKATER_STATS_COLUMNS = {"Skater Name", "#", "Position", "Goals", "Assists", "Points",
-            "Plus Minus"};
-    private static final String[] GOALIE_STATS_COLUMNS = {"Goalie Name", "#", "Wins", "Losses", "OT Losses/Ties", "GAA",
-            "SV%"};
+    private static final String[] SKATER_STATS_COLUMNS = {"Skater Name", "Player #", "Position", "Goals", "Assists",
+            "Points", "+/-"};
+    private static final String[] GOALIE_STATS_COLUMNS = {"Goalie Name", "Player #", "Wins", "Losses", "OT L / Ties",
+            "GAA", "SV%"};
 
     // Numeric Constants
     private static final int ENTER_NAME_SIZE = 30;
     private static final int ENTER_STAT_SIZE = 5;
+    private static final int NAME_COLUMN_WIDTH = 100;
 
     // JComponents
 
@@ -586,6 +587,7 @@ public class TeamGUI implements Runnable {
         return new JRadioButton[]{new JRadioButton(OFFENSE_LINE), new JRadioButton(DEFENSE_LINE),
                 new JRadioButton(PP_LINE), new JRadioButton(PK_LINE)};
     }
+
     /**
      * This method sets up and displays the GUI for editing an actual team after one has been selected/created from
      * the selectTeam frame. It is composed of a variety of tabs that encompass the different ways to modify or manage
@@ -705,15 +707,17 @@ public class TeamGUI implements Runnable {
         JScrollPane viewRosterScroll = new JScrollPane(viewRoster);
         teamTabs.add("View Roster", viewRosterScroll);
 
-        // Text Area that displays slightly more detailed roster
+        // Table that displays slightly more detailed roster with basic stats
         Container viewRosterWithStatsContent = new Container();
         viewRosterWithStatsContent.setLayout(new BoxLayout(viewRosterWithStatsContent, BoxLayout.Y_AXIS));
         JScrollPane viewRosterWithStatsScroll = new JScrollPane(viewRosterWithStatsContent);
 
         viewRosterStatsSkaters = new JTable(new StatsTableModel(team.generateSkaterRosterWithStats(),
                 SKATER_STATS_COLUMNS));
+        viewRosterStatsSkaters.getColumnModel().getColumn(0).setPreferredWidth(NAME_COLUMN_WIDTH);
         viewRosterStatsGoalies = new JTable(new StatsTableModel(team.generateGoalieRosterWithStats(),
                 GOALIE_STATS_COLUMNS));
+        viewRosterStatsGoalies.getColumnModel().getColumn(0).setPreferredWidth(NAME_COLUMN_WIDTH);
 
         createPanel(new JComponent[]{viewRosterStatsSkaters.getTableHeader()}, viewRosterWithStatsContent);
         createPanel(new JComponent[]{viewRosterStatsSkaters}, viewRosterWithStatsContent);
@@ -1055,11 +1059,15 @@ public class TeamGUI implements Runnable {
             try {
                 updateFile();
             } catch (IOException ex) {
-                JOptionPane.showMessageDialog(mainFrame, FILE_ERROR, "Create Team", JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(mainFrame, FILE_ERROR, "Create Line", JOptionPane.ERROR_MESSAGE);
+                return;
             } catch (Exception ex) {
-                JOptionPane.showMessageDialog(mainFrame, ex.getMessage(), "Create Team", 
+                JOptionPane.showMessageDialog(mainFrame, ex.getMessage(), "Create Line",
                         JOptionPane.ERROR_MESSAGE);
+                return;
             }
+            JOptionPane.showMessageDialog(mainFrame, "New line has successfully been created",
+                    "Create Line", JOptionPane.INFORMATION_MESSAGE);
         });
 
         lineTabs.add("Create Line", createLineContent);
@@ -1315,6 +1323,13 @@ public class TeamGUI implements Runnable {
     }
 }
 
+/**
+ * StatsTableModel
+ *
+ * This class serves as the model for the JTables used to display basic player stats for the entire team. It displays
+ * data from a 2D Object array containing Strings, ints, and doubles corresponding to a player's stats.
+ * It is a very simple implementation of the AbstractTableModel because the table is for viewing only.
+ */
 class StatsTableModel extends AbstractTableModel {
     private final String[] columnNames;
     private final Object[][] stats;

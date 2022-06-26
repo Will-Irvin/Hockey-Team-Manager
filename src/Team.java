@@ -500,7 +500,7 @@ public class Team implements Serializable {
         for (Skater player: players) {
             result.append(String.format("%s %d\n", player.getName(), player.getPlayerNumber()));
         }
-        result.append("Goalies:\n");
+        result.append("\nGoalies:\n");
         for (Goalie goalie: goalies) {
             result.append(String.format("%s %d\n", goalie.getName(), goalie.getPlayerNumber()));
         }
@@ -541,7 +541,10 @@ public class Team implements Serializable {
         return result.substring(0, result.length() - 1);
     }
 
-    // TODO documentation
+    /**
+     * @return A 2D object array where each row corresponds to one skater, and each element corresponds to one of that
+     * skater's stats to display in a JTable
+     */
     public Object[][] generateSkaterRosterWithStats() {
         Object[][] result = new Object[players.size()][NUM_BASIC_STATS];
         for (int i = 0; i < players.size(); i++) {
@@ -564,7 +567,10 @@ public class Team implements Serializable {
         return result;
     }
 
-    // TODO documentation
+    /**
+     * @return A 2D object array where each row corresponds to one goalie, and each element corresponds to one of that
+     * skater's stats that will be displayed in a JTable.
+     */
     public Object[][] generateGoalieRosterWithStats() {
         Object[][] result = new Object[goalies.size()][NUM_BASIC_STATS];
         for (int i = 0; i < goalies.size(); i++) {
@@ -575,8 +581,8 @@ public class Team implements Serializable {
             currentRow[2] = currentGoalie.getWins();
             currentRow[3] = currentGoalie.getLosses();
             currentRow[4] = currentGoalie.getOtLosses();
-            currentRow[5] = currentGoalie.getGAA();
-            currentRow[6] = currentGoalie.getSavePercent();
+            currentRow[5] = String.format("%.3f", currentGoalie.getGAA());
+            currentRow[6] = String.format("%.2f", currentGoalie.getSavePercent());
         }
         return result;
     }
