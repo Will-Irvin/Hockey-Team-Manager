@@ -28,6 +28,17 @@ public class OffenseLine extends Line {
         this.rightWing = rightWing;
     }
 
+    /**
+     * Creates a copy of the given line with the same parameters and name as the given argument.
+     * @param line The given line to copy
+     */
+    public OffenseLine(OffenseLine line) {
+        super(line.getName());
+        this.center = line.center;
+        this.leftWing = line.leftWing;
+        this.rightWing = line.rightWing;
+    }
+
     // Setter Methods
 
     /**

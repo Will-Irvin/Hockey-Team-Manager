@@ -4,6 +4,7 @@ import java.awt.*;
 import java.awt.event.*;
 import java.io.*;
 import java.util.ArrayList;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * TeamGUI
@@ -53,7 +54,10 @@ public class TeamGUI implements Runnable {
     private static final String LOSSES_STRING = "Enter number of losses:";
     private static final String OT_STRING = "Enter number of overtime losses or ties:";
     private static final String EDIT_INSTRUCTIONS = "<html>Enter changes for the information that you would like to " +
-            "change.<br>If a field is left blank, no changes will be made for that stat.</html>";
+            "change.<br>If a field is left blank, no changes will be made for the corresponding information.</html>";
+    private static final String EDIT_LINE_INSTRUCTIONS = "<html>This tab will make changes to any already created" +
+            " lines.<br>Use the drop box at the top of the screen to select which line you would like to change.<br>" +
+            EDIT_INSTRUCTIONS;
     private static final String RESET_STATS_WARNING = "<html>This button will reset all stats for your team and its" +
             " players to 0.<br>This action cannot be undone after the fact and their previous stats will be " +
             "lost.</html>";
@@ -85,10 +89,7 @@ public class TeamGUI implements Runnable {
     JComboBox<Line> lineOptions;
     JComboBox<Skater> skaterOptions;
     JComboBox<Center> centerOptions;
-    JComboBox<Defenseman> defenseOptions;
     JComboBox<Goalie> goalieOptions;
-    JComboBox<OffenseLine> offenseLineOptions;
-    JComboBox<DefenseLine> defenseLineOptions;
 
     // Manage Team
 
@@ -128,7 +129,7 @@ public class TeamGUI implements Runnable {
     JComboBox<Defenseman> pickRightDe;
 
     // Create Line
-    JLabel enterLineNameLabel;  // TODO
+    JLabel enterLineNameLabel;
     JTextField lineName;
     JLabel lineTypeLabel;
     ButtonGroup lineTypeGroup;
@@ -148,8 +149,16 @@ public class TeamGUI implements Runnable {
     JButton createLine;
 
     // Edit Line
+    JLabel editLineInstructions;
+    JLabel changeLineNameLabel;
     JTextField changeLineName;
-    JButton changeSuccessPercent;  // For special teams
+    JButton updateLineChanges;
+    // For special teams
+    JLabel changeSuccessPercentLabel;
+    JTextField changeSuccessPercent;
+    JLabel changeNumOppsLabel;
+    JTextField changeNumOpps;
+
     JButton changeLinePlayers;
 
     // Delete Line
@@ -157,17 +166,6 @@ public class TeamGUI implements Runnable {
 
     // View Lines
     JTextArea viewLines;
-
-    // Manage Special Teams
-
-    // Create Special Teams
-    JTextField specialTeamsName;
-    JToggleButton ppPkChoice;
-    JButton createSpecialTeams;
-
-    // Edit Special Teams
-    JTextField changeSpecialName;
-    JButton changeSpecialPlayers;
 
     // Create/Edit Skater/Goalie
     JTextArea playerName;
@@ -770,6 +768,7 @@ public class TeamGUI implements Runnable {
         lineTabs = new JTabbedPane();
         currentLineLabel = new JLabel("Selected Line:");
         lineOptions = new JComboBox<Line>();
+        lineOptions.addItem(null);
         for (Line line: team.getLines()) {
             lineOptions.addItem(line);
         }
@@ -975,7 +974,7 @@ public class TeamGUI implements Runnable {
 
         createLine.addActionListener(e -> {
             Line newLine = null;
-            if (lineType[0].isSelected()) {
+            if (lineType[0].isSelected()) {  // Offense Line
                 try {
                     newLine = new OffenseLine(lineName.getText(), (Center) centerOptions.getSelectedItem(),
                             (Skater) pickLeftWing.getSelectedItem(), (Skater) pickRightWing.getSelectedItem());
@@ -985,7 +984,7 @@ public class TeamGUI implements Runnable {
                             JOptionPane.ERROR_MESSAGE);
                     return;
                 }
-            } else if (lineType[1].isSelected()) {
+            } else if (lineType[1].isSelected()) {  // Defense Line
                 try {
                     newLine = new DefenseLine(lineName.getText(), (Defenseman) pickLeftDe.getSelectedItem(),
                             (Defenseman) pickRightDe.getSelectedItem());
@@ -994,7 +993,7 @@ public class TeamGUI implements Runnable {
                             JOptionPane.ERROR_MESSAGE);
                     return;
                 }
-            } else if (lineType[2].isSelected()) {
+            } else if (lineType[2].isSelected()) {  // PP Line
                 try {
                     if (enterStatsToggle.isSelected()) {
                         double ppPercentage = Double.parseDouble(enterSuccessPercentage.getText());
@@ -1017,7 +1016,7 @@ public class TeamGUI implements Runnable {
                             JOptionPane.ERROR_MESSAGE);
                     return;
                 }
-            } else if (lineType[3].isSelected()) {
+            } else if (lineType[3].isSelected()) {  // PK Line
                 try {
                     if (enterStatsToggle.isSelected()) {
                         double pkPercentage = Double.parseDouble(enterSuccessPercentage.getText());
@@ -1039,7 +1038,7 @@ public class TeamGUI implements Runnable {
                             JOptionPane.ERROR_MESSAGE);
                     return;
                 }
-            } else {
+            } else {  // No selection
                 JOptionPane.showMessageDialog(mainFrame, "Please select a line type to assign players to " +
                         "your line", "Create Line", JOptionPane.ERROR_MESSAGE);
                 return;
@@ -1051,6 +1050,7 @@ public class TeamGUI implements Runnable {
                 return;
             }
 
+            // Reset Text Boxes
             lineName.setText("");
             enterSuccessPercentage.setText("");
             enterNumOpps.setText("");
@@ -1071,6 +1071,150 @@ public class TeamGUI implements Runnable {
         });
 
         lineTabs.add("Create Line", createLineContent);
+
+        // Edit Line
+
+        Container editLineContent = new Container();
+        editLineContent.setLayout(new BoxLayout(editLineContent, BoxLayout.Y_AXIS));
+
+        editLineInstructions = new JLabel(EDIT_LINE_INSTRUCTIONS);
+        createPanel(new JComponent[]{editLineInstructions}, editLineContent);
+
+        // Change Name
+        changeLineNameLabel = new JLabel("Enter New Line Name:");
+        changeLineName = new JTextField(ENTER_NAME_SIZE);
+        createPanel(new JComponent[]{changeLineNameLabel, changeLineName}, editLineContent);
+
+        updateLineChanges = new JButton("Update Name");
+        createPanel(new JComponent[]{updateLineChanges}, editLineContent);
+
+        changeLinePlayers = new JButton("Change Line Players");
+        createPanel(new JComponent[]{changeLinePlayers}, editLineContent);
+
+        // Change Special Teams Stats
+        AtomicBoolean isSpecialTeams = new AtomicBoolean(false);
+        JPanel changeSTSuccess = new JPanel();
+        changeSuccessPercentLabel = new JLabel("Enter New Success Percentage:");
+        changeSuccessPercent = new JTextField(ENTER_STAT_SIZE);
+        changeNumOppsLabel = new JLabel("Enter Number of Opportunities:");
+        changeNumOpps = new JTextField(ENTER_STAT_SIZE);
+        changeSTSuccess.add(changeSuccessPercentLabel);
+        changeSTSuccess.add(changeSuccessPercent);
+        changeSTSuccess.add(changeNumOppsLabel);
+        changeSTSuccess.add(changeNumOpps);
+
+        // Ensures that proper components are displayed for editing a line depending on which line is selected
+        lineOptions.addItemListener(e -> {
+            if (lineOptions.getSelectedItem() instanceof SpecialTeamsLine && !isSpecialTeams.get()) {
+                isSpecialTeams.set(true);
+                updateLineChanges.setText("Update Changes");
+                editLineContent.add(changeSTSuccess, editLineContent.getComponentCount() - 2);
+            } else if (isSpecialTeams.get() && (lineOptions.getSelectedItem() instanceof OffenseLine ||
+                    lineOptions.getSelectedItem() instanceof DefenseLine || lineOptions.getSelectedItem() == null) ) {
+                updateLineChanges.setText("Update Name");
+                editLineContent.remove(changeSTSuccess);
+                isSpecialTeams.set(false);
+            }
+        });
+
+        updateLineChanges.addActionListener(e -> {
+            if (lineOptions.getSelectedItem() == null) {
+                JOptionPane.showMessageDialog(mainFrame, "Please select a line to edit", "Edit Line",
+                        JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+            String name = changeLineName.getText();
+            Line editingLine = (Line) lineOptions.getSelectedItem();
+            Line newLine = null;
+            if (editingLine instanceof OffenseLine oLine) {
+                try {
+                    newLine = new OffenseLine(oLine);
+                    newLine.setName(name);
+                } catch (IllegalArgumentException | NullPointerException ex) {
+                    JOptionPane.showMessageDialog(mainFrame, ex.getMessage(), "Edit Line",
+                            JOptionPane.ERROR_MESSAGE);
+                    return;
+                }
+            } else if (editingLine instanceof DefenseLine defenseLine) {
+                try {
+                    newLine = new DefenseLine(defenseLine);
+                    newLine.setName(name);
+                } catch (IllegalArgumentException | NullPointerException ex) {
+                    JOptionPane.showMessageDialog(mainFrame, ex.getMessage(), "Edit Line",
+                            JOptionPane.ERROR_MESSAGE);
+                    return;
+                }
+            } else if (editingLine instanceof SpecialTeamsLine specialLine) {
+                try {
+                    if (changeSuccessPercent.getText().isBlank() && changeNumOpps.getText().isBlank()) {
+                        if (specialLine instanceof PPLine pp) {
+                            newLine = new PPLine(pp);
+                            newLine.setName(name);
+                        } else if (specialLine instanceof PKLine pk) {
+                            newLine = new PKLine(pk);
+                            newLine.setName(name);
+                        }
+                    } else {
+                        double successPercent = Double.parseDouble(changeSuccessPercent.getText());
+                        int numAttempts = Integer.parseInt(changeNumOpps.getText());
+                        specialLine.setSuccessStats(successPercent, numAttempts);
+                        changeSuccessPercent.setText("");
+                        changeNumOpps.setText("");
+                        if (name.isBlank()) {
+                            try {
+                                updateFile();
+                                JOptionPane.showMessageDialog(mainFrame, "Line Updated Successfully",
+                                        "Edit Line", JOptionPane.INFORMATION_MESSAGE);
+                            } catch (IOException ex) {
+                                JOptionPane.showMessageDialog(mainFrame, FILE_ERROR, "Edit Line",
+                                        JOptionPane.ERROR_MESSAGE);
+                            } catch (Exception ex) {
+                                JOptionPane.showMessageDialog(mainFrame, ex.getMessage(), "Edit Line",
+                                        JOptionPane.ERROR_MESSAGE);
+                            }
+                            return;
+                        } else {
+                            if (specialLine instanceof PPLine pp) {
+                                newLine = new PPLine(pp);
+                                newLine.setName(name);
+                            } else if (specialLine instanceof PKLine pk) {
+                                newLine = new PKLine(pk);
+                                newLine.setName(name);
+                            }
+                        }
+                    }
+                } catch (NumberFormatException ex) {
+                    JOptionPane.showMessageDialog(mainFrame, NUMBER_ERROR, "Edit Line",
+                            JOptionPane.ERROR_MESSAGE);
+                    return;
+                } catch (IllegalArgumentException | NullPointerException ex) {
+                    JOptionPane.showMessageDialog(mainFrame, ex.getMessage(), "Edit Line",
+                            JOptionPane.ERROR_MESSAGE);
+                    return;
+                }
+            }
+            int index = team.changeLine(editingLine, newLine);
+            if (index == -1) {
+                JOptionPane.showMessageDialog(mainFrame, "New name cannot be the same as another line's name",
+                        "Edit Line", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+            lineOptions.removeItem(editingLine);
+            lineOptions.insertItemAt(newLine, index + 1);
+            try {
+                updateFile();
+                changeLineName.setText("");
+                lineOptions.setSelectedIndex(0);
+                JOptionPane.showMessageDialog(mainFrame, "Line Updated Successfully", "Edit Line",
+                        JOptionPane.INFORMATION_MESSAGE);
+            } catch (IOException ex) {
+                JOptionPane.showMessageDialog(mainFrame, FILE_ERROR, "Edit Line", JOptionPane.ERROR_MESSAGE);
+            } catch (Exception ex) {
+                JOptionPane.showMessageDialog(mainFrame, ex.getMessage(), "Edit Line", JOptionPane.ERROR_MESSAGE);
+            }
+        });
+
+        lineTabs.add("Edit Lines", editLineContent);
 
         mainTabs.add("Manage Lines", lineContainerScroll);
 
@@ -1093,7 +1237,6 @@ public class TeamGUI implements Runnable {
         } catch (IOException | ClassNotFoundException e) {
             JOptionPane.showMessageDialog(null, "There was an issue reading from the file. " +
                     "Please try again.", "File Error", JOptionPane.ERROR_MESSAGE);
-            e.printStackTrace();
             return;
         } catch (Exception e) {
             JOptionPane.showMessageDialog(null, e.getMessage(), "File Error",

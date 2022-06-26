@@ -56,6 +56,19 @@ public class PPLine extends SpecialTeamsLine {
         this.rightDe = rightDe;
     }
 
+    /**
+     * Creates a copy of the given line with the same parameters and name as the given argument.
+     * @param line The given line to copy
+     */
+    public PPLine(PPLine line) {
+        super(line.getName(), line.getSuccessPercent(), line.getAttempts());
+        this.center = line.center;
+        this.leftWing = line.leftWing;
+        this.rightWing = line.rightWing;
+        this.leftDe = line.leftDe;
+        this.rightDe = line.rightDe;
+    }
+
     // Setter Methods
 
     /**

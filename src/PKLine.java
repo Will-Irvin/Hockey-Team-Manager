@@ -55,6 +55,18 @@ public class PKLine extends SpecialTeamsLine {
         this.rightDe = rightDe;
     }
 
+    /**
+     * Creates a copy of the given line with the same parameters and name as the given argument.
+     * @param line The given line to copy
+     */
+    public PKLine(PKLine line) {
+        super(line.getName(), line.getSuccessPercent(), line.getAttempts());
+        this.offense1 = line.offense1;
+        this.offense2 = line.offense2;
+        this.leftDe = line.leftDe;
+        this.rightDe = line.rightDe;
+    }
+
     // Setter Methods
 
     /**

@@ -25,13 +25,19 @@ public class DefenseLine extends Line {
         this.rightDe = rightDe;
     }
 
+    public DefenseLine(DefenseLine line) {
+        super(line.getName());
+        this.leftDe = line.leftDe;
+        this.rightDe = line.rightDe;
+    }
+
     // Getter Methods
 
-    public Defenseman getLeftDe() {
+    protected Defenseman getLeftDe() {
         return leftDe;
     }
 
-    public Defenseman getRightDe() {
+    protected Defenseman getRightDe() {
         return rightDe;
     }
 

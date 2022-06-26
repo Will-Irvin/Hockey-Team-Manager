@@ -349,7 +349,9 @@ public class Team implements Serializable {
         if (!newPlayer.equals(oldPlayer) && players.contains(newPlayer)) {
             return -1;
         }
-        players.remove(oldPlayer);
+        if (!players.remove(oldPlayer)) {
+            return -2;
+        }
         return addPlayer(newPlayer);
     }
 
@@ -362,7 +364,7 @@ public class Team implements Serializable {
     public int changeGoalie(Goalie oldGoalie, Goalie newGoalie) {
         if (!newGoalie.equals(oldGoalie) && goalies.contains(newGoalie)) return -1;
         if (!goalies.remove(oldGoalie)) {
-            return -1;
+            return -2;
         }
         return addGoalie(newGoalie);
     }
@@ -372,7 +374,9 @@ public class Team implements Serializable {
         if (!oldLine.equals(newLine) && lines.contains(newLine)) {
             return -1;
         }
-        lines.remove(oldLine);
+        if (!lines.remove(oldLine)) {
+            return -2;
+        }
         return addLine(newLine);
     }
 
