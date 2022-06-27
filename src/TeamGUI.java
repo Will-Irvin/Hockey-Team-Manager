@@ -73,6 +73,7 @@ public class TeamGUI implements Runnable {
             "Points", "+/-"};
     private static final String[] GOALIE_STATS_COLUMNS = {"Goalie Name", "Player #", "Wins", "Losses", "OT L / Ties",
             "GAA", "SV%"};
+    private static final String SELECT_LINE = "Please select a line to edit";
 
     // Numeric Constants
     private static final int ENTER_NAME_SIZE = 30;
@@ -802,6 +803,7 @@ public class TeamGUI implements Runnable {
 
         // Set up Combo Boxes
         centerOptions = new JComboBox<>();
+        centerOptions.addItem(null);
         for (Skater player: team.getPlayers()) {
             if (player instanceof Center center) {
                 centerOptions.addItem(center);
@@ -810,6 +812,8 @@ public class TeamGUI implements Runnable {
 
         pickLeftWing = new JComboBox<>();
         pickRightWing = new JComboBox<>();
+        pickLeftWing.addItem(null);
+        pickRightWing.addItem(null);
         for (Skater player: team.getPlayers()) {
             pickLeftWing.addItem(player);
             pickRightWing.addItem(player);
@@ -817,6 +821,8 @@ public class TeamGUI implements Runnable {
 
         pickLeftDe = new JComboBox<>();
         pickRightDe = new JComboBox<>();
+        pickLeftDe.addItem(null);
+        pickRightDe.addItem(null);
         for (Skater player: team.getPlayers()) {
             if (player instanceof Defenseman de) {
                 pickLeftDe.addItem(de);
@@ -1119,7 +1125,7 @@ public class TeamGUI implements Runnable {
 
         updateLineChanges.addActionListener(e -> {
             if (lineOptions.getSelectedItem() == null) {
-                JOptionPane.showMessageDialog(mainFrame, "Please select a line to edit", "Edit Line",
+                JOptionPane.showMessageDialog(mainFrame, SELECT_LINE, "Edit Line",
                         JOptionPane.ERROR_MESSAGE);
                 return;
             }
@@ -1212,6 +1218,130 @@ public class TeamGUI implements Runnable {
             } catch (Exception ex) {
                 JOptionPane.showMessageDialog(mainFrame, ex.getMessage(), "Edit Line", JOptionPane.ERROR_MESSAGE);
             }
+        });
+
+        changeLinePlayers.addActionListener(e -> {
+            if (lineOptions.getSelectedItem() == null) {
+                JOptionPane.showMessageDialog(mainFrame, SELECT_LINE, "Edit Line", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+            mainFrame.setVisible(false);
+
+            Line editingLine = (Line) lineOptions.getSelectedItem();
+            JFrame playersWindow = new JFrame("Change Players: " + editingLine.getName());
+            playersWindow.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
+            Container playersWindowContent = playersWindow.getContentPane();
+            playersWindowContent.setLayout(new BoxLayout(playersWindowContent, BoxLayout.Y_AXIS));
+            playersWindow.setLocationRelativeTo(mainFrame);
+
+            // TODO
+            for (int i = 0; i < lineType.length; i++) {
+                lineType[i].setSelected(false);
+                selectedLine[i] = false;
+            }
+
+            JTextArea displayCurrentPlayers = new JTextArea(editingLine.lineRoster());
+            displayCurrentPlayers.setEditable(false);
+            createPanel(new JComponent[]{displayCurrentPlayers}, playersWindowContent);
+
+            if (editingLine instanceof OffenseLine) {
+                playersWindowContent.add(selectCenterPanel);
+                playersWindowContent.add(selectLWPanel);
+                playersWindowContent.add(selectRWPanel);
+            } else if (editingLine instanceof DefenseLine) {
+                playersWindowContent.add(selectLDPanel);
+                playersWindowContent.add(selectRDPanel);
+            } else if (editingLine instanceof PPLine) {
+                playersWindowContent.add(selectCenterPanel);
+                playersWindowContent.add(selectLWPanel);
+                playersWindowContent.add(selectRWPanel);
+                playersWindowContent.add(selectLDPanel);
+                playersWindowContent.add(selectRDPanel);
+            } else if (editingLine instanceof PKLine) {
+                playersWindowContent.add(selectLWPanel);
+                playersWindowContent.add(selectRWPanel);
+                playersWindowContent.add(selectLDPanel);
+                playersWindowContent.add(selectRDPanel);
+                selectLWLabel.setText("Offense 1:");
+                selectRWLabel.setText("Offense 2:");
+            }
+
+            JButton assignPlayers = new JButton("Assign These Players");
+            createPanel(new JComponent[]{assignPlayers}, playersWindowContent);
+
+            playersWindow.pack();
+            playersWindow.setVisible(true);
+
+            assignPlayers.addActionListener(e1 -> {
+                try {
+                    if (editingLine instanceof OffenseLine oLine) {
+                        if (centerOptions.getSelectedItem() != null) {
+                            oLine.setCenter((Center) centerOptions.getSelectedItem());
+                        }
+                        if (pickLeftWing.getSelectedItem() != null) {
+                            oLine.setLeftWing((Skater) pickLeftWing.getSelectedItem());
+                        }
+                        if (pickRightWing.getSelectedItem() != null) {
+                            oLine.setRightWing((Skater) pickRightWing.getSelectedItem());
+                        }
+                    } else if (editingLine instanceof DefenseLine dLine) {
+                        if (pickLeftDe.getSelectedItem() != null) {
+                            dLine.setLeftDe((Defenseman) pickLeftDe.getSelectedItem());
+                        }
+                        if (pickRightDe.getSelectedItem() != null) {
+                            dLine.setRightDe((Defenseman) pickRightDe.getSelectedItem());
+                        }
+                    } else if (editingLine instanceof PPLine ppLine) {
+                        if (centerOptions.getSelectedItem() != null) {
+                            ppLine.setCenter((Center) centerOptions.getSelectedItem());
+                        }
+                        if (pickLeftWing.getSelectedItem() != null) {
+                            ppLine.setLeftWing((Skater) pickLeftWing.getSelectedItem());
+                        }
+                        if (pickRightWing.getSelectedItem() != null) {
+                            ppLine.setRightWing((Skater) pickRightWing.getSelectedItem());
+                        }
+                        if (pickLeftDe.getSelectedItem() != null) {
+                            ppLine.setLeftDe((Defenseman) pickLeftDe.getSelectedItem());
+                        }
+                        if (pickRightDe.getSelectedItem() != null) {
+                            ppLine.setRightDe((Defenseman) pickRightDe.getSelectedItem());
+                        }
+                    } else if (editingLine instanceof PKLine pkLine) {
+                        if (pickLeftWing.getSelectedItem() != null) {
+                            pkLine.setOffense1((Skater) pickLeftWing.getSelectedItem());
+                        }
+                        if (pickRightWing.getSelectedItem() != null) {
+                            pkLine.setOffense2((Skater) pickRightWing.getSelectedItem());
+                        }
+                    }
+                } catch (IllegalArgumentException | NullPointerException ex) {
+                    JOptionPane.showMessageDialog(playersWindow, ex.getMessage(), "Edit Line",
+                            JOptionPane.ERROR_MESSAGE);
+                    return;
+                }
+
+                try {
+                    updateFile();
+                    JOptionPane.showMessageDialog(playersWindow, "Players successfully updated",
+                            "Edit Line", JOptionPane.INFORMATION_MESSAGE);
+                } catch (IOException ex) {
+                    JOptionPane.showMessageDialog(mainFrame, FILE_ERROR, "Edit Line",
+                            JOptionPane.ERROR_MESSAGE);
+                } catch (Exception ex) {
+                    JOptionPane.showMessageDialog(mainFrame, ex.getMessage(), "Edit Line",
+                            JOptionPane.ERROR_MESSAGE);
+                }
+                playersWindow.dispose();
+            });
+
+            // Redisplay main JFrame when the window is closed
+            playersWindow.addWindowListener(new WindowAdapter() {
+                @Override
+                public void windowClosed(WindowEvent e) {
+                    mainFrame.setVisible(true);
+                }
+            });
         });
 
         lineTabs.add("Edit Lines", editLineContent);
