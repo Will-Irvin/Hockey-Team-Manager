@@ -265,11 +265,11 @@ public class TeamGUI implements Runnable {
                 0, 0, -1, 12, 0));
         blackhawks.addPlayer(new Skater("Bryan Bickell", 29, "Left", Position.LEFT_WING,
                 14, 14, 5, 205, 38));
-        blackhawks.addGoalie(new Goalie("Corey Crawford", 50, .924, 1661,
+        blackhawks.addPlayer(new Goalie("Corey Crawford", 50, .924, 1661,
                 32, 20, 5, 2));
         blackhawks.addPlayer(new Center("Phillip Danault", 24, "Left", 0, 0,
                 0, 3, 0, 30, 20));
-        blackhawks.addGoalie(new Goalie("Scott Darling", 33, .936, 419, 9,
+        blackhawks.addPlayer(new Goalie("Scott Darling", 33, .936, 419, 9,
                 4, 0, 1));
         blackhawks.addPlayer(new Center("Andrew Desjardins", 11, "Left", 0, 2,
                 1, 32, 7, 63.2, 19));
@@ -315,58 +315,58 @@ public class TeamGUI implements Runnable {
                 -2, 9, 6, 50, 196));
         blackhawks.addPlayer(new Center("Joakim Nordstrom", 42, "Left", 0, 3,
                 -5, 73, 4, 20, 10));
-        blackhawks.addLine(new OffenseLine("Saad-Toews-Hossa", (Center) blackhawks.getPlayers()[7],
-                blackhawks.getPlayers()[8], blackhawks.getPlayers()[22]));
-        blackhawks.addLine(new OffenseLine("Kane-Richards-Versteeg", (Center) blackhawks.getPlayers()[25],
-                blackhawks.getPlayers()[24], blackhawks.getPlayers()[10]));
-        blackhawks.addLine(new OffenseLine("Nordstrom-Kruger-Smith", (Center) blackhawks.getPlayers()[9],
-                blackhawks.getPlayers()[18], blackhawks.getPlayers()[13]));
-        blackhawks.addLine(new OffenseLine("Hossa-Toews-Versteeg", (Center) blackhawks.getPlayers()[7],
-                blackhawks.getPlayers()[22], blackhawks.getPlayers()[10]));
-        blackhawks.addLine(new OffenseLine("Sharp-Richards-Kane", (Center) blackhawks.getPlayers()[25],
-                blackhawks.getPlayers()[4], blackhawks.getPlayers()[24]));
-        blackhawks.addLine(new OffenseLine("Sharp-Shaw-Bickell", (Center) blackhawks.getPlayers()[20],
-                blackhawks.getPlayers()[4], blackhawks.getPlayers()[14]));
-        blackhawks.addLine(new OffenseLine("Sharp-Toews-Hossa", (Center) blackhawks.getPlayers()[7],
-                blackhawks.getPlayers()[4], blackhawks.getPlayers()[22]));
-        blackhawks.addLine(new OffenseLine("Carcillo-Kruger-Smith", (Center) blackhawks.getPlayers()[9],
-                blackhawks.getPlayers()[6], blackhawks.getPlayers()[13]));
-        blackhawks.addLine(new OffenseLine("Teravainen-Shaw-Bickell", (Center) blackhawks.getPlayers()[20],
-                blackhawks.getPlayers()[23], blackhawks.getPlayers()[14]));
-        blackhawks.addLine(new OffenseLine("Carcillo-Shaw-Bickell", (Center) blackhawks.getPlayers()[20],
-                blackhawks.getPlayers()[6], blackhawks.getPlayers()[14]));
-        blackhawks.addLine(new DefenseLine("Hjalmarsson-Oduya", (Defenseman) blackhawks.getPlayers()[1],
-                (Defenseman) blackhawks.getPlayers()[12]));
-        blackhawks.addLine(new DefenseLine("Keith-Seabrook", (Defenseman) blackhawks.getPlayers()[0],
-                (Defenseman) blackhawks.getPlayers()[3]));
-        blackhawks.addLine(new DefenseLine("Keith-Rosival", (Defenseman) blackhawks.getPlayers()[0],
-                (Defenseman) blackhawks.getPlayers()[15]));
-        blackhawks.addLine(new DefenseLine("Hjalmarsson-Seabrook", (Defenseman) blackhawks.getPlayers()[1],
-                (Defenseman) blackhawks.getPlayers()[3]));
-        blackhawks.addLine(new DefenseLine("Keith-Hjalmarsson", (Defenseman) blackhawks.getPlayers()[0],
-                (Defenseman) blackhawks.getPlayers()[1]));
-        blackhawks.addLine(new DefenseLine("Keith-Rundblad", (Defenseman) blackhawks.getPlayers()[0],
-                (Defenseman) blackhawks.getPlayers()[2]));
-        blackhawks.addLine(new DefenseLine("Oduya-Seabrook", (Defenseman) blackhawks.getPlayers()[12],
-                (Defenseman) blackhawks.getPlayers()[3]));
-        blackhawks.addLine(new DefenseLine("Oduya-Rozsival", (Defenseman) blackhawks.getPlayers()[12],
-                (Defenseman) blackhawks.getPlayers()[15]));
-        blackhawks.addLine(new DefenseLine("Rozsival-Van Reimsdyk", (Defenseman) blackhawks.getPlayers()[15],
-                (Defenseman) blackhawks.getPlayers()[19]));
-        blackhawks.addLine(new PPLine("Power Play 1", (Center) blackhawks.getPlayers()[7],
-                blackhawks.getPlayers()[25], blackhawks.getPlayers()[24],
-                (Defenseman) blackhawks.getPlayers()[0], (Defenseman) blackhawks.getPlayers()[3],
+        blackhawks.addLine(new OffenseLine("Saad-Toews-Hossa", (Center) blackhawks.getSkaters()[7],
+                blackhawks.getSkaters()[8], blackhawks.getSkaters()[22]));
+        blackhawks.addLine(new OffenseLine("Kane-Richards-Versteeg", (Center) blackhawks.getSkaters()[25],
+                blackhawks.getSkaters()[24], blackhawks.getSkaters()[10]));
+        blackhawks.addLine(new OffenseLine("Nordstrom-Kruger-Smith", (Center) blackhawks.getSkaters()[9],
+                blackhawks.getSkaters()[18], blackhawks.getSkaters()[13]));
+        blackhawks.addLine(new OffenseLine("Hossa-Toews-Versteeg", (Center) blackhawks.getSkaters()[7],
+                blackhawks.getSkaters()[22], blackhawks.getSkaters()[10]));
+        blackhawks.addLine(new OffenseLine("Sharp-Richards-Kane", (Center) blackhawks.getSkaters()[25],
+                blackhawks.getSkaters()[4], blackhawks.getSkaters()[24]));
+        blackhawks.addLine(new OffenseLine("Sharp-Shaw-Bickell", (Center) blackhawks.getSkaters()[20],
+                blackhawks.getSkaters()[4], blackhawks.getSkaters()[14]));
+        blackhawks.addLine(new OffenseLine("Sharp-Toews-Hossa", (Center) blackhawks.getSkaters()[7],
+                blackhawks.getSkaters()[4], blackhawks.getSkaters()[22]));
+        blackhawks.addLine(new OffenseLine("Carcillo-Kruger-Smith", (Center) blackhawks.getSkaters()[9],
+                blackhawks.getSkaters()[6], blackhawks.getSkaters()[13]));
+        blackhawks.addLine(new OffenseLine("Teravainen-Shaw-Bickell", (Center) blackhawks.getSkaters()[20],
+                blackhawks.getSkaters()[23], blackhawks.getSkaters()[14]));
+        blackhawks.addLine(new OffenseLine("Carcillo-Shaw-Bickell", (Center) blackhawks.getSkaters()[20],
+                blackhawks.getSkaters()[6], blackhawks.getSkaters()[14]));
+        blackhawks.addLine(new DefenseLine("Hjalmarsson-Oduya", (Defenseman) blackhawks.getSkaters()[1],
+                (Defenseman) blackhawks.getSkaters()[12]));
+        blackhawks.addLine(new DefenseLine("Keith-Seabrook", (Defenseman) blackhawks.getSkaters()[0],
+                (Defenseman) blackhawks.getSkaters()[3]));
+        blackhawks.addLine(new DefenseLine("Keith-Rosival", (Defenseman) blackhawks.getSkaters()[0],
+                (Defenseman) blackhawks.getSkaters()[15]));
+        blackhawks.addLine(new DefenseLine("Hjalmarsson-Seabrook", (Defenseman) blackhawks.getSkaters()[1],
+                (Defenseman) blackhawks.getSkaters()[3]));
+        blackhawks.addLine(new DefenseLine("Keith-Hjalmarsson", (Defenseman) blackhawks.getSkaters()[0],
+                (Defenseman) blackhawks.getSkaters()[1]));
+        blackhawks.addLine(new DefenseLine("Keith-Rundblad", (Defenseman) blackhawks.getSkaters()[0],
+                (Defenseman) blackhawks.getSkaters()[2]));
+        blackhawks.addLine(new DefenseLine("Oduya-Seabrook", (Defenseman) blackhawks.getSkaters()[12],
+                (Defenseman) blackhawks.getSkaters()[3]));
+        blackhawks.addLine(new DefenseLine("Oduya-Rozsival", (Defenseman) blackhawks.getSkaters()[12],
+                (Defenseman) blackhawks.getSkaters()[15]));
+        blackhawks.addLine(new DefenseLine("Rozsival-Van Reimsdyk", (Defenseman) blackhawks.getSkaters()[15],
+                (Defenseman) blackhawks.getSkaters()[19]));
+        blackhawks.addLine(new PPLine("Power Play 1", (Center) blackhawks.getSkaters()[7],
+                blackhawks.getSkaters()[25], blackhawks.getSkaters()[24],
+                (Defenseman) blackhawks.getSkaters()[0], (Defenseman) blackhawks.getSkaters()[3],
                 17.69, 130));
-        blackhawks.addLine(new PPLine("Power Play 2", (Center) blackhawks.getPlayers()[9],
-                blackhawks.getPlayers()[8], blackhawks.getPlayers()[22],
-                (Defenseman) blackhawks.getPlayers()[1], (Defenseman) blackhawks.getPlayers()[15],
+        blackhawks.addLine(new PPLine("Power Play 2", (Center) blackhawks.getSkaters()[9],
+                blackhawks.getSkaters()[8], blackhawks.getSkaters()[22],
+                (Defenseman) blackhawks.getSkaters()[1], (Defenseman) blackhawks.getSkaters()[15],
                 17.69, 130));
-        blackhawks.addLine(new PKLine("Penalty Kill 1", blackhawks.getPlayers()[7], blackhawks.getPlayers()[24],
-                (Defenseman) blackhawks.getPlayers()[0], (Defenseman) blackhawks.getPlayers()[3],
+        blackhawks.addLine(new PKLine("Penalty Kill 1", blackhawks.getSkaters()[7], blackhawks.getSkaters()[24],
+                (Defenseman) blackhawks.getSkaters()[0], (Defenseman) blackhawks.getSkaters()[3],
                 83.41, 106));
-        blackhawks.addLine(new PKLine("Penalty Kill 2", blackhawks.getPlayers()[22],
-                blackhawks.getPlayers()[14], (Defenseman) blackhawks.getPlayers()[1],
-                (Defenseman) blackhawks.getPlayers()[12], 83.41, 105));
+        blackhawks.addLine(new PKLine("Penalty Kill 2", blackhawks.getSkaters()[22],
+                blackhawks.getSkaters()[14], (Defenseman) blackhawks.getSkaters()[1],
+                (Defenseman) blackhawks.getSkaters()[12], 83.41, 105));
         return blackhawks;
     }
 
@@ -808,7 +808,7 @@ public class TeamGUI implements Runnable {
         // Set up Combo Boxes
         centerOptions = new JComboBox<>();
         centerOptions.addItem(null);
-        for (Skater player: team.getPlayers()) {
+        for (Skater player: team.getSkaters()) {
             if (player instanceof Center center) {
                 centerOptions.addItem(center);
             }
@@ -818,7 +818,7 @@ public class TeamGUI implements Runnable {
         pickRightWing = new JComboBox<>();
         pickLeftWing.addItem(null);
         pickRightWing.addItem(null);
-        for (Skater player: team.getPlayers()) {
+        for (Skater player: team.getSkaters()) {
             pickLeftWing.addItem(player);
             pickRightWing.addItem(player);
         }
@@ -827,7 +827,7 @@ public class TeamGUI implements Runnable {
         pickRightDe = new JComboBox<>();
         pickLeftDe.addItem(null);
         pickRightDe.addItem(null);
-        for (Skater player: team.getPlayers()) {
+        for (Skater player: team.getSkaters()) {
             if (player instanceof Defenseman de) {
                 pickLeftDe.addItem(de);
                 pickRightDe.addItem(de);

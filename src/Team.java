@@ -1,4 +1,5 @@
 import java.io.Serializable;
+import java.lang.reflect.GenericArrayType;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -8,7 +9,7 @@ import java.util.List;
  */
 public class Team implements Serializable {
     private String name;
-    private final ArrayList<Skater> players;
+    private final ArrayList<Skater> skaters;
     private final ArrayList<Line> lines;
     private final ArrayList<Goalie> goalies;
     private int wins;
@@ -31,7 +32,7 @@ public class Team implements Serializable {
             throw new IllegalArgumentException("Name cannot be empty");
         }
         this.name = name;
-        this.players = new ArrayList<>();
+        this.skaters = new ArrayList<>();
         this.lines = new ArrayList<>();
         this.goalies = new ArrayList<>();
         this.wins = 0;
@@ -52,7 +53,7 @@ public class Team implements Serializable {
             throw new IllegalArgumentException("Name cannot be empty");
         }
         this.name = name;
-        this.players = new ArrayList<>();
+        this.skaters = new ArrayList<>();
         this.lines = new ArrayList<>();
         this.goalies = new ArrayList<>();
         if (wins < 0 || losses < 0 || lossesOT < 0) {
@@ -68,17 +69,17 @@ public class Team implements Serializable {
      * @throws NullPointerException Thrown if given name or lists are null
      * @throws IllegalArgumentException Thrown if name is blank or given stats are negative
      */
-    public Team(String name, ArrayList<Skater> players, ArrayList<Line> lines, ArrayList<Goalie> goalies, int wins,
+    public Team(String name, ArrayList<Skater> skaters, ArrayList<Line> lines, ArrayList<Goalie> goalies, int wins,
                 int losses, int lossesOT)
             throws NullPointerException, IllegalArgumentException {
-        if (name == null || players == null || lines == null || goalies == null) {
+        if (name == null || skaters == null || lines == null || goalies == null) {
             throw new NullPointerException("Given arguments cannot be null");
         }
         if (name.isBlank()) {
             throw new IllegalArgumentException("Name cannot be empty");
         }
         this.name = name;
-        this.players = players;
+        this.skaters = skaters;
         this.lines = lines;
         this.goalies = goalies;
         if (wins < 0 || losses < 0 || lossesOT < 0) {
@@ -98,7 +99,7 @@ public class Team implements Serializable {
         wins = team.getWins();
         losses = team.getLosses();
         otLosses = team.getOtLosses();
-        players = new ArrayList<>(List.of(team.getPlayers()));
+        skaters = new ArrayList<>(List.of(team.getSkaters()));
         lines = new ArrayList<>(List.of(team.getLines()));
         goalies = new ArrayList<>(List.of(team.getGoalies()));
     }
@@ -109,8 +110,8 @@ public class Team implements Serializable {
         return name;
     }
 
-    public Skater[] getPlayers() {
-        return players.toArray(new Skater[]{});
+    public Skater[] getSkaters() {
+        return skaters.toArray(new Skater[]{});
     }
 
     public Line[] getLines() {
@@ -216,85 +217,57 @@ public class Team implements Serializable {
     }
 
     /**
-     * Adds given player to the team's ArrayList of players, ensures that list remains sorted by player number and that
-     * no two players have the same number
+     * Adds given player to the appropriate ArrayList and returns the index where the player was added.
      * @param player The player being added to the team
-     * @return True if the player is added to the team, false if the team already has a player with that number
+     * @return The index of the player in the array list where it was added or -1 if there is an issue
      */
-    public int addPlayer(Skater player) {
-        if (players.contains(player)) {
+    public int addPlayer(Player player) {
+        if (skaters.contains(player) || goalies.contains(player)) {
             return -1;
         }
-        if (players.size() == 0) {
-            players.add(player);
-            return 0;
-        }
-        int low = 0;
-        int high = players.size();
-        while (true) {
-            int i = (low + high) / 2;
-            if (player.getPlayerNumber() < players.get(i).getPlayerNumber()) {
-                if (i == 0) {
-                    players.add(0, player);
-                    return i;
-                }
-                if (player.getPlayerNumber() > players.get(i - 1).getPlayerNumber()) {
-                    players.add(i, player);
-                    return i;
-                } else {
-                    high = i;
-                }
-            } else {
-                if (i == players.size() - 1) {
-                    players.add(player);
-                    return i + 1;
-                }
-                if (player.getPlayerNumber() < players.get(i + 1).getPlayerNumber()) {
-                    players.add(i + 1, player);
-                    return i + 1;
-                } else {
-                    low = i;
-                }
-            }
+        int index;
+        if (player instanceof Skater s) {
+            index = findIndex(player, skaters.toArray(new Player[]{}));
+            skaters.add(index, s);
+            return index;
+        } else if (player instanceof Goalie g) {
+            index = findIndex(player, goalies.toArray(new Player[]{}));
+            goalies.add(index, g);
+            return index;
+        } else {
+            return -1;
         }
     }
 
     /**
-     * Similar to the addPlayer method, adds a goalie to the team, keeps the list sorted by player number, and ensures
-     * that no two goalies have the same number
-     * @param goalie The goalie being added to the team
-     * @return True if the goalie is added, false if a goalie with the same player number already exists on the team
+     * This method is used to determine at which index a player should be added to a given teams skater list or goalie
+     * list. It will return that index which will be used in the addPlayer method.
+     * @param player The player being added to the team
+     * @param list The list that the player should be added to: skaters for Skater class and goalies for Goalie class
+     * @return The index where the player was added
      */
-    public int addGoalie(Goalie goalie) {
-        if (goalies.contains(goalie)) {
-            return -1;
-        }
-        if (goalies.size() == 0) {
-            goalies.add(goalie);
+    private static int findIndex(Player player, Player[] list) {
+        if (list.length == 0) {
             return 0;
         }
         int low = 0;
-        int high = goalies.size();
+        int high = list.length;
         while (true) {
             int i = (low + high) / 2;
-            if (goalie.getPlayerNumber() < goalies.get(i).getPlayerNumber()) {
+            if (player.getPlayerNumber() < list[i].getPlayerNumber()) {
                 if (i == 0) {
-                    goalies.add(0, goalie);
                     return i;
                 }
-                if (goalie.getPlayerNumber() > goalies.get(i - 1).getPlayerNumber()) {
-                    goalies.add(i, goalie);
+                if (player.getPlayerNumber() > list[i - 1].getPlayerNumber()) {
                     return i;
                 } else {
                     high = i;
                 }
             } else {
-                if (i == goalies.size() - 1) {
-                    goalies.add(goalie);
+                if (i == list.length - 1) {
                     return i + 1;
                 }
-                if (goalie.getPlayerNumber() < goalies.get(i + i).getPlayerNumber()) {
-                    goalies.add(i + 1, goalie);
+                if (player.getPlayerNumber() < list[i + 1].getPlayerNumber()) {
                     return i + 1;
                 } else {
                     low = i;
@@ -346,10 +319,10 @@ public class Team implements Serializable {
      * @return True if the change was made false otherwise
      */
     public int changePlayer(Skater oldPlayer, Skater newPlayer) {
-        if (!newPlayer.equals(oldPlayer) && players.contains(newPlayer)) {
+        if (!newPlayer.equals(oldPlayer) && skaters.contains(newPlayer)) {
             return -1;
         }
-        if (!players.remove(oldPlayer)) {
+        if (!skaters.remove(oldPlayer)) {
             return -2;
         }
         return addPlayer(newPlayer);
@@ -366,7 +339,7 @@ public class Team implements Serializable {
         if (!goalies.remove(oldGoalie)) {
             return -2;
         }
-        return addGoalie(newGoalie);
+        return addPlayer(newGoalie);
     }
 
     // Edit a line on the list, works like changePlayer/Goalie for lines
@@ -385,7 +358,7 @@ public class Team implements Serializable {
      * @return Whether the removal was successful or not
      */
     public boolean removePlayer(Skater player) {
-        return players.remove(player);
+        return skaters.remove(player);
     }
 
     // Like removePLayer but for goalies
@@ -406,7 +379,7 @@ public class Team implements Serializable {
     public double getFaceOffPercent() {
         int totalFaceOffs = 0;
         int faceOffWins = 0;
-        for (Skater player: players) {
+        for (Skater player: skaters) {
             if (player instanceof Center center) {
                 totalFaceOffs += center.getFaceOffTotal();
                 faceOffWins += center.getFaceOffWins();
@@ -483,7 +456,7 @@ public class Team implements Serializable {
         wins = 0;
         losses = 0;
         otLosses = 0;
-        for (Skater player: players) {
+        for (Skater player: skaters) {
             player.resetStats();
         }
         for (Goalie goalie: goalies) {
@@ -501,7 +474,7 @@ public class Team implements Serializable {
      */
     public String generateRoster() {
         StringBuilder result = new StringBuilder(String.format("%s\nSkaters:\n", name));
-        for (Skater player: players) {
+        for (Skater player: skaters) {
             result.append(String.format("%s %d\n", player.getName(), player.getPlayerNumber()));
         }
         result.append("\nGoalies:\n");
@@ -518,7 +491,7 @@ public class Team implements Serializable {
     public String generateRosterWithStats() {
         StringBuilder result = new StringBuilder(String.format("%s\nSkaters:\t|  #|Pos|  G|  A|Pts|+/-|\n", name));
 
-        for (Skater player : players) {
+        for (Skater player : skaters) {
             int index = player.getName().lastIndexOf(' ');
             if (index >= 0) {
                 result.append(String.format("%.15s\t|%3d|", player.getName().substring(index),
@@ -551,9 +524,9 @@ public class Team implements Serializable {
      * skater's stats to display in a JTable
      */
     public Object[][] generateSkaterRosterWithStats() {
-        Object[][] result = new Object[players.size()][NUM_BASIC_STATS];
-        for (int i = 0; i < players.size(); i++) {
-            Skater currentPlayer = players.get(i);
+        Object[][] result = new Object[skaters.size()][NUM_BASIC_STATS];
+        for (int i = 0; i < skaters.size(); i++) {
+            Skater currentPlayer = skaters.get(i);
             Object[] currentRow = result[i];
             currentRow[0] = currentPlayer.getName();
             currentRow[1] = currentPlayer.getPlayerNumber();
