@@ -164,7 +164,8 @@ public class TeamGUI implements Runnable {
     JButton deleteLine;
 
     // View Lines
-    JTextArea viewLines;
+    JLabel viewLineLabel;
+    JTextArea viewLine;
 
     // Create/Edit Skater/Goalie
     JTextArea playerName;
@@ -599,7 +600,7 @@ public class TeamGUI implements Runnable {
         JFrame mainFrame = new JFrame(team.getName());
         mainFrame.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
         Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
-        mainFrame.setSize(new Dimension(screenSize.width / 2, screenSize.height / 2));
+        mainFrame.setSize(new Dimension(screenSize.width * 2 / 3, screenSize.height * 2 / 3));
         Container mainContent = mainFrame.getContentPane();
         mainContent.setLayout(new BoxLayout(mainContent, BoxLayout.Y_AXIS));
 
@@ -1129,6 +1130,12 @@ public class TeamGUI implements Runnable {
                 editLineContent.remove(changeSTSuccess);
                 isSpecialTeams.set(false);
             }
+            if (lineOptions.getSelectedItem() == null) {
+                viewLine.setText("");
+            } else {
+                Line line = (Line) lineOptions.getSelectedItem();
+                viewLine.setText(line.lineRoster());
+            }
         });
 
         updateLineChanges.addActionListener(e -> {
@@ -1177,6 +1184,7 @@ public class TeamGUI implements Runnable {
                         if (name.isBlank()) {
                             try {
                                 updateFile();
+                                viewLine.setText(editingLine.lineRoster());
                                 JOptionPane.showMessageDialog(mainFrame, "Line Updated Successfully",
                                         "Edit Line", JOptionPane.INFORMATION_MESSAGE);
                             } catch (IOException ex) {
@@ -1217,6 +1225,7 @@ public class TeamGUI implements Runnable {
             lineOptions.insertItemAt(newLine, index + 1);
             try {
                 updateFile();
+                viewLine.setText(editingLine.lineRoster());
                 changeLineName.setText("");
                 lineOptions.setSelectedIndex(0);
                 JOptionPane.showMessageDialog(mainFrame, "Line Updated Successfully", "Edit Line",
@@ -1371,6 +1380,7 @@ public class TeamGUI implements Runnable {
                 if (change) {
                     try {
                         updateFile();
+                        viewLine.setText(editingLine.lineRoster());
                         JOptionPane.showMessageDialog(playersWindow, "Players successfully updated",
                                 "Edit Line", JOptionPane.INFORMATION_MESSAGE);
                     } catch (IOException ex) {
@@ -1428,7 +1438,20 @@ public class TeamGUI implements Runnable {
             }
         });
 
-        lineTabs.add("Edit/Delete Lines", editLineContent);
+        lineTabs.add("Edit or Delete Lines", editLineContent);
+
+        // View Lines
+
+        Container viewLinesContent = new Container();
+        viewLinesContent.setLayout(new BoxLayout(viewLinesContent, BoxLayout.Y_AXIS));
+        viewLineLabel = new JLabel("Select a line above to view its assigned players and relevant stats here");
+        viewLine = new JTextArea();
+        viewLine.setEditable(false);
+
+        createPanel(new JComponent[]{viewLineLabel}, viewLinesContent);
+        createPanel(new JComponent[]{viewLine}, viewLinesContent);
+
+        lineTabs.add("View Lines", viewLinesContent);
 
         mainTabs.add("Manage Lines", lineContainerScroll);
 
@@ -1689,7 +1712,7 @@ public class TeamGUI implements Runnable {
  */
 class StatsTableModel extends AbstractTableModel {
     private final String[] columnNames;
-    private Object[][] stats;
+    private final Object[][] stats;
 
     public StatsTableModel(Object[][] stats, String[] columnNames) {
         this.stats = stats;
@@ -1712,9 +1735,5 @@ class StatsTableModel extends AbstractTableModel {
     @Override
     public String getColumnName(int column) {
         return columnNames[column];
-    }
-
-    public void setStats(Object[][] stats) {
-        this.stats = stats;
     }
 }
