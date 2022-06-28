@@ -52,7 +52,7 @@ public abstract class SpecialTeamsLine extends Line {
         if (attempts == 0) {
             return 0;
         }
-        return (double) successes / attempts;
+        return (double) successes / attempts * 100;
     }
 
     /**

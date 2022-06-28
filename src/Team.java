@@ -510,6 +510,7 @@ public class Team implements Serializable {
         }
         return result.substring(0, result.length() - 1);
     }
+
     /**
      * @return A string containing every player listed on the team and some of their basic stats (points, number,
      * record, etc.)

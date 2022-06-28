@@ -55,9 +55,9 @@ public class TeamGUI implements Runnable {
     private static final String OT_STRING = "Enter number of overtime losses or ties:";
     private static final String EDIT_INSTRUCTIONS = "<html>Enter changes for the information that you would like to " +
             "change.<br>If a field is left blank, no changes will be made for the corresponding information.</html>";
-    private static final String EDIT_LINE_INSTRUCTIONS = "<html>This tab will make changes to any already created" +
-            " lines.<br>Use the drop box at the top of the screen to select which line you would like to change.<br>" +
-            EDIT_INSTRUCTIONS;
+    private static final String EDIT_LINE_INSTRUCTIONS = "<html>This tab will make changes to or delete any already " +
+            "created lines.<br>Use the drop box at the top of the screen to select which line you would like to " +
+            "change or delete.<br>" + EDIT_INSTRUCTIONS;
     private static final String RESET_STATS_WARNING = "<html>This button will reset all stats for your team and its" +
             " players to 0.<br>This action cannot be undone after the fact and their previous stats will be " +
             "lost.</html>";
@@ -149,7 +149,7 @@ public class TeamGUI implements Runnable {
 
     JButton createLine;
 
-    // Edit Line
+    // Edit/Delete Line
     JLabel editLineInstructions;
     JLabel changeLineNameLabel;
     JTextField changeLineName;
@@ -161,8 +161,6 @@ public class TeamGUI implements Runnable {
     JTextField changeNumOpps;
 
     JButton changeLinePlayers;
-
-    // Delete Line
     JButton deleteLine;
 
     // View Lines
@@ -576,6 +574,10 @@ public class TeamGUI implements Runnable {
         changeTeamLossesLabel.setText(LOSSES_STRING + " (Current: " + team.getLosses() + ")");
         changeTeamOTLabel.setText(OT_STRING + " (Current: " + team.getOtLosses() + ")");
         viewTeamStats.setText(team.displayTeamStats());
+        viewRosterStatsSkaters.setModel(new StatsTableModel(team.generateSkaterRosterWithStats(),
+                SKATER_STATS_COLUMNS));
+        viewRosterStatsGoalies.setModel(new StatsTableModel(team.generateGoalieRosterWithStats(),
+                GOALIE_STATS_COLUMNS));
     }
 
     /**
@@ -755,6 +757,7 @@ public class TeamGUI implements Runnable {
                             JOptionPane.ERROR_MESSAGE);
                 }
                 updateEntireTeamComponents();
+                mainFrame.repaint();
             }
         });
 
@@ -1094,8 +1097,13 @@ public class TeamGUI implements Runnable {
         updateLineChanges = new JButton("Update Name");
         createPanel(new JComponent[]{updateLineChanges}, editLineContent);
 
+        // Change Players
         changeLinePlayers = new JButton("Change Line Players");
         createPanel(new JComponent[]{changeLinePlayers}, editLineContent);
+
+        // Delete Line
+        deleteLine = new JButton("Delete Selected Line");
+        createPanel(new JComponent[]{deleteLine}, editLineContent);
 
         // Change Special Teams Stats
         AtomicBoolean isSpecialTeams = new AtomicBoolean(false);
@@ -1114,7 +1122,7 @@ public class TeamGUI implements Runnable {
             if (lineOptions.getSelectedItem() instanceof SpecialTeamsLine && !isSpecialTeams.get()) {
                 isSpecialTeams.set(true);
                 updateLineChanges.setText("Update Changes");
-                editLineContent.add(changeSTSuccess, editLineContent.getComponentCount() - 2);
+                editLineContent.add(changeSTSuccess, editLineContent.getComponentCount() - 3);
             } else if (isSpecialTeams.get() && (lineOptions.getSelectedItem() instanceof OffenseLine ||
                     lineOptions.getSelectedItem() instanceof DefenseLine || lineOptions.getSelectedItem() == null) ) {
                 updateLineChanges.setText("Update Name");
@@ -1228,16 +1236,43 @@ public class TeamGUI implements Runnable {
             mainFrame.setVisible(false);
 
             Line editingLine = (Line) lineOptions.getSelectedItem();
-            JFrame playersWindow = new JFrame("Change Players: " + editingLine.getName());
+            JFrame playersWindow = new JFrame("Change Players:");
             playersWindow.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
             Container playersWindowContent = playersWindow.getContentPane();
             playersWindowContent.setLayout(new BoxLayout(playersWindowContent, BoxLayout.Y_AXIS));
             playersWindow.setLocationRelativeTo(mainFrame);
 
-            // TODO
-            for (int i = 0; i < lineType.length; i++) {
-                lineType[i].setSelected(false);
-                selectedLine[i] = false;
+            // Clears the selection in create line tab and removes any selected components
+            lineTypeGroup.clearSelection();
+            for (int i = 0; i < selectedLine.length; i++) {
+                if (selectedLine[i]) {
+                    selectedLine[i] = false;
+                    switch (i) {
+                        case 0 -> { // Offense Line
+                            createLineContent.remove(selectCenterPanel);
+                            createLineContent.remove(selectLWPanel);
+                            createLineContent.remove(selectRWPanel);
+                        }
+                        case 1 -> { // De Line
+                            createLineContent.remove(selectLDPanel);
+                            createLineContent.remove(selectRDPanel);
+                        }
+                        case 2 -> { // PP Line
+                            createLineContent.remove(selectCenterPanel);
+                            createLineContent.remove(selectLWPanel);
+                            createLineContent.remove(selectRWPanel);
+                            createLineContent.remove(selectLDPanel);
+                            createLineContent.remove(selectRDPanel);
+                        }
+                        case 3 -> { // PK Line
+                            createLineContent.remove(selectLWPanel);
+                            createLineContent.remove(selectRWPanel);
+                            createLineContent.remove(selectLDPanel);
+                            createLineContent.remove(selectRDPanel);
+                        }
+                    }
+                    break;
+                }
             }
 
             JTextArea displayCurrentPlayers = new JTextArea(editingLine.lineRoster());
@@ -1273,46 +1308,59 @@ public class TeamGUI implements Runnable {
             playersWindow.setVisible(true);
 
             assignPlayers.addActionListener(e1 -> {
+                boolean change = false;
                 try {
                     if (editingLine instanceof OffenseLine oLine) {
                         if (centerOptions.getSelectedItem() != null) {
                             oLine.setCenter((Center) centerOptions.getSelectedItem());
+                            change = true;
                         }
                         if (pickLeftWing.getSelectedItem() != null) {
                             oLine.setLeftWing((Skater) pickLeftWing.getSelectedItem());
+                            change = true;
                         }
                         if (pickRightWing.getSelectedItem() != null) {
                             oLine.setRightWing((Skater) pickRightWing.getSelectedItem());
+                            change = true;
                         }
                     } else if (editingLine instanceof DefenseLine dLine) {
                         if (pickLeftDe.getSelectedItem() != null) {
                             dLine.setLeftDe((Defenseman) pickLeftDe.getSelectedItem());
+                            change = true;
                         }
                         if (pickRightDe.getSelectedItem() != null) {
                             dLine.setRightDe((Defenseman) pickRightDe.getSelectedItem());
+                            change = true;
                         }
                     } else if (editingLine instanceof PPLine ppLine) {
                         if (centerOptions.getSelectedItem() != null) {
                             ppLine.setCenter((Center) centerOptions.getSelectedItem());
+                            change = true;
                         }
                         if (pickLeftWing.getSelectedItem() != null) {
                             ppLine.setLeftWing((Skater) pickLeftWing.getSelectedItem());
+                            change = true;
                         }
                         if (pickRightWing.getSelectedItem() != null) {
                             ppLine.setRightWing((Skater) pickRightWing.getSelectedItem());
+                            change = true;
                         }
                         if (pickLeftDe.getSelectedItem() != null) {
                             ppLine.setLeftDe((Defenseman) pickLeftDe.getSelectedItem());
+                            change = true;
                         }
                         if (pickRightDe.getSelectedItem() != null) {
                             ppLine.setRightDe((Defenseman) pickRightDe.getSelectedItem());
+                            change = true;
                         }
                     } else if (editingLine instanceof PKLine pkLine) {
                         if (pickLeftWing.getSelectedItem() != null) {
                             pkLine.setOffense1((Skater) pickLeftWing.getSelectedItem());
+                            change = true;
                         }
                         if (pickRightWing.getSelectedItem() != null) {
                             pkLine.setOffense2((Skater) pickRightWing.getSelectedItem());
+                            change = true;
                         }
                     }
                 } catch (IllegalArgumentException | NullPointerException ex) {
@@ -1320,19 +1368,23 @@ public class TeamGUI implements Runnable {
                             JOptionPane.ERROR_MESSAGE);
                     return;
                 }
-
-                try {
-                    updateFile();
-                    JOptionPane.showMessageDialog(playersWindow, "Players successfully updated",
-                            "Edit Line", JOptionPane.INFORMATION_MESSAGE);
-                } catch (IOException ex) {
-                    JOptionPane.showMessageDialog(mainFrame, FILE_ERROR, "Edit Line",
-                            JOptionPane.ERROR_MESSAGE);
-                } catch (Exception ex) {
-                    JOptionPane.showMessageDialog(mainFrame, ex.getMessage(), "Edit Line",
-                            JOptionPane.ERROR_MESSAGE);
+                if (change) {
+                    try {
+                        updateFile();
+                        JOptionPane.showMessageDialog(playersWindow, "Players successfully updated",
+                                "Edit Line", JOptionPane.INFORMATION_MESSAGE);
+                    } catch (IOException ex) {
+                        JOptionPane.showMessageDialog(mainFrame, FILE_ERROR, "Edit Line",
+                                JOptionPane.ERROR_MESSAGE);
+                    } catch (Exception ex) {
+                        JOptionPane.showMessageDialog(mainFrame, ex.getMessage(), "Edit Line",
+                                JOptionPane.ERROR_MESSAGE);
+                    }
+                    playersWindow.dispose();
+                } else {
+                    JOptionPane.showMessageDialog(mainFrame, "Please select new players for the line or close" +
+                            " the window.", "Edit Line", JOptionPane.ERROR_MESSAGE);
                 }
-                playersWindow.dispose();
             });
 
             // Redisplay main JFrame when the window is closed
@@ -1344,7 +1396,39 @@ public class TeamGUI implements Runnable {
             });
         });
 
-        lineTabs.add("Edit Lines", editLineContent);
+        // Asks user to confirm choice, then deletes selected line from team and ComboBox
+        deleteLine.addActionListener(e -> {
+            Line removingLine = (Line) lineOptions.getSelectedItem();
+            if (removingLine == null) {
+                JOptionPane.showMessageDialog(mainFrame, "Please select a line to delete", "Delete Line",
+                        JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+
+            int response = JOptionPane.showConfirmDialog(mainFrame, "Are you sure you would like to delete " +
+                    removingLine.getName() + "?", "Delete Line", JOptionPane.YES_NO_OPTION);
+            if (response == JOptionPane.YES_OPTION) {
+                if (team.removeLine(removingLine)) {
+                    lineOptions.removeItem(removingLine);
+                    try {
+                        updateFile();
+                        JOptionPane.showMessageDialog(mainFrame, "Line successfully deleted", "Delete Line",
+                                JOptionPane.INFORMATION_MESSAGE);
+                    } catch (IOException ex) {
+                        JOptionPane.showMessageDialog(mainFrame, FILE_ERROR, "Edit Line",
+                                JOptionPane.ERROR_MESSAGE);
+                    } catch (Exception ex) {
+                        JOptionPane.showMessageDialog(mainFrame, ex.getMessage(), "Edit Line",
+                                JOptionPane.ERROR_MESSAGE);
+                    }
+                } else {
+                    JOptionPane.showMessageDialog(mainFrame, "There was an issue deleting the selected line.",
+                            "Delete Line", JOptionPane.ERROR_MESSAGE);
+                }
+            }
+        });
+
+        lineTabs.add("Edit/Delete Lines", editLineContent);
 
         mainTabs.add("Manage Lines", lineContainerScroll);
 
@@ -1605,7 +1689,7 @@ public class TeamGUI implements Runnable {
  */
 class StatsTableModel extends AbstractTableModel {
     private final String[] columnNames;
-    private final Object[][] stats;
+    private Object[][] stats;
 
     public StatsTableModel(Object[][] stats, String[] columnNames) {
         this.stats = stats;
@@ -1628,5 +1712,9 @@ class StatsTableModel extends AbstractTableModel {
     @Override
     public String getColumnName(int column) {
         return columnNames[column];
+    }
+
+    public void setStats(Object[][] stats) {
+        this.stats = stats;
     }
 }
