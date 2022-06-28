@@ -1,8 +1,9 @@
-import java.io.Serializable;
-
-public class Goalie implements Serializable {
-    private int playerNumber;
-    private String name;
+/**
+ * Goalie
+ *
+ * A class storing relevant stats for a goalie on a hockey team as well as methods to manipulate these stats.
+ */
+public class Goalie extends Player {
     private int shotsBlocked;
     private int shotsAgainst;
     private int wins;
@@ -16,18 +17,7 @@ public class Goalie implements Serializable {
      * @throws NullPointerException If given name is null
      */
     public Goalie(String name, int playerNumber) throws IllegalArgumentException, NullPointerException {
-        if (playerNumber < 0 || playerNumber > 99) {
-            throw new IllegalArgumentException("Player Number must be between 0-99");
-        } else {
-            this.playerNumber = playerNumber;
-        }
-        if (name == null) {
-            throw new NullPointerException("Name cannot be null");
-        } else if (name.isBlank()) {
-            throw new IllegalArgumentException("Name cannot be blank");
-        } else {
-            this.name = name;
-        }
+        super(name, playerNumber);
         wins = 0;
         shotsBlocked = 0;
         shotsAgainst = 0;
@@ -45,18 +35,7 @@ public class Goalie implements Serializable {
     public Goalie(String name, int playerNumber, double savePercentage,
                   int shotsAgainst, int wins, int losses, int otLosses, int shutouts)
             throws IllegalArgumentException, NullPointerException {
-        if (playerNumber < 0 || playerNumber > 99) {
-            throw new IllegalArgumentException("Player Number must be between 0-99");
-        } else {
-            this.playerNumber = playerNumber;
-        }
-        if (name == null) {
-            throw new NullPointerException("Name cannot be null");
-        } else if (name.length() == 0) {
-            throw new IllegalArgumentException("Name must have length greater than 0");
-        } else {
-            this.name = name;
-        }
+        super(name, playerNumber);
         if (savePercentage < 0 || savePercentage > 1) {
             throw new IllegalArgumentException("Save % Must be between 0 and 1");
         }
@@ -86,37 +65,6 @@ public class Goalie implements Serializable {
     }
 
     // Getter Methods
-
-    public int getPlayerNumber() {
-        return playerNumber;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    /**
-     * @throws IllegalArgumentException If given number is outside 1-99
-     */
-    public void setPlayerNumber(int playerNumber) throws IllegalArgumentException {
-        if (playerNumber < 0 || playerNumber > 99) {
-            throw new IllegalArgumentException("Player Number must be between 0-99");
-        }
-        this.playerNumber = playerNumber;
-    }
-
-    /**
-     * @throws NullPointerException If given name is null
-     * @throws IllegalArgumentException If given name is blank
-     */
-    public void setName(String name) throws NullPointerException, IllegalArgumentException {
-        if (name == null) {
-            throw new NullPointerException("Name cannot be null");
-        } else if (name.isBlank()) {
-            throw new IllegalArgumentException("Name cannot be blank");
-        }
-        this.name = name;
-    }
 
     /**
      * Calculates and returns the goalie's save percentage based on the shotsBlocked and shotsAgainst stat (returns 0 if
@@ -257,18 +205,6 @@ public class Goalie implements Serializable {
     }
 
     /**
-     * @param o Object being compared
-     * @return True if the object is a goalie and has the same player number as the original goalie
-     */
-    @Override
-    public boolean equals(Object o) {
-        if (o instanceof Goalie g) {
-            return g.getPlayerNumber() == this.getPlayerNumber();
-        }
-        return false;
-    }
-
-    /**
      * Used to enter a goalie's stats (shotsBlocked and shotsAgainst) after a game
      * @param numGoals Number of goals scored on a goalie
      * @param numShots Number of shots the goalie faced
@@ -303,12 +239,6 @@ public class Goalie implements Serializable {
                             Shutouts: %d
                             Goals Against Average: %.2f
                             Save Percentage: %.3f""",
-                name, playerNumber, wins, losses, otLosses, shutouts, getGAA(), getSavePercent());
-    }
-
-    // toString Method
-    @Override
-    public String toString() {
-        return String.format("%s %d", name, playerNumber);
+                getName(), getPlayerNumber(), wins, losses, otLosses, shutouts, getGAA(), getSavePercent());
     }
 }

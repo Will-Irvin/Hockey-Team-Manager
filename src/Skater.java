@@ -1,14 +1,10 @@
-import java.io.Serializable;
-
 /**
  * Skater
  * Class that stores information for a basic skater/player on a team along with methods to manipulate and retrieve said
  * information.
  */
 
-public class Skater implements Serializable {
-    private String name;
-    private int playerNumber;
+public class Skater extends Player {
     private int goals;
     private int assists;
     private int plusMinus;
@@ -24,18 +20,7 @@ public class Skater implements Serializable {
      */
     public Skater(String name, int playerNumber, String stickHand, Position position)
             throws NullPointerException, IllegalArgumentException{
-        if (name == null) {
-            throw new NullPointerException("Name cannot be null");
-        } else if (name.isBlank()) {
-            throw new IllegalArgumentException("Name cannot be blank");
-        } else {
-            this.name = name;
-        }
-        if (playerNumber < 1 || playerNumber > 99) {
-            throw new IllegalArgumentException("Player number must be between 1-99");
-        } else {
-            this.playerNumber = playerNumber;
-        }
+        super(name, playerNumber);
         if (stickHand == null) {
             throw new IllegalArgumentException("Stick Hand cannot be null");
         } else if (!(stickHand.equals("Left")) && !(stickHand.equals("Right"))) {
@@ -63,18 +48,7 @@ public class Skater implements Serializable {
     public Skater(String name, int playerNumber, String stickHand, Position position,
                   int goals, int assists, int plusMinus, int hits, double penaltyMinutes)
             throws NullPointerException, IllegalArgumentException {
-        if (name == null) {
-            throw new NullPointerException("Name cannot be null");
-        } else if (name.length() == 0) {
-            throw new IllegalArgumentException("Name must have length greater than 0");
-        } else {
-            this.name = name;
-        }
-        if (playerNumber < 1 || playerNumber > 99) {
-            throw new IllegalArgumentException("Player number must be between 1-99");
-        } else {
-            this.playerNumber = playerNumber;
-        }
+        super(name, playerNumber);
         if (stickHand == null) {
             throw new IllegalArgumentException("Stick Hand cannot be null");
         } else if (!(stickHand.equals("Left")) && !(stickHand.equals("Right"))) {
@@ -101,28 +75,6 @@ public class Skater implements Serializable {
         this.plusMinus = plusMinus;
         this.hits = hits;
         this.penaltyMinutes = penaltyMinutes;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    /**
-     * @throws NullPointerException If the given name is null
-     * @throws IllegalArgumentException If the given name is blank
-     */
-    public void setName(String name) throws NullPointerException, IllegalArgumentException {
-        if (name == null) {
-            throw new NullPointerException("Name cannot be null");
-        } else if (name.isBlank()) {
-            throw new IllegalArgumentException("Name cannot be blank");
-        } else {
-            this.name = name;
-        }
-    }
-
-    public int getPlayerNumber() {
-        return playerNumber;
     }
 
     public int getGoals() {
@@ -155,16 +107,6 @@ public class Skater implements Serializable {
 
     public double getPenaltyMinutes() {
         return penaltyMinutes;
-    }
-
-    /**
-     * @throws IllegalArgumentException If the given player number is not in range 1-99
-     */
-    public void setPlayerNumber(int playerNumber) throws IllegalArgumentException {
-        if (playerNumber < 1 || playerNumber > 99) {
-            throw new IllegalArgumentException("Player number must be between 1-99");
-        }
-        this.playerNumber = playerNumber;
     }
 
     /**
@@ -256,19 +198,6 @@ public class Skater implements Serializable {
         penaltyMinutes += minutes;
     }
 
-    /**
-     * Returns true if the given object is a skater, and the two skaters have the same player number
-     * @param o Given object to compare
-     * @return True if the skaters have the same player number
-     */
-    @Override
-    public boolean equals(Object o) {
-        if (o instanceof Skater s) {
-            return s.getPlayerNumber() == this.playerNumber;
-        }
-        return false;
-    }
-
     // Increments plusMinus up by 1
     public void scoredOnIce() {
         plusMinus++;
@@ -277,17 +206,21 @@ public class Skater implements Serializable {
     /**
      * Resets the players stats to 0 (for something like a new season)
      */
+    @Override
     public void resetStats() {
         goals = 0;
         assists = 0;
         plusMinus = 0;
+        hits = 0;
+        penaltyMinutes = 0;
     }
 
     /**
      * @return A formatted String that displays all valid information on the player
      */
+    @Override
     public String statsDisplay() {
-        String result = String.format("%s #%d\n    ", name, playerNumber);
+        String result = String.format("%s #%d\n    ", getName(), getPlayerNumber());
         switch (this.position) {
             case CENTER -> result += "Center\n";
             case LEFT_WING -> result += "Left Wing\n";
@@ -306,11 +239,4 @@ public class Skater implements Serializable {
                 stickHand.charAt(0), goals, assists, getPoints(), plusMinus, hits, penaltyMinutes);
         return result;
     }
-
-    // toString Method
-    @Override
-    public String toString() {
-        return String.format("%s %d", name, playerNumber);
-    }
-
 }
