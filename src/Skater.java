@@ -222,11 +222,11 @@ public class Skater extends Player {
     public String statsDisplay() {
         String result = String.format("%s #%d\n    ", getName(), getPlayerNumber());
         switch (this.position) {
-            case CENTER -> result += "Center\n";
-            case LEFT_WING -> result += "Left Wing\n";
-            case RIGHT_WING -> result += "Right Wing\n";
-            case LEFT_DEFENSE -> result += "Left Defense\n";
-            case RIGHT_DEFENSE -> result += "Right Defense\n";
+            case Center -> result += "Center\n";
+            case Left_Wing -> result += "Left Wing\n";
+            case Right_Wing -> result += "Right Wing\n";
+            case Left_Defense -> result += "Left Defense\n";
+            case Right_Defense -> result += "Right Defense\n";
         }
         result += String.format("""
                         Stick Hand: %s

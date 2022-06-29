@@ -49,7 +49,17 @@ public class TeamGUI implements Runnable {
 
     // MainGUI Constants/Components
     // Reused String expressions
-    private static final String NAME_STRING = "Enter name:";
+    private static final String NAME_STRING = "Enter Name:";
+    private static final String PLAYER_NUMBER_STRING = "Select Player Number:";
+    private static final String LEFT_HANDED = "Left-handed (Click to switch)";
+    private static final String RIGHT_HANDED = "Right-handed (Click to switch)";
+    private static final String GOALS_STRING = "Enter Goals:";
+    private static final String ASSISTS_STRING = "Enter Assists:";
+    private static final String PM_STRING = "Enter +/-:";
+    private static final String HITS_STRING = "Enter Hits:";
+    private static final String PIM_STRING = "Enter Penalty Minutes:";
+    private static final String SHOT_BLOCK_STRING = "Enter Shots Blocked:";
+    private static final String FACE_OFF_STRING = "Enter Face Off % / Face Off Total:";
     private static final String WINS_STRING = "Enter number of wins:";
     private static final String LOSSES_STRING = "Enter number of losses:";
     private static final String OT_STRING = "Enter number of overtime losses or ties:";
@@ -168,27 +178,60 @@ public class TeamGUI implements Runnable {
     JTextArea viewLine;
 
     // Create/Edit Skater/Goalie
-    JTextArea playerName;
-    JSlider playerNumber;
 
     // Manage Skaters
 
     JTabbedPane skaterTabs;
 
-    // Create/Edit Skater
+    // Create Skater
+    JLabel enterSkaterNameLabel;
+    JTextField enterSkaterName;
+    JLabel enterSkaterNumberLabel;
+    JSlider enterSkaterNumber;
     JToggleButton chooseStickHand;
+    JLabel selectPostition;
     JComboBox<Position> positionOptions;
     JToggleButton assignSkaterStats;
+    JLabel enterGoalsLabel;
     JTextField enterGoals;
+    JLabel enterAssistsLabel;
     JTextField enterAssists;
+    JLabel enterPMLabel;
     JTextField enterPlusMinus;
+    JLabel enterHitsLabel;
     JTextField enterHits;
+    JLabel enterPIMLabel;
     JTextField enterPenaltyMinutes;
+    JLabel enterBlocksLabel;
     JTextField enterShotsBlocked;
+    JLabel enterFaceOffLabel;
     JTextField enterFaceOffPercent;
     JTextField enterFaceOffTotal;
 
     JButton createPlayer;
+
+    // Edit Skater
+    JLabel changeSkaterNameLabel;
+    JTextArea changeSkaterName;
+    JLabel changeSkaterNumberLabel;
+    JSlider changeSkaterNumber;
+    JToggleButton changeStickHand;
+    JLabel changeGoalsLabel;
+    JTextField changeGoals;
+    JLabel changeAssistsLabel;
+    JTextField changeAssists;
+    JLabel changePMLabel;
+    JTextField changePlusMinus;
+    JLabel changeHitsLabel;
+    JTextField changeHits;
+    JLabel changePIMLabel;
+    JTextField changePenaltyMinutes;
+    JLabel changeBlocksLabel;
+    JTextField changeShotsBlocked;
+    JLabel changeFaceOffLabel;
+    JTextField changeFaceOffPercent;
+    JTextField changeFaceOffTotal;
+
     JButton editPlayer;
 
     // Delete Player
@@ -259,11 +302,11 @@ public class TeamGUI implements Runnable {
     public static Team createSample() {
         Team blackhawks = new Team("Sample Team: Chicago Blackhawks - 2014-15 Regular Season", 48, 28,
                 6);
-        blackhawks.addPlayer(new Skater("Patrick Kane", 88, "Left", Position.RIGHT_WING,
+        blackhawks.addPlayer(new Skater("Patrick Kane", 88, "Left", Position.Right_Wing,
                 27, 37, 10, 22, 10));
-        blackhawks.addPlayer(new Skater("Kyle Baun", 39, "Right", Position.LEFT_WING,
+        blackhawks.addPlayer(new Skater("Kyle Baun", 39, "Right", Position.Left_Wing,
                 0, 0, -1, 12, 0));
-        blackhawks.addPlayer(new Skater("Bryan Bickell", 29, "Left", Position.LEFT_WING,
+        blackhawks.addPlayer(new Skater("Bryan Bickell", 29, "Left", Position.Left_Wing,
                 14, 14, 5, 205, 38));
         blackhawks.addPlayer(new Goalie("Corey Crawford", 50, .924, 1661,
                 32, 20, 5, 2));
@@ -273,43 +316,43 @@ public class TeamGUI implements Runnable {
                 4, 0, 1));
         blackhawks.addPlayer(new Center("Andrew Desjardins", 11, "Left", 0, 2,
                 1, 32, 7, 63.2, 19));
-        blackhawks.addPlayer(new Skater("Ryan Hartman", 38, "Right", Position.RIGHT_WING,
+        blackhawks.addPlayer(new Skater("Ryan Hartman", 38, "Right", Position.Right_Wing,
                 0, 0, -1, 11, 2));
         blackhawks.addPlayer(new Defenseman("Niklas Hjalmarsson", 4, "Left",
-                Position.LEFT_DEFENSE, 3, 16, 25, 39, 44, 127));
-        blackhawks.addPlayer(new Skater("Marian Hossa", 81, "Left", Position.RIGHT_WING,
+                Position.Left_Defense, 3, 16, 25, 39, 44, 127));
+        blackhawks.addPlayer(new Skater("Marian Hossa", 81, "Left", Position.Right_Wing,
                 22, 39, 17, 62, 32));
         blackhawks.addPlayer(new Defenseman("Duncan Keith", 2, "Left",
-                Position.LEFT_DEFENSE, 10, 35, 12, 16, 20, 113));
+                Position.Left_Defense, 10, 35, 12, 16, 20, 113));
         blackhawks.addPlayer(new Center("Markus Kruger", 22, "Left", 7, 10,
                 -5, 29, 32, 53.3, 770));
         blackhawks.addPlayer(new Defenseman("Michal Rozsival", 32, "Right",
-                Position.RIGHT_DEFENSE, 1, 12, 0, 103, 22, 87));
+                Position.Right_Defense, 1, 12, 0, 103, 22, 87));
         blackhawks.addPlayer(new Defenseman("David Rundblad", 5, "Right",
-                Position.RIGHT_DEFENSE, 3, 11, 17, 23, 12, 38));
+                Position.Right_Defense, 3, 11, 17, 23, 12, 38));
         blackhawks.addPlayer(new Defenseman("Brent Seabrook", 7, "Right",
-                Position.RIGHT_DEFENSE, 8, 23, -3, 135, 27, 141));
+                Position.Right_Defense, 8, 23, -3, 135, 27, 141));
         blackhawks.addPlayer(new Center("Andrew Shaw", 65, "Right",
                 15, 11, -8, 127, 67, 50.1, 712));
-        blackhawks.addPlayer(new Skater("Teuvo Teravainen", 86, "Left", Position.LEFT_WING,
+        blackhawks.addPlayer(new Skater("Teuvo Teravainen", 86, "Left", Position.Left_Wing,
                 4, 5, 4, 11, 2));
         blackhawks.addPlayer(new Center("Jonathan Toews", 19, "Left", 28, 38,
                 30, 56, 36, 56.5, 1675));
         blackhawks.addPlayer(new Defenseman("Trevor van Riemsdyk", 57, "Right",
-                Position.RIGHT_DEFENSE, 0, 1, 0, 4, 2, 15));
-        blackhawks.addPlayer(new Skater("Brandon Saad", 20, "Left", Position.LEFT_WING,
+                Position.Right_Defense, 0, 1, 0, 4, 2, 15));
+        blackhawks.addPlayer(new Skater("Brandon Saad", 20, "Left", Position.Left_Wing,
                 23, 29, 7, 53, 12));
-        blackhawks.addPlayer(new Skater("Patrick Sharp", 10, "Right", Position.LEFT_WING,
+        blackhawks.addPlayer(new Skater("Patrick Sharp", 10, "Right", Position.Left_Wing,
                 16, 27, -8, 74, 33));
         blackhawks.addPlayer(new Center("Brad Richards", 91, "Left", 12, 225,
                 3, 74, 12, 48.4, 825));
-        blackhawks.addPlayer(new Skater("Kris Versteeg", 23, "Right", Position.LEFT_WING,
+        blackhawks.addPlayer(new Skater("Kris Versteeg", 23, "Right", Position.Left_Wing,
                 14, 20, 11, 31, 35));
-        blackhawks.addPlayer(new Defenseman("Johnny Oduya", 27, "Left", Position.LEFT_DEFENSE,
+        blackhawks.addPlayer(new Defenseman("Johnny Oduya", 27, "Left", Position.Left_Defense,
                 2, 8, 5, 69, 26, 123));
-        blackhawks.addPlayer(new Skater("Ben Smith", 28, "Right", Position.RIGHT_WING,
+        blackhawks.addPlayer(new Skater("Ben Smith", 28, "Right", Position.Right_Wing,
                 5, 4, -1, 49, 2));
-        blackhawks.addPlayer(new Skater("Daniel Carcillo", 13, "Left", Position.LEFT_WING,
+        blackhawks.addPlayer(new Skater("Daniel Carcillo", 13, "Left", Position.Left_Wing,
                 4, 4, 3, 36, 54));
         blackhawks.addPlayer(new Center("Antoine Vermette", 80, "Left", 0, 3,
                 -2, 9, 6, 50, 196));
@@ -521,6 +564,17 @@ public class TeamGUI implements Runnable {
     }
 
     /**
+     * Adds given components to the given panel
+     * @param components Components to be added to the panel
+     * @param panel Panel where the components should be added
+     */
+    private void addComponentsToPanel(JComponent[] components, JPanel panel) {
+        for (JComponent component: components) {
+            panel.add(component);
+        }
+    }
+
+    /**
      * This method can only be used to check responses that should be positive ints. If the string contains a response
      * attempts to enter the response into the appropriate index. If there is no response, leaves the index as -1.
      * @param stringInputs The inputs being checked.
@@ -591,11 +645,68 @@ public class TeamGUI implements Runnable {
     }
 
     /**
+     * Initializes all combo boxes containing elements of a team such as the boxes for selecting a line, a skater, a
+     * goalie, etc.
+     */
+    private void setUpComboBoxes() {
+        lineOptions = new JComboBox<>();
+        lineOptions.addItem(null);
+        for (Line line: team.getLines()) {
+            lineOptions.addItem(line);
+        }
+
+        centerOptions = new JComboBox<>();
+        centerOptions.addItem(null);
+        for (Skater player: team.getSkaters()) {
+            if (player instanceof Center center) {
+                centerOptions.addItem(center);
+            }
+        }
+
+        pickLeftWing = new JComboBox<>();
+        pickRightWing = new JComboBox<>();
+        skaterOptions = new JComboBox<>();
+        pickLeftWing.addItem(null);
+        pickRightWing.addItem(null);
+        skaterOptions.addItem(null);
+        for (Skater player: team.getSkaters()) {
+            pickLeftWing.addItem(player);
+            pickRightWing.addItem(player);
+            skaterOptions.addItem(player);
+        }
+
+        pickLeftDe = new JComboBox<>();
+        pickRightDe = new JComboBox<>();
+        pickLeftDe.addItem(null);
+        pickRightDe.addItem(null);
+        for (Skater player: team.getSkaters()) {
+            if (player instanceof Defenseman de) {
+                pickLeftDe.addItem(de);
+                pickRightDe.addItem(de);
+            }
+        }
+
+        goalieOptions = new JComboBox<>();
+        goalieOptions.addItem(null);
+        for (Goalie goalie: team.getGoalies()) {
+            goalieOptions.addItem(goalie);
+        }
+
+        positionOptions = new JComboBox<>();
+        positionOptions.addItem(Position.Center);
+        positionOptions.addItem(Position.Left_Wing);
+        positionOptions.addItem(Position.Right_Wing);
+        positionOptions.addItem(Position.Left_Defense);
+        positionOptions.addItem(Position.Right_Defense);
+    }
+
+    /**
      * This method sets up and displays the GUI for editing an actual team after one has been selected/created from
      * the selectTeam frame. It is composed of a variety of tabs that encompass the different ways to modify or manage
      * a team.
      */
     private void displayTeamGUI() {
+        setUpComboBoxes();
         // Setup Frame
         JFrame mainFrame = new JFrame(team.getName());
         mainFrame.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
@@ -772,11 +883,6 @@ public class TeamGUI implements Runnable {
         mainLineContainer.setLayout(new BoxLayout(mainLineContainer, BoxLayout.Y_AXIS));
         lineTabs = new JTabbedPane();
         currentLineLabel = new JLabel("Selected Line:");
-        lineOptions = new JComboBox<Line>();
-        lineOptions.addItem(null);
-        for (Line line: team.getLines()) {
-            lineOptions.addItem(line);
-        }
 
         createPanel(new JComponent[]{currentLineLabel, lineOptions}, mainLineContainer);
         createPanel(new JComponent[]{lineTabs}, mainLineContainer);
@@ -805,64 +911,30 @@ public class TeamGUI implements Runnable {
         createPanel(new JComponent[]{lineTypeLabel}, createLineContent);
         createPanel(lineType, createLineContent);
 
-        // Set up Combo Boxes
-        centerOptions = new JComboBox<>();
-        centerOptions.addItem(null);
-        for (Skater player: team.getSkaters()) {
-            if (player instanceof Center center) {
-                centerOptions.addItem(center);
-            }
-        }
-
-        pickLeftWing = new JComboBox<>();
-        pickRightWing = new JComboBox<>();
-        pickLeftWing.addItem(null);
-        pickRightWing.addItem(null);
-        for (Skater player: team.getSkaters()) {
-            pickLeftWing.addItem(player);
-            pickRightWing.addItem(player);
-        }
-
-        pickLeftDe = new JComboBox<>();
-        pickRightDe = new JComboBox<>();
-        pickLeftDe.addItem(null);
-        pickRightDe.addItem(null);
-        for (Skater player: team.getSkaters()) {
-            if (player instanceof Defenseman de) {
-                pickLeftDe.addItem(de);
-                pickRightDe.addItem(de);
-            }
-        }
-
         // Center
         JPanel selectCenterPanel = new JPanel();
         selectCenterLabel = new JLabel("Center:");
-        selectCenterPanel.add(selectCenterLabel);
-        selectCenterPanel.add(centerOptions);
+        addComponentsToPanel(new JComponent[]{selectCenterLabel, centerOptions}, selectCenterPanel);
 
         // Left Wing
         JPanel selectLWPanel = new JPanel();
         selectLWLabel = new JLabel("Left Wing:");
-        selectLWPanel.add(selectLWLabel);
-        selectLWPanel.add(pickLeftWing);
+        addComponentsToPanel(new JComponent[]{selectLWLabel, pickLeftWing}, selectLWPanel);
 
         // Right Wing
         JPanel selectRWPanel = new JPanel();
         selectRWLabel = new JLabel("Right Wing:");
-        selectRWPanel.add(selectRWLabel);
-        selectRWPanel.add(pickRightWing);
+        addComponentsToPanel(new JComponent[]{selectRWLabel, pickRightWing}, selectRWPanel);
 
         // Left De
         JPanel selectLDPanel = new JPanel();
         selectLDLabel = new JLabel("Left Defense:");
-        selectLDPanel.add(selectLDLabel);
-        selectLDPanel.add(pickLeftDe);
+        addComponentsToPanel(new JComponent[]{selectLDLabel, pickLeftDe}, selectLDPanel);
 
         // Right De
         JPanel selectRDPanel = new JPanel();
         selectRDLabel = new JLabel("Right Defense:");
-        selectRDPanel.add(selectRDLabel);
-        selectRDPanel.add(pickRightDe);
+        addComponentsToPanel(new JComponent[]{selectRDLabel, pickRightDe}, selectRDPanel);
 
         // Special Teams Stats
         JPanel statsTogglePanel = new JPanel();
@@ -872,14 +944,13 @@ public class TeamGUI implements Runnable {
         JPanel enterSuccessPercentagePanel = new JPanel();
         enterSuccessPercentageLabel = new JLabel("Enter Success Percentage:");
         enterSuccessPercentage = new JTextField(ENTER_STAT_SIZE);
-        enterSuccessPercentagePanel.add(enterSuccessPercentageLabel);
-        enterSuccessPercentagePanel.add(enterSuccessPercentage);
+        addComponentsToPanel(new JComponent[]{enterSuccessPercentageLabel, enterSuccessPercentage},
+                enterSuccessPercentagePanel);
 
         JPanel enterNumOppsPanel = new JPanel();
         enterNumOppsLabel = new JLabel("Enter Number of PP/PK Opportunities:");
         enterNumOpps = new JTextField(ENTER_STAT_SIZE);
-        enterNumOppsPanel.add(enterNumOppsLabel);
-        enterNumOppsPanel.add(enterNumOpps);
+        addComponentsToPanel(new JComponent[]{enterNumOppsLabel, enterNumOpps}, enterNumOppsPanel);
 
         // Displays text fields to enter success percentage and number of opportunities for the newly created line
         enterStatsToggle.addActionListener(e -> {
@@ -1113,10 +1184,8 @@ public class TeamGUI implements Runnable {
         changeSuccessPercent = new JTextField(ENTER_STAT_SIZE);
         changeNumOppsLabel = new JLabel("Enter Number of Opportunities:");
         changeNumOpps = new JTextField(ENTER_STAT_SIZE);
-        changeSTSuccess.add(changeSuccessPercentLabel);
-        changeSTSuccess.add(changeSuccessPercent);
-        changeSTSuccess.add(changeNumOppsLabel);
-        changeSTSuccess.add(changeNumOpps);
+        addComponentsToPanel(new JComponent[]{changeSuccessPercentLabel, changeSuccessPercent, changeNumOppsLabel,
+                changeNumOpps}, changeSTSuccess);
 
         // Ensures that proper components are displayed for editing a line depending on which line is selected
         lineOptions.addItemListener(e -> {
@@ -1454,6 +1523,118 @@ public class TeamGUI implements Runnable {
         lineTabs.add("View Lines", viewLinesContent);
 
         mainTabs.add("Manage Lines", lineContainerScroll);
+
+        // Manage Skaters
+        Container manageSkaterContent = new Container();
+        manageSkaterContent.setLayout(new BoxLayout(manageSkaterContent, BoxLayout.Y_AXIS));
+        skaterTabs = new JTabbedPane();
+        createPanel(new JComponent[]{skaterOptions}, manageSkaterContent);
+        createPanel(new JComponent[]{skaterTabs}, manageSkaterContent);
+
+        // Create Skater
+
+        Container createSkater = new Container();
+        createSkater.setLayout(new BoxLayout(createSkater, BoxLayout.Y_AXIS));
+        JScrollPane createSkaterScroll = new JScrollPane(createSkater);
+
+        enterSkaterNameLabel = new JLabel(NAME_STRING);
+        enterSkaterName = new JTextField(ENTER_NAME_SIZE);
+        enterSkaterNumber = new JSlider(1, 99);
+        enterSkaterNumberLabel = new JLabel(PLAYER_NUMBER_STRING + "  " + enterSkaterNumber.getValue());
+        createPanel(new JComponent[]{enterSkaterNameLabel, enterSkaterName, enterSkaterNumberLabel, enterSkaterNumber},
+                createSkater);
+
+        // Displays currently selected value in the JLabel
+        enterSkaterNumber.addChangeListener(e -> {
+            enterSkaterNumberLabel.setText(PLAYER_NUMBER_STRING + "  " + enterSkaterNumber.getValue());
+        });
+
+        chooseStickHand = new JToggleButton(RIGHT_HANDED);
+        selectPostition = new JLabel("Select Player Position:");
+        createPanel(new JComponent[]{chooseStickHand, selectPostition, positionOptions}, createSkater);
+
+        // Changes text for JToggleButton to reflect user's choice
+        chooseStickHand.addActionListener(e -> {
+            if (chooseStickHand.isSelected()) {
+                chooseStickHand.setText(LEFT_HANDED);
+            } else {
+                chooseStickHand.setText(RIGHT_HANDED);
+            }
+        });
+
+        assignSkaterStats = new JToggleButton("Initialize Skater Stats");
+        createPanel(new JComponent[]{assignSkaterStats}, createSkater);
+
+        createPlayer = new JButton("Create Player");
+        createPanel(new JComponent[]{createPlayer}, createSkater);
+
+        JPanel basicStatsPanel = new JPanel();
+        enterGoalsLabel = new JLabel(GOALS_STRING);
+        enterGoals = new JTextField(ENTER_STAT_SIZE);
+        enterAssistsLabel = new JLabel(ASSISTS_STRING);
+        enterAssists = new JTextField(ENTER_STAT_SIZE);
+        enterPMLabel = new JLabel(PM_STRING);
+        enterPlusMinus = new JTextField(ENTER_STAT_SIZE);
+        addComponentsToPanel(new JComponent[]{enterGoalsLabel, enterGoals, enterAssistsLabel, enterAssists,
+                enterPMLabel, enterPlusMinus}, basicStatsPanel);
+
+        JPanel advancedStatsPanel = new JPanel();
+        enterHitsLabel = new JLabel(HITS_STRING);
+        enterHits = new JTextField(ENTER_STAT_SIZE);
+        enterPIMLabel = new JLabel(PIM_STRING);
+        enterPenaltyMinutes = new JTextField(ENTER_STAT_SIZE);
+        addComponentsToPanel(new JComponent[]{enterHitsLabel, enterHits, enterPIMLabel, enterPenaltyMinutes},
+                advancedStatsPanel);
+
+        JPanel defenseStatsPanel = new JPanel();
+        enterBlocksLabel = new JLabel(SHOT_BLOCK_STRING);
+        enterShotsBlocked = new JTextField(ENTER_STAT_SIZE);
+        addComponentsToPanel(new JComponent[]{enterBlocksLabel, enterShotsBlocked}, defenseStatsPanel);
+
+        JPanel centerStatsPanel = new JPanel();
+        enterFaceOffLabel = new JLabel(FACE_OFF_STRING);
+        enterFaceOffPercent = new JTextField(ENTER_STAT_SIZE);
+        enterFaceOffTotal = new JTextField(ENTER_STAT_SIZE);
+        addComponentsToPanel(new JComponent[]{enterFaceOffLabel, enterFaceOffPercent, enterFaceOffTotal},
+                centerStatsPanel);
+
+        assignSkaterStats.addActionListener(e -> {
+            if (assignSkaterStats.isSelected()) {
+                Position position = (Position) positionOptions.getSelectedItem();
+                createSkater.add(basicStatsPanel, createSkater.getComponentCount() - 1);
+                createSkater.add(advancedStatsPanel, createSkater.getComponentCount() - 1);
+                if (position == Position.Center) {
+                    createSkater.add(centerStatsPanel, createSkater.getComponentCount() - 1);
+                } else if (position == Position.Left_Defense || position == Position.Right_Defense) {
+                    createSkater.add(defenseStatsPanel, createSkater.getComponentCount() - 1);
+                }
+            } else {
+                createSkater.remove(basicStatsPanel);
+                createSkater.remove(advancedStatsPanel);
+                createSkater.remove(centerStatsPanel);
+                createSkater.remove(defenseStatsPanel);
+            }
+            mainFrame.repaint();
+        });
+
+        positionOptions.addItemListener(e -> {
+            if (assignSkaterStats.isSelected() && e.getStateChange() == ItemEvent.SELECTED) {
+                Position position = (Position) positionOptions.getSelectedItem();
+                createSkater.remove(centerStatsPanel);
+                createSkater.remove(defenseStatsPanel);
+                if (position == Position.Center) {
+                    createSkater.add(centerStatsPanel, createSkater.getComponentCount() - 1);
+                }
+                if (position == Position.Left_Defense || position == Position.Right_Defense) {
+                    createSkater.add(defenseStatsPanel, createSkater.getComponentCount() - 1);
+                }
+                mainFrame.repaint();
+            }
+        });
+
+        skaterTabs.add("Create Skater", createSkaterScroll);
+
+        mainTabs.add("Manage Skaters", manageSkaterContent);
 
         // Sets team to null and re displays SelectTeamGUI when window is closed
         mainFrame.addWindowListener(new WindowAdapter() {

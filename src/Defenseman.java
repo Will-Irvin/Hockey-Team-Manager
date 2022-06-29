@@ -13,7 +13,7 @@ public class Defenseman extends Skater {
     public Defenseman(String name, int playerNumber, String stickHand, Position side) throws IllegalArgumentException {
         super(name, playerNumber, stickHand, side);
 
-        if (side != Position.LEFT_DEFENSE && side != Position.RIGHT_DEFENSE) {
+        if (side != Position.Left_Defense && side != Position.Right_Defense) {
             throw new IllegalArgumentException("Position must be a defensive position");
         }
 
@@ -30,7 +30,7 @@ public class Defenseman extends Skater {
             throws IllegalArgumentException {
         super(name, playerNumber, stickHand, side, goals, assists, plusMinus, hits, penaltyMinutes);
 
-        if (side != Position.LEFT_DEFENSE && side != Position.RIGHT_DEFENSE) {
+        if (side != Position.Left_Defense && side != Position.Right_Defense) {
             throw new IllegalArgumentException("Position must be a defensive position");
         }
         if (shotsBlocked < 0) {

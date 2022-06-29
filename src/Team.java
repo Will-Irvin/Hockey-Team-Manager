@@ -1,5 +1,4 @@
 import java.io.Serializable;
-import java.lang.reflect.GenericArrayType;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -500,11 +499,11 @@ public class Team implements Serializable {
                 result.append(String.format("%.15s\t|%3d|", player.getName(), player.getPlayerNumber()));
             }
             switch (player.getPosition()) {
-                case CENTER -> result.append("  C");
-                case LEFT_WING -> result.append(" LW");
-                case RIGHT_WING -> result.append(" RW");
-                case LEFT_DEFENSE -> result.append(" LD");
-                case RIGHT_DEFENSE -> result.append(" RD");
+                case Center -> result.append("  C");
+                case Left_Wing -> result.append(" LW");
+                case Right_Wing -> result.append(" RW");
+                case Left_Defense -> result.append(" LD");
+                case Right_Defense -> result.append(" RD");
             }
             result.append(String.format("|%3d|%3d|%3d|%3d|\n", player.getGoals(), player.getAssists(),
                     player.getPoints(), player.getPlusMinus()));
@@ -531,11 +530,11 @@ public class Team implements Serializable {
             currentRow[0] = currentPlayer.getName();
             currentRow[1] = currentPlayer.getPlayerNumber();
             switch (currentPlayer.getPosition()) {
-                case CENTER -> currentRow[2] = "C";
-                case LEFT_WING -> currentRow[2] = "LW";
-                case RIGHT_WING -> currentRow[2] = "RW";
-                case LEFT_DEFENSE -> currentRow[2] = "LD";
-                case RIGHT_DEFENSE -> currentRow[2] = "RD";
+                case Center -> currentRow[2] = "C";
+                case Left_Wing -> currentRow[2] = "LW";
+                case Right_Wing -> currentRow[2] = "RW";
+                case Left_Defense -> currentRow[2] = "LD";
+                case Right_Defense -> currentRow[2] = "RD";
             }
             currentRow[3] = currentPlayer.getGoals();
             currentRow[4] = currentPlayer.getAssists();

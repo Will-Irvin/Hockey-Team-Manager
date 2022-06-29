@@ -12,7 +12,7 @@ public class Center extends Skater {
      * Behaves like basic Skater constructor and initializes stats to 0. Assigns position as CENTER
      */
     public Center(String name, int playerNumber, String stickHand) {
-        super(name, playerNumber, stickHand, Position.CENTER);
+        super(name, playerNumber, stickHand, Position.Center);
         faceOffWins = 0;
         faceOffTotal = 0;
     }
@@ -25,7 +25,7 @@ public class Center extends Skater {
     public Center(String name, int playerNumber, String stickHand, int goals,
                   int assists, int plusMinus, int hits, double penaltyMinutes, double faceOffPercentage, int faceOffTotal)
                   throws IllegalArgumentException {
-        super(name, playerNumber, stickHand, Position.CENTER, goals, assists, plusMinus, hits, penaltyMinutes);
+        super(name, playerNumber, stickHand, Position.Center, goals, assists, plusMinus, hits, penaltyMinutes);
         if (faceOffPercentage < 0 || faceOffPercentage > 100) {
             throw new IllegalArgumentException("Face Off % must be between 0-100");
         }

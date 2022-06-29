@@ -136,26 +136,26 @@ public class PKLine extends SpecialTeamsLine {
         if (position == null) {
             throw new NullPointerException(NULL_ERROR);
         }
-        if (position == Position.CENTER) {
+        if (position == Position.Center) {
             throw new IllegalArgumentException(centerError);
         }
 
-        if (position == Position.LEFT_WING) {
+        if (position == Position.Left_Wing) {
             offense1.score();
         } else {
             offense1.scoredOnIce();
         }
-        if (position == Position.RIGHT_WING) {
+        if (position == Position.Right_Wing) {
             offense2.score();
         } else {
             offense2.scoredOnIce();
         }
-        if (position == Position.LEFT_DEFENSE) {
+        if (position == Position.Left_Defense) {
             leftDe.score();
         } else {
             leftDe.scoredOnIce();
         }
-        if (position == Position.RIGHT_DEFENSE) {
+        if (position == Position.Right_Defense) {
             rightDe.score();
         } else {
             rightDe.scoredOnIce();
@@ -175,40 +175,40 @@ public class PKLine extends SpecialTeamsLine {
         if (scorer == null || assist == null) {
             throw new NullPointerException(NULL_ERROR);
         }
-        if (scorer == Position.CENTER || assist == Position.CENTER) {
+        if (scorer == Position.Center || assist == Position.Center) {
             throw new IllegalArgumentException(centerError);
         }
         if (scorer == assist) {
             throw new IllegalArgumentException(Line.POSITION_DUPLICATES_ERROR);
         }
 
-        if (scorer == Position.LEFT_WING) {
+        if (scorer == Position.Left_Wing) {
             offense1.score();
-        } else if (assist == Position.LEFT_WING) {
+        } else if (assist == Position.Left_Wing) {
             offense1.assist();
         } else {
             offense1.scoredOnIce();
         }
 
-        if (scorer == Position.RIGHT_WING) {
+        if (scorer == Position.Right_Wing) {
             offense2.score();
-        } else if (assist == Position.RIGHT_WING) {
+        } else if (assist == Position.Right_Wing) {
             offense2.assist();
         } else {
             offense2.scoredOnIce();
         }
 
-        if (scorer == Position.RIGHT_DEFENSE) {
+        if (scorer == Position.Right_Defense) {
             rightDe.score();
-        } else if (assist == Position.RIGHT_DEFENSE) {
+        } else if (assist == Position.Right_Defense) {
             rightDe.assist();
         } else {
             rightDe.scoredOnIce();
         }
 
-        if (scorer == Position.LEFT_DEFENSE) {
+        if (scorer == Position.Left_Defense) {
             leftDe.score();
-        } else if (assist == Position.LEFT_DEFENSE) {
+        } else if (assist == Position.Left_Defense) {
             leftDe.assist();
         } else {
             leftDe.scoredOnIce();
@@ -230,40 +230,40 @@ public class PKLine extends SpecialTeamsLine {
         if (scorer == null || assist1 == null || assist2 == null) {
             throw new NullPointerException(NULL_ERROR);
         }
-        if (scorer == Position.CENTER || assist1 == Position.CENTER || assist2 == Position.CENTER) {
+        if (scorer == Position.Center || assist1 == Position.Center || assist2 == Position.Center) {
             throw new IllegalArgumentException(centerError);
         }
         if (scorer == assist1 || scorer == assist2 || assist1 == assist2) {
             throw new IllegalArgumentException(Line.POSITION_DUPLICATES_ERROR);
         }
 
-        if (scorer == Position.LEFT_WING) {
+        if (scorer == Position.Left_Wing) {
             offense1.score();
-        } else if (assist1 == Position.LEFT_WING || assist2 == Position.LEFT_WING) {
+        } else if (assist1 == Position.Left_Wing || assist2 == Position.Left_Wing) {
             offense1.assist();
         } else {
             offense1.scoredOnIce();
         }
 
-        if (scorer == Position.RIGHT_WING) {
+        if (scorer == Position.Right_Wing) {
             offense2.score();
-        } else if (assist1 == Position.RIGHT_WING || assist2 == Position.RIGHT_WING) {
+        } else if (assist1 == Position.Right_Wing || assist2 == Position.Right_Wing) {
             offense2.assist();
         } else {
             offense2.scoredOnIce();
         }
 
-        if (scorer == Position.RIGHT_DEFENSE) {
+        if (scorer == Position.Right_Defense) {
             rightDe.score();
-        } else if (assist1 == Position.RIGHT_DEFENSE || assist2 == Position.RIGHT_DEFENSE) {
+        } else if (assist1 == Position.Right_Defense || assist2 == Position.Right_Defense) {
             rightDe.assist();
         } else {
             rightDe.scoredOnIce();
         }
 
-        if (scorer == Position.LEFT_DEFENSE) {
+        if (scorer == Position.Left_Defense) {
             leftDe.score();
-        } else if (assist1 == Position.LEFT_DEFENSE || assist2 == Position.LEFT_DEFENSE) {
+        } else if (assist1 == Position.Left_Defense || assist2 == Position.Left_Defense) {
             leftDe.assist();
         } else {
             leftDe.scoredOnIce();
@@ -291,8 +291,7 @@ public class PKLine extends SpecialTeamsLine {
                         Offense: %s
                         Left Defense: %s
                         Right Defense: %s
-                        PK%%: %.2f
-                        """, getName(), offense1.getName(), offense2.getName(),
-                leftDe.getName(), rightDe.getName(), getSuccessPercent());
+                        PK%%: %.2f""", getName(), offense1.getName(), offense2.getName(), leftDe.getName(),
+                rightDe.getName(), getSuccessPercent());
     }
 }

@@ -4,9 +4,9 @@
  */
 
 public enum Position {
-    CENTER,
-    LEFT_WING,
-    RIGHT_WING,
-    LEFT_DEFENSE,
-    RIGHT_DEFENSE
+    Center,
+    Left_Wing,
+    Right_Wing,
+    Left_Defense,
+    Right_Defense
 }

@@ -94,31 +94,31 @@ public class OffenseLine extends Line {
             throw new NullPointerException("Please enter all given arguments");
         }
 
-        if (scorer == Position.CENTER) {
+        if (scorer == Position.Center) {
             center.score();
         } else {
             center.scoredOnIce();
         }
 
-        if (scorer == Position.LEFT_WING) {
+        if (scorer == Position.Left_Wing) {
             leftWing.score();
         } else {
             leftWing.scoredOnIce();
         }
 
-        if (scorer == Position.RIGHT_WING) {
+        if (scorer == Position.Right_Wing) {
             rightWing.score();
         } else {
             rightWing.scoredOnIce();
         }
 
-        if (scorer == Position.RIGHT_DEFENSE) {
+        if (scorer == Position.Right_Defense) {
             de.getRightDe().score();
         } else {
             de.getRightDe().scoredOnIce();
         }
 
-        if (scorer == Position.LEFT_DEFENSE) {
+        if (scorer == Position.Left_Defense) {
             de.getLeftDe().score();
         } else {
             de.getLeftDe().scoredOnIce();
@@ -142,41 +142,41 @@ public class OffenseLine extends Line {
             throw new IllegalArgumentException(POSITION_DUPLICATES_ERROR);
         }
 
-        if (scorer == Position.CENTER) {
+        if (scorer == Position.Center) {
             center.score();
-        } else if (assist == Position.CENTER) {
+        } else if (assist == Position.Center) {
             center.assist();
         } else {
             center.scoredOnIce();
         }
 
-        if (scorer == Position.LEFT_WING) {
+        if (scorer == Position.Left_Wing) {
             leftWing.score();
-        } else if (assist == Position.LEFT_WING) {
+        } else if (assist == Position.Left_Wing) {
             leftWing.assist();
         } else {
             leftWing.scoredOnIce();
         }
 
-        if (scorer == Position.RIGHT_WING) {
+        if (scorer == Position.Right_Wing) {
             rightWing.score();
-        } else if (assist == Position.RIGHT_WING) {
+        } else if (assist == Position.Right_Wing) {
             rightWing.assist();
         } else {
             rightWing.scoredOnIce();
         }
 
-        if (scorer == Position.RIGHT_DEFENSE) {
+        if (scorer == Position.Right_Defense) {
             de.getRightDe().score();
-        } else if (assist == Position.RIGHT_DEFENSE) {
+        } else if (assist == Position.Right_Defense) {
             de.getRightDe().assist();
         } else {
             de.getRightDe().scoredOnIce();
         }
 
-        if (scorer == Position.LEFT_DEFENSE) {
+        if (scorer == Position.Left_Defense) {
             de.getLeftDe().score();
-        } else if (assist == Position.LEFT_DEFENSE) {
+        } else if (assist == Position.Left_Defense) {
             de.getLeftDe().assist();
         } else {
             de.getLeftDe().scoredOnIce();
@@ -201,41 +201,41 @@ public class OffenseLine extends Line {
             throw new IllegalArgumentException(POSITION_DUPLICATES_ERROR);
         }
 
-        if (scorer == Position.CENTER) {
+        if (scorer == Position.Center) {
             center.score();
-        } else if (assist1 == Position.CENTER || assist2 == Position.CENTER) {
+        } else if (assist1 == Position.Center || assist2 == Position.Center) {
             center.assist();
         } else {
             center.scoredOnIce();
         }
 
-        if (scorer == Position.LEFT_WING) {
+        if (scorer == Position.Left_Wing) {
             leftWing.score();
-        } else if (assist1 == Position.LEFT_WING || assist2 == Position.LEFT_WING) {
+        } else if (assist1 == Position.Left_Wing || assist2 == Position.Left_Wing) {
             leftWing.assist();
         } else {
             leftWing.scoredOnIce();
         }
 
-        if (scorer == Position.RIGHT_WING) {
+        if (scorer == Position.Right_Wing) {
             rightWing.score();
-        } else if (assist1 == Position.RIGHT_WING || assist2 == Position.RIGHT_WING) {
+        } else if (assist1 == Position.Right_Wing || assist2 == Position.Right_Wing) {
             rightWing.assist();
         } else {
             rightWing.scoredOnIce();
         }
 
-        if (scorer == Position.RIGHT_DEFENSE) {
+        if (scorer == Position.Right_Defense) {
             de.getRightDe().score();
-        } else if (assist1 == Position.RIGHT_DEFENSE || assist2 == Position.RIGHT_DEFENSE) {
+        } else if (assist1 == Position.Right_Defense || assist2 == Position.Right_Defense) {
             de.getRightDe().assist();
         } else {
             de.getRightDe().scoredOnIce();
         }
 
-        if (scorer == Position.LEFT_DEFENSE) {
+        if (scorer == Position.Left_Defense) {
             de.getLeftDe().score();
-        } else if (assist1 == Position.LEFT_DEFENSE || assist2 == Position.LEFT_DEFENSE) {
+        } else if (assist1 == Position.Left_Defense || assist2 == Position.Left_Defense) {
             de.getLeftDe().assist();
         } else {
             de.getLeftDe().scoredOnIce();
