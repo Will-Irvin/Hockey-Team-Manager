@@ -22,9 +22,8 @@ public class Center extends Skater {
      * @throws IllegalArgumentException Thrown when faceOffPercentage argument is not in range 0-100 or when
      * faceOffTotal is negative
      */
-    public Center(String name, int playerNumber, String stickHand, int goals,
-                  int assists, int plusMinus, int hits, double penaltyMinutes, double faceOffPercentage, int faceOffTotal)
-                  throws IllegalArgumentException {
+    public Center(String name, int playerNumber, String stickHand, int goals, int assists, int plusMinus, int hits,
+                  double penaltyMinutes, double faceOffPercentage, int faceOffTotal) throws IllegalArgumentException {
         super(name, playerNumber, stickHand, Position.Center, goals, assists, plusMinus, hits, penaltyMinutes);
         if (faceOffPercentage < 0 || faceOffPercentage > 100) {
             throw new IllegalArgumentException("Face Off % must be between 0-100");

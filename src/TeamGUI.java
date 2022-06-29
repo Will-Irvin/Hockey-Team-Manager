@@ -1,3 +1,4 @@
+import javax.print.attribute.standard.PDLOverrideSupported;
 import javax.swing.*;
 import javax.swing.table.AbstractTableModel;
 import java.awt.*;
@@ -75,6 +76,7 @@ public class TeamGUI implements Runnable {
     private static final String FILE_ERROR = "There was an issue writing to the file. Please close the application " +
             "and try again.";
     private static final String EMPTY_INPUTS = "Please enter a value in at least one of the boxes";
+    private static final String PLAYER_DUPLICATE = "New player cannot share the same number as another player";
     private static final String OFFENSE_LINE = "Offense Line";
     private static final String DEFENSE_LINE = "Defense Pair";
     private static final String PP_LINE = "Power Play Line";
@@ -344,7 +346,7 @@ public class TeamGUI implements Runnable {
                 23, 29, 7, 53, 12));
         blackhawks.addPlayer(new Skater("Patrick Sharp", 10, "Right", Position.Left_Wing,
                 16, 27, -8, 74, 33));
-        blackhawks.addPlayer(new Center("Brad Richards", 91, "Left", 12, 225,
+        blackhawks.addPlayer(new Center("Brad Richards", 91, "Left", 12, 25,
                 3, 74, 12, 48.4, 825));
         blackhawks.addPlayer(new Skater("Kris Versteeg", 23, "Right", Position.Left_Wing,
                 14, 20, 11, 31, 35));
@@ -698,6 +700,62 @@ public class TeamGUI implements Runnable {
         positionOptions.addItem(Position.Right_Wing);
         positionOptions.addItem(Position.Left_Defense);
         positionOptions.addItem(Position.Right_Defense);
+    }
+
+    /**
+     * Removes the old skater from relevant combo boxes and adds the new skater to the appropriate combo boxes in the
+     * GUI.
+     * @param oldSkater Skater being removed
+     * @param newSkater Skater being added
+     * @param index Index where the new skater will be added in full combo boxes
+     */
+    private void updateSkaterComboBoxes(Skater oldSkater, Skater newSkater, int index) {
+        if (oldSkater != null) {  // Remove old skater
+            pickLeftWing.removeItem(oldSkater);
+            pickRightWing.removeItem(oldSkater);
+            skaterOptions.removeItem(oldSkater);
+            if (oldSkater instanceof Center) {
+                centerOptions.removeItem(oldSkater);
+            }
+            if (oldSkater instanceof Defenseman) {
+                pickLeftDe.removeItem(oldSkater);
+                pickRightDe.removeItem(oldSkater);
+            }
+        }
+
+        pickLeftWing.insertItemAt(newSkater, index + 1);
+        pickRightWing.insertItemAt(newSkater, index + 1);
+        skaterOptions.insertItemAt(newSkater, index + 1);
+
+        if (newSkater instanceof Center c) {  // Finds proper spot in center combo box if the player is a center
+            for (int i = 1; i < centerOptions.getItemCount(); i++) {
+                if (i == centerOptions.getItemCount() - 1) {
+                    centerOptions.addItem(c);
+                    break;
+                }
+                if (centerOptions.getItemAt(i).getPlayerNumber() < c.getPlayerNumber() &&
+                        c.getPlayerNumber() < centerOptions.getItemAt(i + 1).getPlayerNumber()) {
+                    centerOptions.insertItemAt(c, i + 1);
+                    break;
+                }
+            }
+        }
+
+        if (newSkater instanceof Defenseman de) {  // Finds proper spot in defenseman combo boxes if player is de
+            for (int i = 1; i < pickLeftDe.getItemCount(); i++) {
+                if (i == pickLeftDe.getItemCount() - 1) {
+                    pickLeftDe.addItem(de);
+                    pickRightDe.addItem(de);
+                    break;
+                }
+                if (pickLeftDe.getItemAt(i).getPlayerNumber() < de.getPlayerNumber() &&
+                        de.getPlayerNumber() < pickLeftDe.getItemAt(i + 1).getPlayerNumber()) {
+                    pickLeftDe.insertItemAt(de, i + 1);
+                    pickRightDe.insertItemAt(de, i + 1);
+                    break;
+                }
+            }
+        }
     }
 
     /**
@@ -1624,11 +1682,92 @@ public class TeamGUI implements Runnable {
                 createSkater.remove(defenseStatsPanel);
                 if (position == Position.Center) {
                     createSkater.add(centerStatsPanel, createSkater.getComponentCount() - 1);
-                }
-                if (position == Position.Left_Defense || position == Position.Right_Defense) {
+                } else if (position == Position.Left_Defense || position == Position.Right_Defense) {
                     createSkater.add(defenseStatsPanel, createSkater.getComponentCount() - 1);
                 }
                 mainFrame.repaint();
+            }
+        });
+
+        createPlayer.addActionListener(e -> {
+            String name = enterSkaterName.getText();
+            String stickHand;
+            Skater newSkater;
+            if (chooseStickHand.isSelected()) {
+                stickHand = "Left";
+            } else {
+                stickHand = "Right";
+            }
+
+            Position position = (Position) positionOptions.getSelectedItem();
+            try {
+                if (assignSkaterStats.isSelected()) {
+                    int goals = Integer.parseInt(enterGoals.getText());
+                    int assists = Integer.parseInt(enterAssists.getText());
+                    int plusMinus = Integer.parseInt(enterPlusMinus.getText());
+                    int hits = Integer.parseInt(enterHits.getText());
+                    double penaltyMinutes = Double.parseDouble(enterPenaltyMinutes.getText());
+                    if (position == Position.Center) {
+                        double percent = Double.parseDouble(enterFaceOffPercent.getText());
+                        int total = Integer.parseInt(enterFaceOffTotal.getText());
+                        newSkater = new Center(name, enterSkaterNumber.getValue(), stickHand, goals, assists, plusMinus,
+                                hits, penaltyMinutes, percent, total);
+                    } else if (position == Position.Left_Defense || position == Position.Right_Defense) {
+                        int shotsBlocked = Integer.parseInt(enterShotsBlocked.getText());
+                        newSkater = new Defenseman(name, enterSkaterNumber.getValue(), stickHand, position, goals,
+                                assists, plusMinus, hits, penaltyMinutes, shotsBlocked);
+                    } else {
+                        newSkater = new Skater(name, enterSkaterNumber.getValue(), stickHand, position, goals, assists,
+                                plusMinus, hits, penaltyMinutes);
+                    }
+                } else {
+                    if (position == Position.Center) {
+                        newSkater = new Center(name, enterSkaterNumber.getValue(), stickHand);
+                    } else if (position == Position.Left_Defense || position == Position.Right_Defense) {
+                        newSkater = new Defenseman(name, enterSkaterNumber.getValue(), stickHand, position);
+                    } else {
+                        newSkater = new Skater(name, enterSkaterNumber.getValue(), stickHand, position);
+                    }
+                }
+            } catch (NumberFormatException ex) {
+                JOptionPane.showMessageDialog(mainFrame, NUMBER_ERROR, "Create Skater", JOptionPane.ERROR_MESSAGE);
+                return;
+            } catch (IllegalArgumentException | NullPointerException ex) {
+                JOptionPane.showMessageDialog(mainFrame, ex.getMessage(), "Create Skater",
+                        JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+            int index = team.addPlayer(newSkater);
+            if (index == -1) {
+                JOptionPane.showMessageDialog(mainFrame, PLAYER_DUPLICATE, "Create Skater",
+                        JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+            updateSkaterComboBoxes(null, newSkater, index);
+
+            try {
+                updateFile();
+                JOptionPane.showMessageDialog(mainFrame, "Skater successfully created", "Create Skater",
+                        JOptionPane.INFORMATION_MESSAGE);
+
+                // Reset Text Fields
+                enterSkaterName.setText("");
+                if (assignSkaterStats.isSelected()) {
+                    enterGoals.setText("");
+                    enterAssists.setText("");
+                    enterPlusMinus.setText("");
+                    enterHits.setText("");
+                    enterPenaltyMinutes.setText("");
+                    enterFaceOffPercent.setText("");
+                    enterFaceOffTotal.setText("");
+                    enterShotsBlocked.setText("");
+                }
+            } catch (IOException ex) {
+                JOptionPane.showMessageDialog(selectFrame, "There was an issue writing to the file. " +
+                        "Please try again", "Create Team", JOptionPane.ERROR_MESSAGE);
+            } catch (Exception ex) {
+                JOptionPane.showMessageDialog(selectFrame, ex.getMessage(), "Create Team",
+                        JOptionPane.ERROR_MESSAGE);
             }
         });
 

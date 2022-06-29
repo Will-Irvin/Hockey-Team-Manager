@@ -558,8 +558,8 @@ public class Team implements Serializable {
             currentRow[2] = currentGoalie.getWins();
             currentRow[3] = currentGoalie.getLosses();
             currentRow[4] = currentGoalie.getOtLosses();
-            currentRow[5] = String.format("%.3f", currentGoalie.getGAA());
-            currentRow[6] = String.format("%.2f", currentGoalie.getSavePercent());
+            currentRow[5] = String.format("%.2f", currentGoalie.getGAA());
+            currentRow[6] = String.format("%.3f", currentGoalie.getSavePercent());
         }
         return result;
     }
