@@ -221,6 +221,7 @@ public class Goalie extends Player {
         shotsAgainst += numShots;
     }
 
+    @Override
     public void resetStats() {
         shotsAgainst = 0;
         shotsBlocked = 0;
@@ -229,9 +230,11 @@ public class Goalie extends Player {
         otLosses = 0;
         shutouts = 0;
     }
+
     /**
      * @return A formatted String containing the goalie's relevant stats
      */
+    @Override
     public String statsDisplay() {
         return String.format("""
                         %s #%d
@@ -240,5 +243,11 @@ public class Goalie extends Player {
                             Goals Against Average: %.2f
                             Save Percentage: %.3f""",
                 getName(), getPlayerNumber(), wins, losses, otLosses, shutouts, getGAA(), getSavePercent());
+    }
+
+    @Override
+    public Object[] getStatsArray() {
+        return new Object[]{getName(), getPlayerNumber(), wins, losses, otLosses, String.format("%.2f", getGAA()),
+                String.format("%.3f", getSavePercent())};
     }
 }

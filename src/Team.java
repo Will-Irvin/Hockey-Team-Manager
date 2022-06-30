@@ -525,21 +525,7 @@ public class Team implements Serializable {
     public Object[][] generateSkaterRosterWithStats() {
         Object[][] result = new Object[skaters.size()][NUM_BASIC_STATS];
         for (int i = 0; i < skaters.size(); i++) {
-            Skater currentPlayer = skaters.get(i);
-            Object[] currentRow = result[i];
-            currentRow[0] = currentPlayer.getName();
-            currentRow[1] = currentPlayer.getPlayerNumber();
-            switch (currentPlayer.getPosition()) {
-                case Center -> currentRow[2] = "C";
-                case Left_Wing -> currentRow[2] = "LW";
-                case Right_Wing -> currentRow[2] = "RW";
-                case Left_Defense -> currentRow[2] = "LD";
-                case Right_Defense -> currentRow[2] = "RD";
-            }
-            currentRow[3] = currentPlayer.getGoals();
-            currentRow[4] = currentPlayer.getAssists();
-            currentRow[5] = currentPlayer.getPoints();
-            currentRow[6] = currentPlayer.getPlusMinus();
+            result[i] = skaters.get(i).getStatsArray();
         }
         return result;
     }
@@ -551,15 +537,7 @@ public class Team implements Serializable {
     public Object[][] generateGoalieRosterWithStats() {
         Object[][] result = new Object[goalies.size()][NUM_BASIC_STATS];
         for (int i = 0; i < goalies.size(); i++) {
-            Goalie currentGoalie = goalies.get(i);
-            Object[] currentRow = result[i];
-            currentRow[0] = currentGoalie.getName();
-            currentRow[1] = currentGoalie.getPlayerNumber();
-            currentRow[2] = currentGoalie.getWins();
-            currentRow[3] = currentGoalie.getLosses();
-            currentRow[4] = currentGoalie.getOtLosses();
-            currentRow[5] = String.format("%.2f", currentGoalie.getGAA());
-            currentRow[6] = String.format("%.3f", currentGoalie.getSavePercent());
+            result[i] = goalies.get(i).getStatsArray();
         }
         return result;
     }

@@ -1,6 +1,7 @@
 import javax.print.attribute.standard.PDLOverrideSupported;
 import javax.swing.*;
 import javax.swing.table.AbstractTableModel;
+import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.awt.event.*;
 import java.io.*;
@@ -883,11 +884,13 @@ public class TeamGUI implements Runnable {
         viewRosterWithStatsContent.setLayout(new BoxLayout(viewRosterWithStatsContent, BoxLayout.Y_AXIS));
         JScrollPane viewRosterWithStatsScroll = new JScrollPane(viewRosterWithStatsContent);
 
-        viewRosterStatsSkaters = new JTable(new StatsTableModel(team.generateSkaterRosterWithStats(),
-                SKATER_STATS_COLUMNS));
+        StatsTableModel skaterStats = new StatsTableModel(team.generateSkaterRosterWithStats(),
+                SKATER_STATS_COLUMNS);
+        StatsTableModel goalieStats = new StatsTableModel(team.generateGoalieRosterWithStats(),
+                GOALIE_STATS_COLUMNS);
+        viewRosterStatsSkaters = new JTable(skaterStats);
         viewRosterStatsSkaters.getColumnModel().getColumn(0).setPreferredWidth(NAME_COLUMN_WIDTH);
-        viewRosterStatsGoalies = new JTable(new StatsTableModel(team.generateGoalieRosterWithStats(),
-                GOALIE_STATS_COLUMNS));
+        viewRosterStatsGoalies = new JTable(goalieStats);
         viewRosterStatsGoalies.getColumnModel().getColumn(0).setPreferredWidth(NAME_COLUMN_WIDTH);
 
         createPanel(new JComponent[]{viewRosterStatsSkaters.getTableHeader()}, viewRosterWithStatsContent);
@@ -1112,7 +1115,7 @@ public class TeamGUI implements Runnable {
         }
 
         createLine.addActionListener(e -> {
-            Line newLine = null;
+            Line newLine;
             if (lineType[0].isSelected()) {  // Offense Line
                 try {
                     newLine = new OffenseLine(lineName.getText(), (Center) centerOptions.getSelectedItem(),
@@ -1744,6 +1747,7 @@ public class TeamGUI implements Runnable {
                 return;
             }
             updateSkaterComboBoxes(null, newSkater, index);
+            skaterStats.insertRow(index, newSkater.getStatsArray());
 
             try {
                 updateFile();
@@ -2030,30 +2034,14 @@ public class TeamGUI implements Runnable {
  * data from a 2D Object array containing Strings, ints, and doubles corresponding to a player's stats.
  * It is a very simple implementation of the AbstractTableModel because the table is for viewing only.
  */
-class StatsTableModel extends AbstractTableModel {
-    private final String[] columnNames;
-    private final Object[][] stats;
+class StatsTableModel extends DefaultTableModel {
 
     public StatsTableModel(Object[][] stats, String[] columnNames) {
-        this.stats = stats;
-        this.columnNames = columnNames;
-    }
-
-    public int getColumnCount() {
-        return columnNames.length;
-    }
-
-    public int getRowCount() {
-        return stats.length;
+        super(stats, columnNames);
     }
 
     @Override
-    public Object getValueAt(int rowIndex, int columnIndex) {
-        return stats[rowIndex][columnIndex];
-    }
-
-    @Override
-    public String getColumnName(int column) {
-        return columnNames[column];
+    public boolean isCellEditable(int row, int column) {
+        return false;
     }
 }

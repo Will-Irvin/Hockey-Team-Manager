@@ -239,4 +239,20 @@ public class Skater extends Player {
                 stickHand.charAt(0), goals, assists, getPoints(), plusMinus, hits, penaltyMinutes);
         return result;
     }
+
+    /**
+     * @return An object array where each element is one of the key stats of the skater
+     */
+    @Override
+    public Object[] getStatsArray() {
+        Object[] result = new Object[]{getName(), getPlayerNumber(), "", goals, assists, getPoints(), plusMinus};
+        switch (position) {
+            case Center -> result[2] = "C";
+            case Left_Wing -> result[2] = "LW";
+            case Right_Wing -> result[2] = "RW";
+            case Right_Defense -> result[2] = "RD";
+            case Left_Defense -> result[2] = "LD";
+        }
+        return result;
+    }
 }

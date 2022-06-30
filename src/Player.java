@@ -77,5 +77,7 @@ public abstract class Player implements Serializable {
 
     public abstract String statsDisplay();
 
+    public abstract Object[] getStatsArray();
+
     public abstract void resetStats();
 }
