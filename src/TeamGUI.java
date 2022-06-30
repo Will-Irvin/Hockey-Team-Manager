@@ -1,6 +1,4 @@
-import javax.print.attribute.standard.PDLOverrideSupported;
 import javax.swing.*;
-import javax.swing.table.AbstractTableModel;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.awt.event.*;
@@ -124,6 +122,8 @@ public class TeamGUI implements Runnable {
     JTextArea viewRoster;
 
     // View Roster with Basic Stats
+    StatsTableModel skaterStats;
+    StatsTableModel goalieStats;
     JTable viewRosterStatsSkaters;
     JTable viewRosterStatsGoalies;
 
@@ -215,10 +215,11 @@ public class TeamGUI implements Runnable {
 
     // Edit Skater
     JLabel changeSkaterNameLabel;
-    JTextArea changeSkaterName;
+    JTextField changeSkaterName;
+    JCheckBox changeSkaterNumberCheck;
     JLabel changeSkaterNumberLabel;
     JSlider changeSkaterNumber;
-    JToggleButton changeStickHand;
+    JCheckBox changeStickHand;
     JLabel changeGoalsLabel;
     JTextField changeGoals;
     JLabel changeAssistsLabel;
@@ -710,11 +711,12 @@ public class TeamGUI implements Runnable {
      * @param newSkater Skater being added
      * @param index Index where the new skater will be added in full combo boxes
      */
-    private void updateSkaterComboBoxes(Skater oldSkater, Skater newSkater, int index) {
+    private void updateSkaterComponents(Skater oldSkater, Skater newSkater, int oldIndex, int index) {
         if (oldSkater != null) {  // Remove old skater
             pickLeftWing.removeItem(oldSkater);
             pickRightWing.removeItem(oldSkater);
             skaterOptions.removeItem(oldSkater);
+            skaterStats.removeRow(oldIndex);
             if (oldSkater instanceof Center) {
                 centerOptions.removeItem(oldSkater);
             }
@@ -727,6 +729,8 @@ public class TeamGUI implements Runnable {
         pickLeftWing.insertItemAt(newSkater, index + 1);
         pickRightWing.insertItemAt(newSkater, index + 1);
         skaterOptions.insertItemAt(newSkater, index + 1);
+        skaterStats.insertRow(index, newSkater.getStatsArray());
+
 
         if (newSkater instanceof Center c) {  // Finds proper spot in center combo box if the player is a center
             for (int i = 1; i < centerOptions.getItemCount(); i++) {
@@ -884,9 +888,9 @@ public class TeamGUI implements Runnable {
         viewRosterWithStatsContent.setLayout(new BoxLayout(viewRosterWithStatsContent, BoxLayout.Y_AXIS));
         JScrollPane viewRosterWithStatsScroll = new JScrollPane(viewRosterWithStatsContent);
 
-        StatsTableModel skaterStats = new StatsTableModel(team.generateSkaterRosterWithStats(),
+        skaterStats = new StatsTableModel(team.generateSkaterRosterWithStats(),
                 SKATER_STATS_COLUMNS);
-        StatsTableModel goalieStats = new StatsTableModel(team.generateGoalieRosterWithStats(),
+        goalieStats = new StatsTableModel(team.generateGoalieRosterWithStats(),
                 GOALIE_STATS_COLUMNS);
         viewRosterStatsSkaters = new JTable(skaterStats);
         viewRosterStatsSkaters.getColumnModel().getColumn(0).setPreferredWidth(NAME_COLUMN_WIDTH);
@@ -1562,7 +1566,8 @@ public class TeamGUI implements Runnable {
                                 JOptionPane.ERROR_MESSAGE);
                     }
                 } else {
-                    JOptionPane.showMessageDialog(mainFrame, "There was an issue deleting the selected line.",
+                    JOptionPane.showMessageDialog(mainFrame, "An unexpected error occurred - " +
+                                    "deleteLine.addActionListener",
                             "Delete Line", JOptionPane.ERROR_MESSAGE);
                 }
             }
@@ -1746,8 +1751,7 @@ public class TeamGUI implements Runnable {
                         JOptionPane.ERROR_MESSAGE);
                 return;
             }
-            updateSkaterComboBoxes(null, newSkater, index);
-            skaterStats.insertRow(index, newSkater.getStatsArray());
+            updateSkaterComponents(null, newSkater, -1, index);
 
             try {
                 updateFile();
@@ -1767,8 +1771,7 @@ public class TeamGUI implements Runnable {
                     enterShotsBlocked.setText("");
                 }
             } catch (IOException ex) {
-                JOptionPane.showMessageDialog(selectFrame, "There was an issue writing to the file. " +
-                        "Please try again", "Create Team", JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(selectFrame, FILE_ERROR, "Create Team", JOptionPane.ERROR_MESSAGE);
             } catch (Exception ex) {
                 JOptionPane.showMessageDialog(selectFrame, ex.getMessage(), "Create Team",
                         JOptionPane.ERROR_MESSAGE);
@@ -1776,6 +1779,53 @@ public class TeamGUI implements Runnable {
         });
 
         skaterTabs.add("Create Skater", createSkaterScroll);
+
+        // Edit Skater
+
+        Container editSkaterContent = new Container();
+        editSkaterContent.setLayout(new BoxLayout(editSkaterContent, BoxLayout.Y_AXIS));
+
+        // Top Panel (name and number)
+
+        changeSkaterNameLabel = new JLabel(NAME_STRING);
+        changeSkaterName = new JTextField(ENTER_NAME_SIZE);
+        changeSkaterNumberCheck = new JCheckBox("Change Number?");
+        changeSkaterNumber = new JSlider(1, 99);
+        changeSkaterNumberLabel = new JLabel(Integer.toString(changeSkaterNumber.getValue()));
+        JComponent[] changeNumberComponents = new JComponent[]{changeSkaterNumberLabel, changeSkaterNumber};
+
+        JPanel topEditSkaterPanel = new JPanel();
+        addComponentsToPanel(new JComponent[]{changeSkaterNameLabel, changeSkaterName, changeSkaterNumberCheck},
+                topEditSkaterPanel);
+        editSkaterContent.add(topEditSkaterPanel);
+
+        // Adds/Removes proper components when user wants to change the player's number
+        changeSkaterNumberCheck.addActionListener(e -> {
+            if (changeSkaterNumberCheck.isSelected()) {
+                addComponentsToPanel(changeNumberComponents, topEditSkaterPanel);
+            } else {
+                topEditSkaterPanel.remove(changeSkaterNumberLabel);
+                topEditSkaterPanel.remove(changeSkaterNumber);
+            }
+            mainFrame.repaint();
+        });
+
+        // Updates label to display currently selected value
+        changeSkaterNumber.addChangeListener(e ->
+                changeSkaterNumberLabel.setText(Integer.toString(changeSkaterNumber.getValue())));
+
+        changeStickHand = new JCheckBox("Swap Stick Hand? - Current: ");
+        changeGoalsLabel = new JLabel(GOALS_STRING);
+        changeGoals = new JTextField(ENTER_STAT_SIZE);
+        changeAssistsLabel = new JLabel(ASSISTS_STRING);
+        changeAssists = new JTextField(ENTER_STAT_SIZE);
+        changePMLabel = new JLabel(PM_STRING);
+        changePlusMinus = new JTextField(ENTER_STAT_SIZE);
+
+        createPanel(new JComponent[]{changeStickHand, changeGoalsLabel, changeGoals, changeAssistsLabel, changeAssists,
+                changePMLabel, changePlusMinus}, editSkaterContent);
+
+        skaterTabs.add("Edit or Delete Skaters", editSkaterContent);
 
         mainTabs.add("Manage Skaters", manageSkaterContent);
 
@@ -1796,8 +1846,7 @@ public class TeamGUI implements Runnable {
         try {
             openFile();
         } catch (IOException | ClassNotFoundException e) {
-            JOptionPane.showMessageDialog(null, "There was an issue reading from the file. " +
-                    "Please try again.", "File Error", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(null, FILE_ERROR, "File Error", JOptionPane.ERROR_MESSAGE);
             return;
         } catch (Exception e) {
             JOptionPane.showMessageDialog(null, e.getMessage(), "File Error",
@@ -1895,11 +1944,11 @@ public class TeamGUI implements Runnable {
                             displayTeamGUI();
                             break;
                         } catch (NumberFormatException ex) {
-                            JOptionPane.showMessageDialog(selectFrame, "Please enter a number when prompted",
-                                    "Create Team", JOptionPane.ERROR_MESSAGE);
+                            JOptionPane.showMessageDialog(selectFrame, NUMBER_ERROR, "Create Team",
+                                    JOptionPane.ERROR_MESSAGE);
                         } catch (IOException ex) {
-                            JOptionPane.showMessageDialog(selectFrame, "There was an issue writing to the file. " +
-                                    "Please try again", "Create Team", JOptionPane.ERROR_MESSAGE);
+                            JOptionPane.showMessageDialog(selectFrame, FILE_ERROR, "Create Team",
+                                    JOptionPane.ERROR_MESSAGE);
                         } catch (Exception ex) {
                             JOptionPane.showMessageDialog(selectFrame, ex.getMessage(), "Create Team",
                                     JOptionPane.ERROR_MESSAGE);
