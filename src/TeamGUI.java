@@ -1,5 +1,6 @@
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
+import javax.xml.stream.events.EntityReference;
 import java.awt.*;
 import java.awt.event.*;
 import java.io.*;
@@ -66,6 +67,7 @@ public class TeamGUI implements Runnable {
     private static final String LOSSES_STRING = "Enter number of losses:";
     private static final String OT_STRING = "Enter number of overtime losses or ties:";
     private static final String UPDATE = "Update Changes";
+    private static final String CONFIRM_DELETE = "Are you sure you would like to delete ";
     private static final String EDIT_INSTRUCTIONS = "<html>Enter changes for the information that you would like to " +
             "change.<br>If a field is left blank, no changes will be made for the corresponding information.</html>";
     private static final String EDIT_LINE_INSTRUCTIONS = "<html>This tab will make changes to or delete any already " +
@@ -91,7 +93,7 @@ public class TeamGUI implements Runnable {
             "Points", "+/-"};
     private static final String[] GOALIE_STATS_COLUMNS = {"Goalie Name", "Player #", "Wins", "Losses", "OT L / Ties",
             "GAA", "SV%"};
-    private static final String SELECT = "Please select something to be changed";
+    private static final String SELECT = "Please select a player or line to be changed or deleted.";
 
     // Numeric Constants
     private static final int ENTER_NAME_SIZE = 30;
@@ -219,7 +221,7 @@ public class TeamGUI implements Runnable {
 
     JButton createPlayer;
 
-    // Edit Skater
+    // Edit/Delete Skater
     JLabel editSkaterInstructions;
     JLabel changeSkaterNameLabel;
     JTextField changeSkaterName;
@@ -248,7 +250,6 @@ public class TeamGUI implements Runnable {
 
     JButton editPlayer;
 
-    // Delete Player
     JButton deletePlayer;
 
     // View Stats
@@ -748,38 +749,40 @@ public class TeamGUI implements Runnable {
             return;
         }
 
-        pickLeftWing.insertItemAt(newSkater, index + 1);
-        pickRightWing.insertItemAt(newSkater, index + 1);
-        skaterOptions.insertItemAt(newSkater, index + 1);
-        skaterStats.insertRow(index, newSkater.getStatsArray());
+        if (newSkater != null) {
+            pickLeftWing.insertItemAt(newSkater, index + 1);
+            pickRightWing.insertItemAt(newSkater, index + 1);
+            skaterOptions.insertItemAt(newSkater, index + 1);
+            skaterStats.insertRow(index, newSkater.getStatsArray());
 
 
-        if (newSkater instanceof Center c) {  // Finds proper spot in center combo box if the player is a center
-            for (int i = 1; i < centerOptions.getItemCount(); i++) {
-                if (i == centerOptions.getItemCount() - 1) {
-                    centerOptions.addItem(c);
-                    break;
-                }
-                if (centerOptions.getItemAt(i).getPlayerNumber() < c.getPlayerNumber() &&
-                        c.getPlayerNumber() < centerOptions.getItemAt(i + 1).getPlayerNumber()) {
-                    centerOptions.insertItemAt(c, i + 1);
-                    break;
+            if (newSkater instanceof Center c) {  // Finds proper spot in center combo box if the player is a center
+                for (int i = 1; i < centerOptions.getItemCount(); i++) {
+                    if (i == centerOptions.getItemCount() - 1) {
+                        centerOptions.addItem(c);
+                        break;
+                    }
+                    if (centerOptions.getItemAt(i).getPlayerNumber() < c.getPlayerNumber() &&
+                            c.getPlayerNumber() < centerOptions.getItemAt(i + 1).getPlayerNumber()) {
+                        centerOptions.insertItemAt(c, i + 1);
+                        break;
+                    }
                 }
             }
-        }
 
-        if (newSkater instanceof Defenseman de) {  // Finds proper spot in defenseman combo boxes if player is de
-            for (int i = 1; i < pickLeftDe.getItemCount(); i++) {
-                if (i == pickLeftDe.getItemCount() - 1) {
-                    pickLeftDe.addItem(de);
-                    pickRightDe.addItem(de);
-                    break;
-                }
-                if (pickLeftDe.getItemAt(i).getPlayerNumber() < de.getPlayerNumber() &&
-                        de.getPlayerNumber() < pickLeftDe.getItemAt(i + 1).getPlayerNumber()) {
-                    pickLeftDe.insertItemAt(de, i + 1);
-                    pickRightDe.insertItemAt(de, i + 1);
-                    break;
+            if (newSkater instanceof Defenseman de) {  // Finds proper spot in defenseman combo boxes if player is de
+                for (int i = 1; i < pickLeftDe.getItemCount(); i++) {
+                    if (i == pickLeftDe.getItemCount() - 1) {
+                        pickLeftDe.addItem(de);
+                        pickRightDe.addItem(de);
+                        break;
+                    }
+                    if (pickLeftDe.getItemAt(i).getPlayerNumber() < de.getPlayerNumber() &&
+                            de.getPlayerNumber() < pickLeftDe.getItemAt(i + 1).getPlayerNumber()) {
+                        pickLeftDe.insertItemAt(de, i + 1);
+                        pickRightDe.insertItemAt(de, i + 1);
+                        break;
+                    }
                 }
             }
         }
@@ -950,7 +953,8 @@ public class TeamGUI implements Runnable {
                 try {
                     updateFile();
                 } catch (IOException ex) {
-                    JOptionPane.showMessageDialog(mainFrame, FILE_ERROR, "Reset Team Stats", JOptionPane.ERROR_MESSAGE);
+                    JOptionPane.showMessageDialog(mainFrame, FILE_ERROR, "Reset Team Stats",
+                            JOptionPane.ERROR_MESSAGE);
                 } catch (Exception ex) {
                     JOptionPane.showMessageDialog(mainFrame, ex.getMessage(), "Reset Team Stats",
                             JOptionPane.ERROR_MESSAGE);
@@ -1571,7 +1575,7 @@ public class TeamGUI implements Runnable {
                 return;
             }
 
-            int response = JOptionPane.showConfirmDialog(mainFrame, "Are you sure you would like to delete " +
+            int response = JOptionPane.showConfirmDialog(mainFrame, CONFIRM_DELETE +
                     removingLine.getName() + "?", "Delete Line", JOptionPane.YES_NO_OPTION);
             if (response == JOptionPane.YES_OPTION) {
                 if (team.removeLine(removingLine)) {
@@ -2091,16 +2095,40 @@ public class TeamGUI implements Runnable {
                 } catch (IOException ex) {
                     JOptionPane.showMessageDialog(mainFrame, FILE_ERROR, "Edit Skater", JOptionPane.ERROR_MESSAGE);
                 } catch (Exception ex) {
-                    JOptionPane.showMessageDialog(mainFrame, ex.getMessage(), "Edit Skater", JOptionPane.ERROR_MESSAGE);
+                    JOptionPane.showMessageDialog(mainFrame, ex.getMessage(), "Edit Skater",
+                            JOptionPane.ERROR_MESSAGE);
                 }
             } else {  // Displays message telling the user to enter something
                 JOptionPane.showMessageDialog(mainFrame, EMPTY_INPUTS, "Edit Skater", JOptionPane.ERROR_MESSAGE);
             }
         });
 
-        // TODO
+        // Deletes the selected player from the team and any GUI elements
         deletePlayer.addActionListener(e -> {
+            Skater deletingSkater = (Skater) skaterOptions.getSelectedItem();
+            if (deletingSkater == null) {
+                JOptionPane.showMessageDialog(mainFrame, SELECT, "Delete Skater", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+            int selection = JOptionPane.showConfirmDialog(mainFrame, CONFIRM_DELETE + deletingSkater.getName()
+                    + "?", "Delete Skater", JOptionPane.YES_NO_OPTION);
+            if (selection == JOptionPane.YES_OPTION) {
+                team.removePlayer(deletingSkater);
+                updateSkaterComponents(deletingSkater, null, skaterOptions.getSelectedIndex() - 1,
+                        -1);
 
+                try {
+                    updateFile();
+                    JOptionPane.showMessageDialog(mainFrame, "Skater successfully deleted", "Delete Skater",
+                            JOptionPane.INFORMATION_MESSAGE);
+                } catch (IOException ex) {
+                    JOptionPane.showMessageDialog(mainFrame, FILE_ERROR, "Delete Skater",
+                            JOptionPane.ERROR_MESSAGE);
+                } catch (Exception ex) {
+                    JOptionPane.showMessageDialog(mainFrame, ex.getMessage(), "Delete Skater",
+                            JOptionPane.ERROR_MESSAGE);
+                }
+            }
         });
 
         skaterTabs.add("Edit or Delete Skaters", editSkaterContent);
@@ -2359,7 +2387,8 @@ public class TeamGUI implements Runnable {
  *
  * This class serves as the model for the JTables used to display basic player stats for the entire team. It displays
  * data from a 2D Object array containing Strings, ints, and doubles corresponding to a player's stats.
- * It is a very simple implementation of the AbstractTableModel because the table is for viewing only.
+ * It is a very simple implementation of the DefaultTableModel class. The main difference is that this table is view
+ * only.
  */
 class StatsTableModel extends DefaultTableModel {
 

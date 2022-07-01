@@ -345,16 +345,16 @@ public class Team implements Serializable {
     }
 
     /**
-     * @param player Player removed from the list
+     * @param player Player removed from the appropriate list
      * @return Whether the removal was successful or not
      */
-    public boolean removePlayer(Skater player) {
-        return skaters.remove(player);
-    }
-
-    // Like removePLayer but for goalies
-    public boolean removeGoalie(Goalie goalie) {
-        return goalies.remove(goalie);
+    public boolean removePlayer(Player player) {
+        if (player instanceof Skater) {
+            return skaters.remove(player);
+        } else if (player instanceof Goalie) {
+            return goalies.remove(player);
+        }
+        return false;
     }
 
     // Like removePlayer but for lines
