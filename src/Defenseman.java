@@ -40,6 +40,16 @@ public class Defenseman extends Skater {
         }
     }
 
+    // Shallow Copy Constructor
+    public Defenseman(Skater s) {
+        super(s);
+        if (s instanceof Defenseman d) {
+            this.shotsBlocked = d.shotsBlocked;
+        } else {
+            shotsBlocked = 0;
+        }
+    }
+
     public int getShotsBlocked() {
         return shotsBlocked;
     }

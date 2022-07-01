@@ -35,6 +35,19 @@ public class Center extends Skater {
         this.faceOffTotal = faceOffTotal;
     }
 
+    // Shallow Copy Constructor
+    public Center(Skater s) {
+        super(s);
+        setPosition(Position.Center);
+        if (s instanceof Center c) {
+            this.faceOffWins = c.faceOffWins;
+            this.faceOffTotal = c.faceOffTotal;
+        } else {
+            faceOffWins = 0;
+            faceOffTotal = 0;
+        }
+    }
+
     // Getter Methods
 
     public int getFaceOffWins() {

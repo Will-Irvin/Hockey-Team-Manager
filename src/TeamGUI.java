@@ -78,9 +78,10 @@ public class TeamGUI implements Runnable {
             " players to 0.<br>This action cannot be undone after the fact and their previous stats will be " +
             "lost.</html>";
     private static final String NUMBER_ERROR = "Please enter a number where prompted";
-    private static final String FILE_ERROR = "There was an issue writing to the file. Please close the application " +
-            "and try again.";
+    private static final String FILE_ERROR = "There was an issue interacting with the file. Please close the " +
+            "application and try again.";
     private static final String EMPTY_INPUTS = "Please enter a value in at least one of the boxes";
+    private static final String BLANK_UPDATED = " (Any blank fields have already been updated)";
     private static final String PLAYER_DUPLICATE = "New player cannot share the same number as another player";
     private static final String OFFENSE_LINE = "Offense Line";
     private static final String DEFENSE_LINE = "Defense Pair";
@@ -90,7 +91,7 @@ public class TeamGUI implements Runnable {
             "Points", "+/-"};
     private static final String[] GOALIE_STATS_COLUMNS = {"Goalie Name", "Player #", "Wins", "Losses", "OT L / Ties",
             "GAA", "SV%"};
-    private static final String SELECT_LINE = "Please select a line to edit";
+    private static final String SELECT = "Please select something to be changed";
 
     // Numeric Constants
     private static final int ENTER_NAME_SIZE = 30;
@@ -741,6 +742,12 @@ public class TeamGUI implements Runnable {
             }
         }
 
+        if (oldSkater == null && oldIndex == index) {
+            skaterStats.removeRow(oldIndex);
+            skaterStats.insertRow(index, newSkater.getStatsArray());
+            return;
+        }
+
         pickLeftWing.insertItemAt(newSkater, index + 1);
         pickRightWing.insertItemAt(newSkater, index + 1);
         skaterOptions.insertItemAt(newSkater, index + 1);
@@ -1289,7 +1296,7 @@ public class TeamGUI implements Runnable {
 
         updateLineChanges.addActionListener(e -> {
             if (lineOptions.getSelectedItem() == null) {
-                JOptionPane.showMessageDialog(mainFrame, SELECT_LINE, "Edit Line",
+                JOptionPane.showMessageDialog(mainFrame, SELECT, "Edit Line",
                         JOptionPane.ERROR_MESSAGE);
                 return;
             }
@@ -1388,7 +1395,7 @@ public class TeamGUI implements Runnable {
 
         changeLinePlayers.addActionListener(e -> {
             if (lineOptions.getSelectedItem() == null) {
-                JOptionPane.showMessageDialog(mainFrame, SELECT_LINE, "Edit Line", JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(mainFrame, SELECT, "Edit Line", JOptionPane.ERROR_MESSAGE);
                 return;
             }
             mainFrame.setVisible(false);
@@ -1845,9 +1852,9 @@ public class TeamGUI implements Runnable {
         // Adds position combo box if user wants to change player's position
         changePositionCheck.addActionListener(e -> {
             if (changePositionCheck.isSelected()) {
-                secondEditSkaterPanel.add(positionOptions, 1);
+                secondEditSkaterPanel.add(changePosition, 1);
             } else {
-                secondEditSkaterPanel.remove(positionOptions);
+                secondEditSkaterPanel.remove(changePosition);
             }
             mainFrame.repaint();
         });
@@ -1906,9 +1913,189 @@ public class TeamGUI implements Runnable {
             }
         });
 
-        // TODO
+        // Updates any changes being made to a skater in the edit skaters tab
         editPlayer.addActionListener(e -> {
+            Skater editingSkater = (Skater) skaterOptions.getSelectedItem();
+            if (editingSkater == null) {  // Did not choose a skater
+                JOptionPane.showMessageDialog(mainFrame, SELECT, "Edit Skater", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+            boolean change = false;  // Used to keep track of whether the user actually makes a change
+            try {
+                // Name
+                String name = changeSkaterName.getText();
+                if (!name.isBlank()) {
+                    editingSkater.setName(name);
+                    changeSkaterName.setText("");
+                    change = true;
+                }
+                // Stick Hand
+                if (changeStickHand.isSelected()) {
+                    if (editingSkater.getStickHand().equals("Left")) {
+                        editingSkater.setStickHand("Right");
+                    } else {
+                        editingSkater.setStickHand("Left");
+                    }
+                    changeStickHand.setSelected(false);
+                    change = true;
+                }
+                // Stats
+                String goalsText = changeGoals.getText();
+                String assistsText = changeAssists.getText();
+                String pmText = changePlusMinus.getText();
+                String hitsText = changeHits.getText();
+                String pimText = changePenaltyMinutes.getText();
+                if (!goalsText.isBlank()) {
+                    editingSkater.setGoals(Integer.parseInt(goalsText));
+                    changeGoals.setText("");
+                    change = true;
+                }
+                if (!assistsText.isBlank()) {
+                    editingSkater.setAssists(Integer.parseInt(assistsText));
+                    changeAssists.setText("");
+                    change = true;
+                }
+                if (!pmText.isBlank()) {
+                    editingSkater.setPlusMinus(Integer.parseInt(pmText));
+                    changePlusMinus.setText("");
+                    change = true;
+                }
+                if (!hitsText.isBlank()) {
+                    editingSkater.setHits(Integer.parseInt(hitsText));
+                    changeHits.setText("");
+                    change = true;
+                }
+                if (!pimText.isBlank()) {
+                    editingSkater.setPenaltyMinutes(Double.parseDouble(pimText));
+                    changePenaltyMinutes.setText("");
+                    change = true;
+                }
+                if (editingSkater instanceof Center c) {
+                    String faceOffPercent = changeFaceOffPercent.getText();
+                    if (!faceOffPercent.isBlank()) {
+                        c.setFaceoffPercent(Double.parseDouble(faceOffPercent),
+                                Integer.parseInt(changeFaceOffTotal.getText()));
+                        changeFaceOffPercent.setText("");
+                        changeFaceOffTotal.setText("");
+                        change = true;
+                    }
+                }
+                if (editingSkater instanceof Defenseman de) {
+                    String shotsBlockedText = changeShotsBlocked.getText();
+                    if (!shotsBlockedText.isBlank()) {
+                        de.setShotsBlocked(Integer.parseInt(shotsBlockedText));
+                        changeShotsBlocked.setText("");
+                        change = true;
+                    }
+                }
+            } catch (NumberFormatException ex) {
+                JOptionPane.showMessageDialog(mainFrame, NUMBER_ERROR + BLANK_UPDATED, "Edit Skater",
+                        JOptionPane.ERROR_MESSAGE);
+                return;
+            } catch (IllegalArgumentException | NullPointerException ex) {
+                JOptionPane.showMessageDialog(mainFrame, ex.getMessage() + BLANK_UPDATED, "Edit Skater",
+                        JOptionPane.ERROR_MESSAGE);
+                return;
+            }
 
+            Skater newSkater = null;  // Skater where changes to position or player number will be made
+
+            /*
+               If position needs to be changed, may need to create an entirely new skater
+               This segment handles all the different possibilities for changing a player's position
+             */
+            if (changePositionCheck.isSelected()) {
+                Position newPosition = (Position) changePosition.getSelectedItem();
+                if (editingSkater instanceof Center) {
+                    if (newPosition == Position.Left_Wing || newPosition == Position.Right_Wing) {
+                        newSkater = new Skater(editingSkater);
+                        newSkater.setPosition(newPosition);
+                        if (changeSkaterNumberCheck.isSelected()) {
+                            newSkater.setPlayerNumber(changeSkaterNumber.getValue());
+                        }
+                        change = true;
+                    } else if (newPosition == Position.Right_Defense || newPosition == Position.Left_Defense) {
+                        newSkater = new Defenseman(editingSkater);
+                        newSkater.setPosition(newPosition);
+                        if (changeSkaterNumberCheck.isSelected()) {
+                            newSkater.setPlayerNumber(changeSkaterNumber.getValue());
+                        }
+                        change = true;
+                    }
+                } else if (editingSkater instanceof Defenseman) {
+                    if (newPosition == Position.Center) {
+                        newSkater = new Center(editingSkater);
+                        if (changeSkaterNumberCheck.isSelected()) {
+                            newSkater.setPlayerNumber(changeSkaterNumber.getValue());
+                        }
+                    } else if (newPosition == Position.Left_Wing || newPosition == Position.Right_Wing) {
+                        newSkater = new Skater(editingSkater);
+                        newSkater.setPosition(newPosition);
+                        if (changeSkaterNumberCheck.isSelected()) {
+                            newSkater.setPlayerNumber(changeSkaterNumber.getValue());
+                        }
+                    } else {
+                        editingSkater.setPosition(newPosition);
+                    }
+                    change = true;
+                } else {
+                    if (newPosition == Position.Center) {
+                        newSkater = new Center(editingSkater);
+                        if (changeSkaterNumberCheck.isSelected()) {
+                            newSkater.setPlayerNumber(changeSkaterNumber.getValue());
+                        }
+                    } else if (newPosition == Position.Left_Defense || newPosition == Position.Right_Defense) {
+                        newSkater = new Defenseman(editingSkater);
+                        newSkater.setPosition(newPosition);
+                        if (changeSkaterNumberCheck.isSelected()) {
+                            newSkater.setPlayerNumber(changeSkaterNumber.getValue());
+                        }
+                    } else {
+                        editingSkater.setPosition(newPosition);
+                    }
+                    change = true;
+                }
+            } else if (changeSkaterNumberCheck.isSelected()) {
+                if (editingSkater instanceof Center) {
+                    newSkater = new Center(editingSkater);
+                } else if (editingSkater instanceof  Defenseman) {
+                    newSkater = new Defenseman(editingSkater);
+                } else {
+                    newSkater = new Skater(editingSkater);
+                }
+                newSkater.setPlayerNumber(changeSkaterNumber.getValue());
+                changeSkaterNumberCheck.setSelected(false);
+                change = true;
+            }
+
+
+            if (change) {  // Update GUI components, file, and the team lists if necessary
+                int oldIndex = skaterOptions.getSelectedIndex() - 1;  // Index where the skater used to be
+
+                if (newSkater != null) {
+                    int index = team.changePlayer(editingSkater, newSkater);
+                    if (index == -1) {
+                        JOptionPane.showMessageDialog(mainFrame, PLAYER_DUPLICATE, "Edit Skater",
+                                JOptionPane.ERROR_MESSAGE);
+                        return;
+                    }
+                    updateSkaterComponents(editingSkater, newSkater, oldIndex, index);
+                } else {
+                    updateSkaterComponents(null, editingSkater, oldIndex, oldIndex);
+                }
+
+                try {
+                    updateFile();
+                    JOptionPane.showMessageDialog(mainFrame, "Skater updated successfully", "Edit Skater",
+                            JOptionPane.INFORMATION_MESSAGE);
+                } catch (IOException ex) {
+                    JOptionPane.showMessageDialog(mainFrame, FILE_ERROR, "Edit Skater", JOptionPane.ERROR_MESSAGE);
+                } catch (Exception ex) {
+                    JOptionPane.showMessageDialog(mainFrame, ex.getMessage(), "Edit Skater", JOptionPane.ERROR_MESSAGE);
+                }
+            } else {  // Displays message telling the user to enter something
+                JOptionPane.showMessageDialog(mainFrame, EMPTY_INPUTS, "Edit Skater", JOptionPane.ERROR_MESSAGE);
+            }
         });
 
         // TODO

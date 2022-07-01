@@ -11,7 +11,7 @@ public class Skater extends Player {
     private int hits;
     private double penaltyMinutes;
     private String stickHand;
-    private final Position position;
+    private Position position;
 
     /**
      * Sets given arguments to their respective instance variables. Initializes stats such as goals/assists to 0.
@@ -77,6 +77,18 @@ public class Skater extends Player {
         this.penaltyMinutes = penaltyMinutes;
     }
 
+    // Shallow copy constructor
+    public Skater(Skater s) {
+        super(s.getName(), s.getPlayerNumber());
+        this.stickHand = s.stickHand;
+        this.position = s.position;
+        this.goals = s.goals;
+        this.assists = s.assists;
+        this.plusMinus = s.plusMinus;
+        this.hits = s.hits;
+        this.penaltyMinutes = s.penaltyMinutes;
+    }
+
     public int getGoals() {
         return goals;
     }
@@ -107,6 +119,10 @@ public class Skater extends Player {
 
     public double getPenaltyMinutes() {
         return penaltyMinutes;
+    }
+
+    public void setPosition(Position position) {
+        this.position = position;
     }
 
     /**

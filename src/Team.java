@@ -317,28 +317,20 @@ public class Team implements Serializable {
      * @param newPlayer New player being added
      * @return True if the change was made false otherwise
      */
-    public int changePlayer(Skater oldPlayer, Skater newPlayer) {
-        if (!newPlayer.equals(oldPlayer) && skaters.contains(newPlayer)) {
+    public int changePlayer(Player oldPlayer, Player newPlayer) {
+        if (!newPlayer.equals(oldPlayer) && (skaters.contains(newPlayer) || goalies.contains(newPlayer))) {
             return -1;
         }
-        if (!skaters.remove(oldPlayer)) {
-            return -2;
+        if (oldPlayer instanceof Skater) {
+            if (!skaters.remove(oldPlayer)) {
+                return -2;
+            }
+        } else if (oldPlayer instanceof Goalie){
+            if (!goalies.remove(oldPlayer)) {
+                return -2;
+            }
         }
         return addPlayer(newPlayer);
-    }
-
-    /**
-     * Does functionality of changePlayer but for goalies
-     * @param oldGoalie Goalie being changed
-     * @param newGoalie New goalie being added
-     * @return True if the change was made, false otherwise
-     */
-    public int changeGoalie(Goalie oldGoalie, Goalie newGoalie) {
-        if (!newGoalie.equals(oldGoalie) && goalies.contains(newGoalie)) return -1;
-        if (!goalies.remove(oldGoalie)) {
-            return -2;
-        }
-        return addPlayer(newGoalie);
     }
 
     // Edit a line on the list, works like changePlayer/Goalie for lines
