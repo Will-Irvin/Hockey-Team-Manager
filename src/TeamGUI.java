@@ -53,6 +53,8 @@ public class TeamGUI implements Runnable {
     private static final String PLAYER_NUMBER_STRING = "Select Player Number:";
     private static final String LEFT_HANDED = "Left-handed (Click to switch)";
     private static final String RIGHT_HANDED = "Right-handed (Click to switch)";
+    private static final String STICK_HAND_STRING = "Current Stick Hand: ";
+    private static final String CHANGE_POSITION = "Change Position? - Current: ";
     private static final String GOALS_STRING = "Enter Goals:";
     private static final String ASSISTS_STRING = "Enter Assists:";
     private static final String PM_STRING = "Enter +/-:";
@@ -63,10 +65,14 @@ public class TeamGUI implements Runnable {
     private static final String WINS_STRING = "Enter number of wins:";
     private static final String LOSSES_STRING = "Enter number of losses:";
     private static final String OT_STRING = "Enter number of overtime losses or ties:";
+    private static final String UPDATE = "Update Changes";
     private static final String EDIT_INSTRUCTIONS = "<html>Enter changes for the information that you would like to " +
             "change.<br>If a field is left blank, no changes will be made for the corresponding information.</html>";
     private static final String EDIT_LINE_INSTRUCTIONS = "<html>This tab will make changes to or delete any already " +
             "created lines.<br>Use the drop box at the top of the screen to select which line you would like to " +
+            "change or delete.<br>" + EDIT_INSTRUCTIONS;
+    private static final String EDIT_PLAYER_INSTRUCTIONS = "<html>This tab will make changes to or delete any already " +
+            "created players.<br>Use the drop box at the top of the screen to select which player you would like to " +
             "change or delete.<br>" + EDIT_INSTRUCTIONS;
     private static final String RESET_STATS_WARNING = "<html>This button will reset all stats for your team and its" +
             " players to 0.<br>This action cannot be undone after the fact and their previous stats will be " +
@@ -180,11 +186,10 @@ public class TeamGUI implements Runnable {
     JLabel viewLineLabel;
     JTextArea viewLine;
 
-    // Create/Edit Skater/Goalie
-
     // Manage Skaters
 
     JTabbedPane skaterTabs;
+    JLabel selectedSkaterLabel;
 
     // Create Skater
     JLabel enterSkaterNameLabel;
@@ -214,11 +219,15 @@ public class TeamGUI implements Runnable {
     JButton createPlayer;
 
     // Edit Skater
+    JLabel editSkaterInstructions;
     JLabel changeSkaterNameLabel;
     JTextField changeSkaterName;
     JCheckBox changeSkaterNumberCheck;
     JLabel changeSkaterNumberLabel;
     JSlider changeSkaterNumber;
+    JCheckBox changePositionCheck;
+    JComboBox<Position> changePosition;
+    JLabel changeStickHandLabel;
     JCheckBox changeStickHand;
     JLabel changeGoalsLabel;
     JTextField changeGoals;
@@ -702,6 +711,12 @@ public class TeamGUI implements Runnable {
         positionOptions.addItem(Position.Right_Wing);
         positionOptions.addItem(Position.Left_Defense);
         positionOptions.addItem(Position.Right_Defense);
+        changePosition = new JComboBox<>();
+        changePosition.addItem(Position.Center);
+        changePosition.addItem(Position.Left_Wing);
+        changePosition.addItem(Position.Right_Wing);
+        changePosition.addItem(Position.Left_Defense);
+        changePosition.addItem(Position.Right_Defense);
     }
 
     /**
@@ -800,7 +815,7 @@ public class TeamGUI implements Runnable {
         changeTeamLosses = new JTextField(ENTER_STAT_SIZE);
         changeTeamOTLabel = new JLabel(OT_STRING + " (Current: " + team.getOtLosses() + ")");
         changeTeamOT = new JTextField(ENTER_STAT_SIZE);
-        updateTeamChanges = new JButton("Update Changes");
+        updateTeamChanges = new JButton(UPDATE);
 
         // Panels for each different instance variable (name, wins, losses, ot losses)
         createPanel(new JComponent[]{changeTeamNameLabel, changeTeamName}, editTeam);
@@ -1256,7 +1271,7 @@ public class TeamGUI implements Runnable {
         lineOptions.addItemListener(e -> {
             if (lineOptions.getSelectedItem() instanceof SpecialTeamsLine && !isSpecialTeams.get()) {
                 isSpecialTeams.set(true);
-                updateLineChanges.setText("Update Changes");
+                updateLineChanges.setText(UPDATE);
                 editLineContent.add(changeSTSuccess, editLineContent.getComponentCount() - 3);
             } else if (isSpecialTeams.get() && (lineOptions.getSelectedItem() instanceof OffenseLine ||
                     lineOptions.getSelectedItem() instanceof DefenseLine || lineOptions.getSelectedItem() == null) ) {
@@ -1591,10 +1606,12 @@ public class TeamGUI implements Runnable {
         mainTabs.add("Manage Lines", lineContainerScroll);
 
         // Manage Skaters
+
         Container manageSkaterContent = new Container();
         manageSkaterContent.setLayout(new BoxLayout(manageSkaterContent, BoxLayout.Y_AXIS));
         skaterTabs = new JTabbedPane();
-        createPanel(new JComponent[]{skaterOptions}, manageSkaterContent);
+        selectedSkaterLabel = new JLabel("Selected Skater:");
+        createPanel(new JComponent[]{selectedSkaterLabel, skaterOptions}, manageSkaterContent);
         createPanel(new JComponent[]{skaterTabs}, manageSkaterContent);
 
         // Create Skater
@@ -1611,9 +1628,8 @@ public class TeamGUI implements Runnable {
                 createSkater);
 
         // Displays currently selected value in the JLabel
-        enterSkaterNumber.addChangeListener(e -> {
-            enterSkaterNumberLabel.setText(PLAYER_NUMBER_STRING + "  " + enterSkaterNumber.getValue());
-        });
+        enterSkaterNumber.addChangeListener(e ->
+                enterSkaterNumberLabel.setText(PLAYER_NUMBER_STRING + "  " + enterSkaterNumber.getValue()));
 
         chooseStickHand = new JToggleButton(RIGHT_HANDED);
         selectPostition = new JLabel("Select Player Position:");
@@ -1785,6 +1801,9 @@ public class TeamGUI implements Runnable {
         Container editSkaterContent = new Container();
         editSkaterContent.setLayout(new BoxLayout(editSkaterContent, BoxLayout.Y_AXIS));
 
+        editSkaterInstructions = new JLabel(EDIT_PLAYER_INSTRUCTIONS);
+        createPanel(new JComponent[]{editSkaterInstructions}, editSkaterContent);
+
         // Top Panel (name and number)
 
         changeSkaterNameLabel = new JLabel(NAME_STRING);
@@ -1794,18 +1813,18 @@ public class TeamGUI implements Runnable {
         changeSkaterNumberLabel = new JLabel(Integer.toString(changeSkaterNumber.getValue()));
         JComponent[] changeNumberComponents = new JComponent[]{changeSkaterNumberLabel, changeSkaterNumber};
 
-        JPanel topEditSkaterPanel = new JPanel();
+        JPanel nameAndNumberPanel = new JPanel();
         addComponentsToPanel(new JComponent[]{changeSkaterNameLabel, changeSkaterName, changeSkaterNumberCheck},
-                topEditSkaterPanel);
-        editSkaterContent.add(topEditSkaterPanel);
+                nameAndNumberPanel);
+        editSkaterContent.add(nameAndNumberPanel);
 
         // Adds/Removes proper components when user wants to change the player's number
         changeSkaterNumberCheck.addActionListener(e -> {
             if (changeSkaterNumberCheck.isSelected()) {
-                addComponentsToPanel(changeNumberComponents, topEditSkaterPanel);
+                addComponentsToPanel(changeNumberComponents, nameAndNumberPanel);
             } else {
-                topEditSkaterPanel.remove(changeSkaterNumberLabel);
-                topEditSkaterPanel.remove(changeSkaterNumber);
+                nameAndNumberPanel.remove(changeSkaterNumberLabel);
+                nameAndNumberPanel.remove(changeSkaterNumber);
             }
             mainFrame.repaint();
         });
@@ -1814,16 +1833,88 @@ public class TeamGUI implements Runnable {
         changeSkaterNumber.addChangeListener(e ->
                 changeSkaterNumberLabel.setText(Integer.toString(changeSkaterNumber.getValue())));
 
-        changeStickHand = new JCheckBox("Swap Stick Hand? - Current: ");
+        JPanel secondEditSkaterPanel = new JPanel();
+        changePositionCheck = new JCheckBox(CHANGE_POSITION);
+        addComponentsToPanel(new JComponent[]{changePositionCheck}, secondEditSkaterPanel);
+        editSkaterContent.add(secondEditSkaterPanel);
+
+        changeStickHandLabel = new JLabel(STICK_HAND_STRING);
+        changeStickHand = new JCheckBox("Swap Stick Hand?");
+        createPanel(new JComponent[]{changeStickHandLabel, changeStickHand}, editSkaterContent);
+
+        // Adds position combo box if user wants to change player's position
+        changePositionCheck.addActionListener(e -> {
+            if (changePositionCheck.isSelected()) {
+                secondEditSkaterPanel.add(positionOptions, 1);
+            } else {
+                secondEditSkaterPanel.remove(positionOptions);
+            }
+            mainFrame.repaint();
+        });
+
         changeGoalsLabel = new JLabel(GOALS_STRING);
         changeGoals = new JTextField(ENTER_STAT_SIZE);
         changeAssistsLabel = new JLabel(ASSISTS_STRING);
         changeAssists = new JTextField(ENTER_STAT_SIZE);
         changePMLabel = new JLabel(PM_STRING);
         changePlusMinus = new JTextField(ENTER_STAT_SIZE);
+        createPanel(new JComponent[]{changeGoalsLabel, changeGoals, changeAssistsLabel, changeAssists, changePMLabel,
+                changePlusMinus}, editSkaterContent);
 
-        createPanel(new JComponent[]{changeStickHand, changeGoalsLabel, changeGoals, changeAssistsLabel, changeAssists,
-                changePMLabel, changePlusMinus}, editSkaterContent);
+        changeHitsLabel = new JLabel(HITS_STRING);
+        changeHits = new JTextField(ENTER_STAT_SIZE);
+        changePIMLabel = new JLabel(PIM_STRING);
+        changePenaltyMinutes = new JTextField(ENTER_STAT_SIZE);
+        createPanel(new JComponent[]{changeHitsLabel, changeHits, changePIMLabel, changePenaltyMinutes},
+                editSkaterContent);
+
+        editPlayer = new JButton(UPDATE);
+        createPanel(new JComponent[]{editPlayer}, editSkaterContent);
+
+        deletePlayer = new JButton("Delete Selected Skater");
+        createPanel(new JComponent[]{deletePlayer}, editSkaterContent);
+
+        JPanel changeCenterPanel = new JPanel();
+        changeFaceOffLabel = new JLabel(FACE_OFF_STRING);
+        changeFaceOffPercent = new JTextField(ENTER_STAT_SIZE);
+        changeFaceOffTotal = new JTextField(ENTER_STAT_SIZE);
+        addComponentsToPanel(new JComponent[]{changeFaceOffLabel, changeFaceOffPercent, changeFaceOffTotal},
+                changeCenterPanel);
+
+        JPanel changeDefensePanel = new JPanel();
+        changeBlocksLabel = new JLabel(SHOT_BLOCK_STRING);
+        changeShotsBlocked = new JTextField(ENTER_STAT_SIZE);
+        addComponentsToPanel(new JComponent[]{changeBlocksLabel, changeShotsBlocked}, changeDefensePanel);
+
+        // Updates stick hand swap button and adds proper components for a center or defenseman
+        skaterOptions.addItemListener(e -> {
+            Skater newSkater = (Skater) skaterOptions.getSelectedItem();
+            if (e.getStateChange() == ItemEvent.SELECTED && newSkater != null) {
+                editSkaterContent.remove(changeCenterPanel);
+                editSkaterContent.remove(changeDefensePanel);
+                changeStickHandLabel.setText(STICK_HAND_STRING + newSkater.getStickHand());
+                changePositionCheck.setText(CHANGE_POSITION + newSkater.getPosition());
+                if (newSkater instanceof Center) {
+                    editSkaterContent.add(changeCenterPanel, editSkaterContent.getComponentCount() - 2);
+                } else if (newSkater instanceof Defenseman) {
+                    editSkaterContent.add(changeDefensePanel, editSkaterContent.getComponentCount() - 2);
+                }
+                mainFrame.repaint();
+            } else if (newSkater == null) {
+                changeStickHandLabel.setText(STICK_HAND_STRING);
+                changePositionCheck.setText(CHANGE_POSITION);
+            }
+        });
+
+        // TODO
+        editPlayer.addActionListener(e -> {
+
+        });
+
+        // TODO
+        deletePlayer.addActionListener(e -> {
+
+        });
 
         skaterTabs.add("Edit or Delete Skaters", editSkaterContent);
 
@@ -1863,7 +1954,7 @@ public class TeamGUI implements Runnable {
 
         // Top of frame, selecting an already created team
         // Combo Box to select your team
-        teamSelection = new JComboBox<Team>();
+        teamSelection = new JComboBox<>();
         for (Team team: teams) {
             teamSelection.addItem(team);
         }
