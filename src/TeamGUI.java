@@ -1,6 +1,5 @@
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
-import javax.xml.stream.events.EntityReference;
 import java.awt.*;
 import java.awt.event.*;
 import java.io.*;
@@ -200,7 +199,7 @@ public class TeamGUI implements Runnable {
     JLabel enterSkaterNumberLabel;
     JSlider enterSkaterNumber;
     JToggleButton chooseStickHand;
-    JLabel selectPostition;
+    JLabel selectPosition;
     JComboBox<Position> positionOptions;
     JToggleButton assignSkaterStats;
     JLabel enterGoalsLabel;
@@ -540,7 +539,7 @@ public class TeamGUI implements Runnable {
      * @param components The JComponents being inserted into the new panel
      * @param container Container where the JPanel will go
      */
-    private void createPanel(JComponent[] components, Container container) {
+    private void createPanelForContainer(JComponent[] components, Container container) {
         JPanel panel = new JPanel();
         for (JComponent component : components) {
             panel.add(component);
@@ -555,7 +554,7 @@ public class TeamGUI implements Runnable {
      * @param container Container where the panel will be added
      * @param layoutString Border layout location specifier
      */
-    private void createPanel(JComponent[] components, Container container, String layoutString) {
+    private void createPanelForContainer(JComponent[] components, Container container, String layoutString) {
         JPanel panel = new JPanel();
         for (JComponent component: components) {
             panel.add(component);
@@ -564,29 +563,16 @@ public class TeamGUI implements Runnable {
     }
 
     /**
-     * Creates a panel containing each of the given components, and adds it to the given container at the specified
-     * index
-     * @param components The JComponents being inserted into the new panel
-     * @param container Container where the JPanel will go
-     * @param index Position where the panel will go in the container
-     */
-    private void createPanel(JComponent[] components, Container container, int index) {
-        JPanel panel = new JPanel();
-        for (JComponent component : components) {
-            panel.add(component);
-        }
-        container.add(panel, index);
-    }
-
-    /**
-     * Adds given components to the given panel
+     * Adds given components to a newly created panel
      * @param components Components to be added to the panel
-     * @param panel Panel where the components should be added
+     * @return The created panel
      */
-    private void addComponentsToPanel(JComponent[] components, JPanel panel) {
+    private JPanel createPanel(JComponent[] components) {
+        JPanel panel = new JPanel();
         for (JComponent component: components) {
             panel.add(component);
         }
+        return panel;
     }
 
     /**
@@ -648,15 +634,6 @@ public class TeamGUI implements Runnable {
                 SKATER_STATS_COLUMNS));
         viewRosterStatsGoalies.setModel(new StatsTableModel(team.generateGoalieRosterWithStats(),
                 GOALIE_STATS_COLUMNS));
-    }
-
-    /**
-     * @return An array of JRadioButtons that each correspond to a different subclass of lines for when the user is
-     * creating a line
-     */
-    private JRadioButton[] initializeLineType() {
-        return new JRadioButton[]{new JRadioButton(OFFENSE_LINE), new JRadioButton(DEFENSE_LINE),
-                new JRadioButton(PP_LINE), new JRadioButton(PK_LINE)};
     }
 
     /**
@@ -828,14 +805,14 @@ public class TeamGUI implements Runnable {
         updateTeamChanges = new JButton(UPDATE);
 
         // Panels for each different instance variable (name, wins, losses, ot losses)
-        createPanel(new JComponent[]{changeTeamNameLabel, changeTeamName}, editTeam);
-        createPanel(new JComponent[]{changeTeamWinsLabel, changeTeamWins}, editTeam);
-        createPanel(new JComponent[]{changeTeamLossesLabel, changeTeamLosses}, editTeam);
-        createPanel(new JComponent[]{changeTeamOTLabel, changeTeamOT}, editTeam);
+        createPanelForContainer(new JComponent[]{changeTeamNameLabel, changeTeamName}, editTeam);
+        createPanelForContainer(new JComponent[]{changeTeamWinsLabel, changeTeamWins}, editTeam);
+        createPanelForContainer(new JComponent[]{changeTeamLossesLabel, changeTeamLosses}, editTeam);
+        createPanelForContainer(new JComponent[]{changeTeamOTLabel, changeTeamOT}, editTeam);
 
         // Instructions and Button
-        createPanel(new JComponent[]{editInstructionsLabel}, editTeam);
-        createPanel(new JComponent[]{updateTeamChanges}, editTeam);
+        createPanelForContainer(new JComponent[]{editInstructionsLabel}, editTeam);
+        createPanelForContainer(new JComponent[]{updateTeamChanges}, editTeam);
 
         updateTeamChanges.addActionListener(e -> {
             // Get user inputs
@@ -922,10 +899,10 @@ public class TeamGUI implements Runnable {
         viewRosterStatsGoalies = new JTable(goalieStats);
         viewRosterStatsGoalies.getColumnModel().getColumn(0).setPreferredWidth(NAME_COLUMN_WIDTH);
 
-        createPanel(new JComponent[]{viewRosterStatsSkaters.getTableHeader()}, viewRosterWithStatsContent);
-        createPanel(new JComponent[]{viewRosterStatsSkaters}, viewRosterWithStatsContent);
-        createPanel(new JComponent[]{viewRosterStatsGoalies.getTableHeader()}, viewRosterWithStatsContent);
-        createPanel(new JComponent[]{viewRosterStatsGoalies}, viewRosterWithStatsContent);
+        createPanelForContainer(new JComponent[]{viewRosterStatsSkaters.getTableHeader()}, viewRosterWithStatsContent);
+        createPanelForContainer(new JComponent[]{viewRosterStatsSkaters}, viewRosterWithStatsContent);
+        createPanelForContainer(new JComponent[]{viewRosterStatsGoalies.getTableHeader()}, viewRosterWithStatsContent);
+        createPanelForContainer(new JComponent[]{viewRosterStatsGoalies}, viewRosterWithStatsContent);
 
         teamTabs.add("View Basic Player Stats", viewRosterWithStatsScroll);
 
@@ -941,8 +918,8 @@ public class TeamGUI implements Runnable {
         resetTeamStats = new JButton("Reset Team Stats");
         Container resetTeamContent = new Container();
         resetTeamContent.setLayout(new BoxLayout(resetTeamContent, BoxLayout.X_AXIS));
-        createPanel(new JComponent[]{resetStatsWarningLabel}, resetTeamContent);
-        createPanel(new JComponent[]{resetTeamStats}, resetTeamContent);
+        createPanelForContainer(new JComponent[]{resetStatsWarningLabel}, resetTeamContent);
+        createPanelForContainer(new JComponent[]{resetTeamStats}, resetTeamContent);
 
         // Resets stats for teams and updates relevant components
         resetTeamStats.addActionListener(e -> {
@@ -975,8 +952,8 @@ public class TeamGUI implements Runnable {
         lineTabs = new JTabbedPane();
         currentLineLabel = new JLabel("Selected Line:");
 
-        createPanel(new JComponent[]{currentLineLabel, lineOptions}, mainLineContainer);
-        createPanel(new JComponent[]{lineTabs}, mainLineContainer);
+        createPanelForContainer(new JComponent[]{currentLineLabel, lineOptions}, mainLineContainer);
+        createPanelForContainer(new JComponent[]{lineTabs}, mainLineContainer);
 
         JScrollPane lineContainerScroll = new JScrollPane(mainLineContainer);
 
@@ -987,61 +964,55 @@ public class TeamGUI implements Runnable {
 
         enterLineNameLabel = new JLabel("Enter Line Name:");
         lineName = new JTextField(ENTER_NAME_SIZE);
-        createPanel(new JComponent[]{enterLineNameLabel, lineName}, createLineContent);
+        createPanelForContainer(new JComponent[]{enterLineNameLabel, lineName}, createLineContent);
 
         createLine = new JButton("Create Line");
-        createPanel(new JComponent[]{createLine}, createLineContent);
+        createPanelForContainer(new JComponent[]{createLine}, createLineContent);
 
         lineTypeLabel = new JLabel("Select Type of Line:");
         lineTypeGroup = new ButtonGroup();
-        lineType = initializeLineType();
+        lineType = new JRadioButton[]{new JRadioButton(OFFENSE_LINE), new JRadioButton(DEFENSE_LINE),
+                new JRadioButton(PP_LINE), new JRadioButton(PK_LINE)};
         for (JRadioButton button: lineType) {
             lineTypeGroup.add(button);
         }
         final boolean[] selectedLine = {false, false, false, false};
-        createPanel(new JComponent[]{lineTypeLabel}, createLineContent);
-        createPanel(lineType, createLineContent);
+        createPanelForContainer(new JComponent[]{lineTypeLabel}, createLineContent);
+        createPanelForContainer(lineType, createLineContent);
 
         // Center
-        JPanel selectCenterPanel = new JPanel();
         selectCenterLabel = new JLabel("Center:");
-        addComponentsToPanel(new JComponent[]{selectCenterLabel, centerOptions}, selectCenterPanel);
+        JPanel selectCenterPanel = createPanel(new JComponent[]{selectCenterLabel, centerOptions});
 
         // Left Wing
-        JPanel selectLWPanel = new JPanel();
         selectLWLabel = new JLabel("Left Wing:");
-        addComponentsToPanel(new JComponent[]{selectLWLabel, pickLeftWing}, selectLWPanel);
+        JPanel selectLWPanel = createPanel(new JComponent[]{selectLWLabel, pickLeftWing});
+
 
         // Right Wing
-        JPanel selectRWPanel = new JPanel();
         selectRWLabel = new JLabel("Right Wing:");
-        addComponentsToPanel(new JComponent[]{selectRWLabel, pickRightWing}, selectRWPanel);
+        JPanel selectRWPanel = createPanel(new JComponent[]{selectRWLabel, pickRightWing});
 
         // Left De
-        JPanel selectLDPanel = new JPanel();
         selectLDLabel = new JLabel("Left Defense:");
-        addComponentsToPanel(new JComponent[]{selectLDLabel, pickLeftDe}, selectLDPanel);
+        JPanel selectLDPanel = createPanel(new JComponent[]{selectLDLabel, pickLeftDe});
 
         // Right De
-        JPanel selectRDPanel = new JPanel();
         selectRDLabel = new JLabel("Right Defense:");
-        addComponentsToPanel(new JComponent[]{selectRDLabel, pickRightDe}, selectRDPanel);
+        JPanel selectRDPanel = createPanel(new JComponent[]{selectRDLabel, pickRightDe});
 
         // Special Teams Stats
-        JPanel statsTogglePanel = new JPanel();
         enterStatsToggle = new JToggleButton("Click to enter a starting Success %");
-        statsTogglePanel.add(enterStatsToggle);
+        JPanel statsTogglePanel = createPanel(new JComponent[]{enterStatsToggle});
 
-        JPanel enterSuccessPercentagePanel = new JPanel();
         enterSuccessPercentageLabel = new JLabel("Enter Success Percentage:");
         enterSuccessPercentage = new JTextField(ENTER_STAT_SIZE);
-        addComponentsToPanel(new JComponent[]{enterSuccessPercentageLabel, enterSuccessPercentage},
-                enterSuccessPercentagePanel);
+        JPanel enterSuccessPercentagePanel = createPanel(new JComponent[]{enterSuccessPercentageLabel,
+                enterSuccessPercentage});
 
-        JPanel enterNumOppsPanel = new JPanel();
         enterNumOppsLabel = new JLabel("Enter Number of PP/PK Opportunities:");
         enterNumOpps = new JTextField(ENTER_STAT_SIZE);
-        addComponentsToPanel(new JComponent[]{enterNumOppsLabel, enterNumOpps}, enterNumOppsPanel);
+        JPanel enterNumOppsPanel = createPanel(new JComponent[]{enterNumOppsLabel, enterNumOpps});
 
         // Displays text fields to enter success percentage and number of opportunities for the newly created line
         enterStatsToggle.addActionListener(e -> {
@@ -1250,33 +1221,32 @@ public class TeamGUI implements Runnable {
         editLineContent.setLayout(new BoxLayout(editLineContent, BoxLayout.Y_AXIS));
 
         editLineInstructions = new JLabel(EDIT_LINE_INSTRUCTIONS);
-        createPanel(new JComponent[]{editLineInstructions}, editLineContent);
+        createPanelForContainer(new JComponent[]{editLineInstructions}, editLineContent);
 
         // Change Name
         changeLineNameLabel = new JLabel("Enter New Line Name:");
         changeLineName = new JTextField(ENTER_NAME_SIZE);
-        createPanel(new JComponent[]{changeLineNameLabel, changeLineName}, editLineContent);
+        createPanelForContainer(new JComponent[]{changeLineNameLabel, changeLineName}, editLineContent);
 
         updateLineChanges = new JButton("Update Name");
-        createPanel(new JComponent[]{updateLineChanges}, editLineContent);
+        createPanelForContainer(new JComponent[]{updateLineChanges}, editLineContent);
 
         // Change Players
         changeLinePlayers = new JButton("Change Line Players");
-        createPanel(new JComponent[]{changeLinePlayers}, editLineContent);
+        createPanelForContainer(new JComponent[]{changeLinePlayers}, editLineContent);
 
         // Delete Line
         deleteLine = new JButton("Delete Selected Line");
-        createPanel(new JComponent[]{deleteLine}, editLineContent);
+        createPanelForContainer(new JComponent[]{deleteLine}, editLineContent);
 
         // Change Special Teams Stats
         AtomicBoolean isSpecialTeams = new AtomicBoolean(false);
-        JPanel changeSTSuccess = new JPanel();
         changeSuccessPercentLabel = new JLabel("Enter New Success Percentage:");
         changeSuccessPercent = new JTextField(ENTER_STAT_SIZE);
         changeNumOppsLabel = new JLabel("Enter Number of Opportunities:");
         changeNumOpps = new JTextField(ENTER_STAT_SIZE);
-        addComponentsToPanel(new JComponent[]{changeSuccessPercentLabel, changeSuccessPercent, changeNumOppsLabel,
-                changeNumOpps}, changeSTSuccess);
+        JPanel changeSTSuccess = createPanel(new JComponent[]{changeSuccessPercentLabel,
+                changeSuccessPercent, changeNumOppsLabel, changeNumOpps});
 
         // Ensures that proper components are displayed for editing a line depending on which line is selected
         lineOptions.addItemListener(e -> {
@@ -1446,7 +1416,7 @@ public class TeamGUI implements Runnable {
 
             JTextArea displayCurrentPlayers = new JTextArea(editingLine.lineRoster());
             displayCurrentPlayers.setEditable(false);
-            createPanel(new JComponent[]{displayCurrentPlayers}, playersWindowContent);
+            createPanelForContainer(new JComponent[]{displayCurrentPlayers}, playersWindowContent);
 
             if (editingLine instanceof OffenseLine) {
                 playersWindowContent.add(selectCenterPanel);
@@ -1471,7 +1441,7 @@ public class TeamGUI implements Runnable {
             }
 
             JButton assignPlayers = new JButton("Assign These Players");
-            createPanel(new JComponent[]{assignPlayers}, playersWindowContent);
+            createPanelForContainer(new JComponent[]{assignPlayers}, playersWindowContent);
 
             playersWindow.pack();
             playersWindow.setVisible(true);
@@ -1609,8 +1579,8 @@ public class TeamGUI implements Runnable {
         viewLine = new JTextArea();
         viewLine.setEditable(false);
 
-        createPanel(new JComponent[]{viewLineLabel}, viewLinesContent);
-        createPanel(new JComponent[]{viewLine}, viewLinesContent);
+        createPanelForContainer(new JComponent[]{viewLineLabel}, viewLinesContent);
+        createPanelForContainer(new JComponent[]{viewLine}, viewLinesContent);
 
         lineTabs.add("View Lines", viewLinesContent);
 
@@ -1622,8 +1592,8 @@ public class TeamGUI implements Runnable {
         manageSkaterContent.setLayout(new BoxLayout(manageSkaterContent, BoxLayout.Y_AXIS));
         skaterTabs = new JTabbedPane();
         selectedSkaterLabel = new JLabel("Selected Skater:");
-        createPanel(new JComponent[]{selectedSkaterLabel, skaterOptions}, manageSkaterContent);
-        createPanel(new JComponent[]{skaterTabs}, manageSkaterContent);
+        createPanelForContainer(new JComponent[]{selectedSkaterLabel, skaterOptions}, manageSkaterContent);
+        createPanelForContainer(new JComponent[]{skaterTabs}, manageSkaterContent);
 
         // Create Skater
 
@@ -1635,7 +1605,7 @@ public class TeamGUI implements Runnable {
         enterSkaterName = new JTextField(ENTER_NAME_SIZE);
         enterSkaterNumber = new JSlider(1, 99);
         enterSkaterNumberLabel = new JLabel(PLAYER_NUMBER_STRING + "  " + enterSkaterNumber.getValue());
-        createPanel(new JComponent[]{enterSkaterNameLabel, enterSkaterName, enterSkaterNumberLabel, enterSkaterNumber},
+        createPanelForContainer(new JComponent[]{enterSkaterNameLabel, enterSkaterName, enterSkaterNumberLabel, enterSkaterNumber},
                 createSkater);
 
         // Displays currently selected value in the JLabel
@@ -1643,8 +1613,8 @@ public class TeamGUI implements Runnable {
                 enterSkaterNumberLabel.setText(PLAYER_NUMBER_STRING + "  " + enterSkaterNumber.getValue()));
 
         chooseStickHand = new JToggleButton(RIGHT_HANDED);
-        selectPostition = new JLabel("Select Player Position:");
-        createPanel(new JComponent[]{chooseStickHand, selectPostition, positionOptions}, createSkater);
+        selectPosition = new JLabel("Select Player Position:");
+        createPanelForContainer(new JComponent[]{chooseStickHand, selectPosition, positionOptions}, createSkater);
 
         // Changes text for JToggleButton to reflect user's choice
         chooseStickHand.addActionListener(e -> {
@@ -1656,40 +1626,37 @@ public class TeamGUI implements Runnable {
         });
 
         assignSkaterStats = new JToggleButton("Initialize Skater Stats");
-        createPanel(new JComponent[]{assignSkaterStats}, createSkater);
+        createPanelForContainer(new JComponent[]{assignSkaterStats}, createSkater);
 
         createPlayer = new JButton("Create Player");
-        createPanel(new JComponent[]{createPlayer}, createSkater);
+        createPanelForContainer(new JComponent[]{createPlayer}, createSkater);
 
-        JPanel basicStatsPanel = new JPanel();
         enterGoalsLabel = new JLabel(GOALS_STRING);
         enterGoals = new JTextField(ENTER_STAT_SIZE);
         enterAssistsLabel = new JLabel(ASSISTS_STRING);
         enterAssists = new JTextField(ENTER_STAT_SIZE);
         enterPMLabel = new JLabel(PM_STRING);
         enterPlusMinus = new JTextField(ENTER_STAT_SIZE);
-        addComponentsToPanel(new JComponent[]{enterGoalsLabel, enterGoals, enterAssistsLabel, enterAssists,
-                enterPMLabel, enterPlusMinus}, basicStatsPanel);
+        JPanel basicStatsPanel = createPanel(new JComponent[]{enterGoalsLabel, enterGoals,
+                enterAssistsLabel, enterAssists, enterPMLabel, enterPlusMinus});
 
-        JPanel advancedStatsPanel = new JPanel();
         enterHitsLabel = new JLabel(HITS_STRING);
         enterHits = new JTextField(ENTER_STAT_SIZE);
         enterPIMLabel = new JLabel(PIM_STRING);
         enterPenaltyMinutes = new JTextField(ENTER_STAT_SIZE);
-        addComponentsToPanel(new JComponent[]{enterHitsLabel, enterHits, enterPIMLabel, enterPenaltyMinutes},
-                advancedStatsPanel);
+        JPanel advancedStatsPanel = createPanel(new JComponent[]{enterHitsLabel, enterHits, enterPIMLabel,
+                enterPenaltyMinutes});
 
-        JPanel defenseStatsPanel = new JPanel();
         enterBlocksLabel = new JLabel(SHOT_BLOCK_STRING);
         enterShotsBlocked = new JTextField(ENTER_STAT_SIZE);
-        addComponentsToPanel(new JComponent[]{enterBlocksLabel, enterShotsBlocked}, defenseStatsPanel);
+        JPanel defenseStatsPanel = createPanel(new JComponent[]{enterBlocksLabel, enterShotsBlocked});
 
-        JPanel centerStatsPanel = new JPanel();
+
         enterFaceOffLabel = new JLabel(FACE_OFF_STRING);
         enterFaceOffPercent = new JTextField(ENTER_STAT_SIZE);
         enterFaceOffTotal = new JTextField(ENTER_STAT_SIZE);
-        addComponentsToPanel(new JComponent[]{enterFaceOffLabel, enterFaceOffPercent, enterFaceOffTotal},
-                centerStatsPanel);
+        JPanel centerStatsPanel =  createPanel(new JComponent[]{enterFaceOffLabel, enterFaceOffPercent,
+                enterFaceOffTotal});
 
         assignSkaterStats.addActionListener(e -> {
             if (assignSkaterStats.isSelected()) {
@@ -1813,7 +1780,7 @@ public class TeamGUI implements Runnable {
         editSkaterContent.setLayout(new BoxLayout(editSkaterContent, BoxLayout.Y_AXIS));
 
         editSkaterInstructions = new JLabel(EDIT_PLAYER_INSTRUCTIONS);
-        createPanel(new JComponent[]{editSkaterInstructions}, editSkaterContent);
+        createPanelForContainer(new JComponent[]{editSkaterInstructions}, editSkaterContent);
 
         // Top Panel (name and number)
 
@@ -1824,15 +1791,16 @@ public class TeamGUI implements Runnable {
         changeSkaterNumberLabel = new JLabel(Integer.toString(changeSkaterNumber.getValue()));
         JComponent[] changeNumberComponents = new JComponent[]{changeSkaterNumberLabel, changeSkaterNumber};
 
-        JPanel nameAndNumberPanel = new JPanel();
-        addComponentsToPanel(new JComponent[]{changeSkaterNameLabel, changeSkaterName, changeSkaterNumberCheck},
-                nameAndNumberPanel);
+        JPanel nameAndNumberPanel = createPanel(new JComponent[]{changeSkaterNameLabel, changeSkaterName,
+                changeSkaterNumberCheck});
         editSkaterContent.add(nameAndNumberPanel);
 
         // Adds/Removes proper components when user wants to change the player's number
         changeSkaterNumberCheck.addActionListener(e -> {
             if (changeSkaterNumberCheck.isSelected()) {
-                addComponentsToPanel(changeNumberComponents, nameAndNumberPanel);
+                for (JComponent component: changeNumberComponents) {
+                    nameAndNumberPanel.add(component);
+                }
             } else {
                 nameAndNumberPanel.remove(changeSkaterNumberLabel);
                 nameAndNumberPanel.remove(changeSkaterNumber);
@@ -1844,14 +1812,13 @@ public class TeamGUI implements Runnable {
         changeSkaterNumber.addChangeListener(e ->
                 changeSkaterNumberLabel.setText(Integer.toString(changeSkaterNumber.getValue())));
 
-        JPanel secondEditSkaterPanel = new JPanel();
         changePositionCheck = new JCheckBox(CHANGE_POSITION);
-        addComponentsToPanel(new JComponent[]{changePositionCheck}, secondEditSkaterPanel);
+        JPanel secondEditSkaterPanel = createPanel(new JComponent[]{changePositionCheck});
         editSkaterContent.add(secondEditSkaterPanel);
 
         changeStickHandLabel = new JLabel(STICK_HAND_STRING);
         changeStickHand = new JCheckBox("Swap Stick Hand?");
-        createPanel(new JComponent[]{changeStickHandLabel, changeStickHand}, editSkaterContent);
+        createPanelForContainer(new JComponent[]{changeStickHandLabel, changeStickHand}, editSkaterContent);
 
         // Adds position combo box if user wants to change player's position
         changePositionCheck.addActionListener(e -> {
@@ -1869,33 +1836,31 @@ public class TeamGUI implements Runnable {
         changeAssists = new JTextField(ENTER_STAT_SIZE);
         changePMLabel = new JLabel(PM_STRING);
         changePlusMinus = new JTextField(ENTER_STAT_SIZE);
-        createPanel(new JComponent[]{changeGoalsLabel, changeGoals, changeAssistsLabel, changeAssists, changePMLabel,
+        createPanelForContainer(new JComponent[]{changeGoalsLabel, changeGoals, changeAssistsLabel, changeAssists, changePMLabel,
                 changePlusMinus}, editSkaterContent);
 
         changeHitsLabel = new JLabel(HITS_STRING);
         changeHits = new JTextField(ENTER_STAT_SIZE);
         changePIMLabel = new JLabel(PIM_STRING);
         changePenaltyMinutes = new JTextField(ENTER_STAT_SIZE);
-        createPanel(new JComponent[]{changeHitsLabel, changeHits, changePIMLabel, changePenaltyMinutes},
+        createPanelForContainer(new JComponent[]{changeHitsLabel, changeHits, changePIMLabel, changePenaltyMinutes},
                 editSkaterContent);
 
         editPlayer = new JButton(UPDATE);
-        createPanel(new JComponent[]{editPlayer}, editSkaterContent);
+        createPanelForContainer(new JComponent[]{editPlayer}, editSkaterContent);
 
         deletePlayer = new JButton("Delete Selected Skater");
-        createPanel(new JComponent[]{deletePlayer}, editSkaterContent);
+        createPanelForContainer(new JComponent[]{deletePlayer}, editSkaterContent);
 
-        JPanel changeCenterPanel = new JPanel();
         changeFaceOffLabel = new JLabel(FACE_OFF_STRING);
         changeFaceOffPercent = new JTextField(ENTER_STAT_SIZE);
         changeFaceOffTotal = new JTextField(ENTER_STAT_SIZE);
-        addComponentsToPanel(new JComponent[]{changeFaceOffLabel, changeFaceOffPercent, changeFaceOffTotal},
-                changeCenterPanel);
+        JPanel changeCenterPanel = createPanel(new JComponent[]{changeFaceOffLabel, changeFaceOffPercent,
+                changeFaceOffTotal});
 
-        JPanel changeDefensePanel = new JPanel();
         changeBlocksLabel = new JLabel(SHOT_BLOCK_STRING);
         changeShotsBlocked = new JTextField(ENTER_STAT_SIZE);
-        addComponentsToPanel(new JComponent[]{changeBlocksLabel, changeShotsBlocked}, changeDefensePanel);
+        JPanel changeDefensePanel = createPanel(new JComponent[]{changeBlocksLabel, changeShotsBlocked});
 
         // Updates stick hand swap button and adds proper components for a center or defenseman
         skaterOptions.addItemListener(e -> {
@@ -2175,8 +2140,8 @@ public class TeamGUI implements Runnable {
         }
         // Button to confirm selection
         selectTeamButton = new JButton("Open this team");
-        JComponent[] selectTeamComponents = {teamSelection, selectTeamButton};
-        createPanel(selectTeamComponents, selectContent);
+        JPanel selectTeamPanel = createPanel(new JComponent[]{teamSelection, selectTeamButton});
+        selectContent.add(selectTeamPanel);
 
         // Middle of frame that contains other options with teams
         otherOptionsLabel = new JLabel("Additional Options: ");
@@ -2184,11 +2149,11 @@ public class TeamGUI implements Runnable {
         deleteTeam = new JButton("Delete Team");
         restoreSample = new JButton("Restore Sample Team");
 
-        createPanel(new JComponent[]{otherOptionsLabel, createTeam, deleteTeam, restoreSample}, selectContent);
+        createPanelForContainer(new JComponent[]{otherOptionsLabel, createTeam, deleteTeam, restoreSample}, selectContent);
 
         // Bottom of Frame, button where new users can find additional guidance
         newUsers = new JButton("Help and Guidance for New Users");
-        createPanel(new JComponent[]{newUsers}, selectContent);
+        createPanelForContainer(new JComponent[]{newUsers}, selectContent);
 
         selectFrame.pack();
         selectFrame.setLocationRelativeTo(null);
@@ -2346,8 +2311,8 @@ public class TeamGUI implements Runnable {
             deleteFrame.addWindowListener(new WindowAdapter() {
                 @Override
                 public void windowClosed(WindowEvent e) {
-                    selectContent.remove(0);
-                    createPanel(selectTeamComponents, selectContent, 0);
+                    selectTeamPanel.add(teamSelection, 0);
+                    selectFrame.repaint();
                     selectFrame.setVisible(true);
                 }
             });
