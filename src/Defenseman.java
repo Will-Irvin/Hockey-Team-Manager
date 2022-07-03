@@ -83,6 +83,6 @@ public class Defenseman extends Skater {
     @Override
     public String statsDisplay() {
         return super.statsDisplay() +
-                String.format("\n    Shots Blocked: %d", shotsBlocked);
+                String.format("\nShots Blocked: %d", shotsBlocked);
     }
 }

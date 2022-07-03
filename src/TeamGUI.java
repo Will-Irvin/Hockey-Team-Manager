@@ -248,14 +248,11 @@ public class TeamGUI implements Runnable {
     JTextField changeFaceOffTotal;
 
     JButton editPlayer;
-
+    JButton resetPlayerStats;
     JButton deletePlayer;
 
     // View Stats
     JTextArea viewSkaterStats;
-
-    // Reset Stats
-    JButton resetPlayerStats;
 
     // Manage Goalies
 
@@ -723,6 +720,7 @@ public class TeamGUI implements Runnable {
         if (oldSkater == null && oldIndex == index) {
             skaterStats.removeRow(oldIndex);
             skaterStats.insertRow(index, newSkater.getStatsArray());
+            viewSkaterStats.setText(newSkater.statsDisplay());
             return;
         }
 
@@ -731,7 +729,6 @@ public class TeamGUI implements Runnable {
             pickRightWing.insertItemAt(newSkater, index + 1);
             skaterOptions.insertItemAt(newSkater, index + 1);
             skaterStats.insertRow(index, newSkater.getStatsArray());
-
 
             if (newSkater instanceof Center c) {  // Finds proper spot in center combo box if the player is a center
                 for (int i = 1; i < centerOptions.getItemCount(); i++) {
@@ -1849,6 +1846,9 @@ public class TeamGUI implements Runnable {
         editPlayer = new JButton(UPDATE);
         createPanelForContainer(new JComponent[]{editPlayer}, editSkaterContent);
 
+        resetPlayerStats = new JButton("Reset Skater Stats");
+        createPanelForContainer(new JComponent[]{resetPlayerStats}, editSkaterContent);
+
         deletePlayer = new JButton("Delete Selected Skater");
         createPanelForContainer(new JComponent[]{deletePlayer}, editSkaterContent);
 
@@ -1870,15 +1870,17 @@ public class TeamGUI implements Runnable {
                 editSkaterContent.remove(changeDefensePanel);
                 changeStickHandLabel.setText(STICK_HAND_STRING + newSkater.getStickHand());
                 changePositionCheck.setText(CHANGE_POSITION + newSkater.getPosition());
+                viewSkaterStats.setText(newSkater.statsDisplay());
                 if (newSkater instanceof Center) {
-                    editSkaterContent.add(changeCenterPanel, editSkaterContent.getComponentCount() - 2);
+                    editSkaterContent.add(changeCenterPanel, editSkaterContent.getComponentCount() - 3);
                 } else if (newSkater instanceof Defenseman) {
-                    editSkaterContent.add(changeDefensePanel, editSkaterContent.getComponentCount() - 2);
+                    editSkaterContent.add(changeDefensePanel, editSkaterContent.getComponentCount() - 3);
                 }
                 mainFrame.repaint();
             } else if (newSkater == null) {
                 changeStickHandLabel.setText(STICK_HAND_STRING);
                 changePositionCheck.setText(CHANGE_POSITION);
+                viewSkaterStats.setText("");
             }
         });
 
@@ -2068,6 +2070,33 @@ public class TeamGUI implements Runnable {
             }
         });
 
+        // Confirms user's selection and resets stats of the selected player
+        resetPlayerStats.addActionListener(e -> {
+            Skater selectedSkater = (Skater) skaterOptions.getSelectedItem();
+            if (selectedSkater != null) {
+                int confirm = JOptionPane.showConfirmDialog(mainFrame, "Are you sure you want to reset " +
+                        selectedSkater.getName() + "'s stats to 0?", "Edit Skater", JOptionPane.YES_NO_OPTION);
+                if (confirm == JOptionPane.YES_OPTION) {
+                    selectedSkater.resetStats();
+                    updateSkaterComponents(null, selectedSkater, skaterOptions.getSelectedIndex() - 1,
+                            skaterOptions.getSelectedIndex() - 1);
+                    try {
+                        updateFile();
+                        JOptionPane.showMessageDialog(mainFrame, "Skater successfully updated", "Edit Skater",
+                                JOptionPane.INFORMATION_MESSAGE);
+                    } catch (IOException ex) {
+                        JOptionPane.showMessageDialog(mainFrame, FILE_ERROR, "Delete Skater",
+                                JOptionPane.ERROR_MESSAGE);
+                    } catch (Exception ex) {
+                        JOptionPane.showMessageDialog(mainFrame, ex.getMessage(), "Delete Skater",
+                                JOptionPane.ERROR_MESSAGE);
+                    }
+                }
+            } else {
+                JOptionPane.showMessageDialog(mainFrame, SELECT, "Edit Skater", JOptionPane.ERROR_MESSAGE);
+            }
+        });
+
         // Deletes the selected player from the team and any GUI elements
         deletePlayer.addActionListener(e -> {
             Skater deletingSkater = (Skater) skaterOptions.getSelectedItem();
@@ -2097,6 +2126,12 @@ public class TeamGUI implements Runnable {
         });
 
         skaterTabs.add("Edit or Delete Skaters", editSkaterContent);
+
+        // View Skater Stats
+
+        viewSkaterStats = new JTextArea();
+        viewSkaterStats.setEditable(false);
+        skaterTabs.add("View Skater Stats", viewSkaterStats);
 
         mainTabs.add("Manage Skaters", manageSkaterContent);
 

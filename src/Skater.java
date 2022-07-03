@@ -236,7 +236,7 @@ public class Skater extends Player {
      */
     @Override
     public String statsDisplay() {
-        String result = String.format("%s #%d\n    ", getName(), getPlayerNumber());
+        String result = String.format("%s #%d\n", getName(), getPlayerNumber());
         switch (this.position) {
             case Center -> result += "Center\n";
             case Left_Wing -> result += "Left Wing\n";
@@ -245,7 +245,7 @@ public class Skater extends Player {
             case Right_Defense -> result += "Right Defense\n";
         }
         result += String.format("""
-                        Stick Hand: %s
+                            Stick Hand: %s
                             Goals: %d
                             Assists: %d
                             Points: %d

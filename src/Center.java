@@ -108,6 +108,6 @@ public class Center extends Skater {
     @Override
     public String statsDisplay() {
         return super.statsDisplay()
-                + String.format("\n    Faceoff Percentage: %.2f%%", getFaceoffPercent());
+                + String.format("\nFaceoff Percentage: %.2f%%", getFaceoffPercent());
     }
 }
