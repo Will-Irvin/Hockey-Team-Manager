@@ -67,20 +67,21 @@ public class TeamGUI implements Runnable {
     private static final String OT_STRING = "Enter number of overtime losses or ties:";
     private static final String UPDATE = "Update Changes";
     private static final String CONFIRM_DELETE = "Are you sure you would like to delete ";
-    private static final String EDIT_INSTRUCTIONS = "<html>Enter changes for the information that you would like to " +
-            "change.<br>If a field is left blank, no changes will be made for the corresponding information.</html>";
-    private static final String EDIT_LINE_INSTRUCTIONS = "<html>This tab will make changes to or delete any already " +
-            "created lines.<br>Use the drop box at the top of the screen to select which line you would like to " +
-            "change or delete.<br>" + EDIT_INSTRUCTIONS;
-    private static final String EDIT_PLAYER_INSTRUCTIONS = "<html>This tab will make changes to or delete any already " +
-            "created players.<br>Use the drop box at the top of the screen to select which player you would like to " +
-            "change or delete.<br>" + EDIT_INSTRUCTIONS;
-    private static final String RESET_STATS_WARNING = "<html>This button will reset all stats for your team and its" +
-            " players to 0.<br>This action cannot be undone after the fact and their previous stats will be " +
-            "lost.</html>";
-    private static final String NUMBER_ERROR = "Please enter a number where prompted";
-    private static final String FILE_ERROR = "There was an issue interacting with the file. Please close the " +
-            "application and try again.";
+    private static final String EDIT_INSTRUCTIONS = "<html><center>Enter changes for the information that you would " +
+            "like to change.<br>If a field is left blank, no changes will be made for the corresponding information." +
+            "</html>";
+    private static final String EDIT_LINE_INSTRUCTIONS = "<html><center>This tab will make changes to or delete any " +
+            "already created lines.<br>Use the drop box at the top of the screen to select which line you would like " +
+            "to change or delete.<br>" + EDIT_INSTRUCTIONS;
+    private static final String EDIT_PLAYER_INSTRUCTIONS = "<html><center>This tab will make changes to or delete " +
+            "any already created players.<br>Use the drop box at the top of the screen to select which player you " +
+            "would like to change or delete.<br>" + EDIT_INSTRUCTIONS;
+    private static final String RESET_STATS_WARNING = "<html><center>The button below will reset all stats for your " +
+            "team, its players, and its special teams to 0.<br>This action cannot be undone after the fact and their " +
+            "previous stats will be lost.</html>";
+    private static final String NUMBER_ERROR = "Please enter a number where prompted.";
+    private static final String FILE_ERROR = "There was an issue interacting with the file. Please ensure that your " +
+            "file has not been moved or altered, close the application, and try again.";
     private static final String EMPTY_INPUTS = "Please enter a value in at least one of the boxes";
     private static final String BLANK_UPDATED = " (Any blank fields have already been updated)";
     private static final String PLAYER_DUPLICATE = "New player cannot share the same number as another player";
@@ -800,6 +801,8 @@ public class TeamGUI implements Runnable {
         changeTeamOTLabel = new JLabel(OT_STRING + " (Current: " + team.getOtLosses() + ")");
         changeTeamOT = new JTextField(ENTER_STAT_SIZE);
         updateTeamChanges = new JButton(UPDATE);
+        resetStatsWarningLabel = new JLabel(RESET_STATS_WARNING);
+        resetTeamStats = new JButton("Reset Team Stats");
 
         // Panels for each different instance variable (name, wins, losses, ot losses)
         createPanelForContainer(new JComponent[]{changeTeamNameLabel, changeTeamName}, editTeam);
@@ -807,9 +810,11 @@ public class TeamGUI implements Runnable {
         createPanelForContainer(new JComponent[]{changeTeamLossesLabel, changeTeamLosses}, editTeam);
         createPanelForContainer(new JComponent[]{changeTeamOTLabel, changeTeamOT}, editTeam);
 
-        // Instructions and Button
+        // Instructions and Buttons
         createPanelForContainer(new JComponent[]{editInstructionsLabel}, editTeam);
         createPanelForContainer(new JComponent[]{updateTeamChanges}, editTeam);
+        createPanelForContainer(new JComponent[]{resetStatsWarningLabel}, editTeam);
+        createPanelForContainer(new JComponent[]{resetTeamStats}, editTeam);
 
         updateTeamChanges.addActionListener(e -> {
             // Get user inputs
@@ -874,6 +879,26 @@ public class TeamGUI implements Runnable {
             }
         });
 
+        // Resets stats for team and updates relevant components
+        resetTeamStats.addActionListener(e -> {
+            int response = JOptionPane.showConfirmDialog(mainFrame, "Are you sure that you want to reset " +
+                    "stats for the entire team?", "Reset Team Stats", JOptionPane.YES_NO_OPTION);
+            if (response == JOptionPane.YES_OPTION) {
+                team.resetTeamStats();
+                try {
+                    updateFile();
+                } catch (IOException ex) {
+                    JOptionPane.showMessageDialog(mainFrame, FILE_ERROR, "Reset Team Stats",
+                            JOptionPane.ERROR_MESSAGE);
+                } catch (Exception ex) {
+                    JOptionPane.showMessageDialog(mainFrame, ex.getMessage(), "Reset Team Stats",
+                            JOptionPane.ERROR_MESSAGE);
+                }
+                updateEntireTeamComponents();
+                mainFrame.repaint();
+            }
+        });
+
         teamTabs.add("Edit Team", editTeam);
 
         // Text Area that displays the teams roster
@@ -910,35 +935,6 @@ public class TeamGUI implements Runnable {
         teamTabs.add("View Team Stats", viewTeamStatsScroll);
 
 
-        // Reset Team Stats
-        resetStatsWarningLabel = new JLabel(RESET_STATS_WARNING);
-        resetTeamStats = new JButton("Reset Team Stats");
-        Container resetTeamContent = new Container();
-        resetTeamContent.setLayout(new BoxLayout(resetTeamContent, BoxLayout.X_AXIS));
-        createPanelForContainer(new JComponent[]{resetStatsWarningLabel}, resetTeamContent);
-        createPanelForContainer(new JComponent[]{resetTeamStats}, resetTeamContent);
-
-        // Resets stats for teams and updates relevant components
-        resetTeamStats.addActionListener(e -> {
-            int response = JOptionPane.showConfirmDialog(mainFrame, "Are you sure that you want to reset " +
-                    "stats for the entire team?", "Reset Team Stats", JOptionPane.YES_NO_OPTION);
-            if (response == JOptionPane.YES_OPTION) {
-                team.resetTeamStats();
-                try {
-                    updateFile();
-                } catch (IOException ex) {
-                    JOptionPane.showMessageDialog(mainFrame, FILE_ERROR, "Reset Team Stats",
-                            JOptionPane.ERROR_MESSAGE);
-                } catch (Exception ex) {
-                    JOptionPane.showMessageDialog(mainFrame, ex.getMessage(), "Reset Team Stats",
-                            JOptionPane.ERROR_MESSAGE);
-                }
-                updateEntireTeamComponents();
-                mainFrame.repaint();
-            }
-        });
-
-        teamTabs.add("Reset Team Stats", resetTeamContent);
 
         mainTabs.add("Manage Team", teamTabs);
 
