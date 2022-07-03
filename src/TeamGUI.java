@@ -258,27 +258,53 @@ public class TeamGUI implements Runnable {
     // Manage Goalies
 
     JTabbedPane goalieTabs;
+    JLabel selectedGoalieLabel;
 
-    // Create/Edit Goalie
+    // Create Goalie
+    JLabel enterGoalieNameLabel;
+    JTextField enterGoalieName;
+    JLabel enterGoalieNumberLabel;
+    JSlider selectGoalieNumber;
     JToggleButton assignGoalieStats;
+    JLabel enterSVPercentageLabel;
     JTextField enterSavePercentage;
+    JLabel enterShotsAgainstLabel;
     JTextField enterGoalieShotsAgainst;
+    JLabel enterGoalieWinsLabel;
     JTextField enterGoalieWins;
+    JLabel enterGoalieLossesLabel;
     JTextField enterGoalieLosses;
+    JLabel enterGoalieOTLabel;
     JTextField enterGoalieOTLosses;
+    JLabel enterShutoutsLabel;
     JSlider enterShutouts;
 
     JButton createGoalie;
-    JButton editGoalie;
 
-    // Delete Goalie
+    // Edit/Delete Goalie
+    JLabel editGoalieInstructions;
+    JLabel changeGoalieNameLabel;
+    JTextField changeGoalieName;
+    JCheckBox changeGoalieNumberCheck;
+    JSlider changeGoalieNumber;
+    JLabel changeSVPercentageLabel;
+    JTextField changeSavePercentage;
+    JLabel changeShotsAgainstLabel;
+    JTextField changeGoalieShotsAgainst;
+    JLabel changeGoalieWinsLabel;
+    JTextField changeGoalieWins;
+    JLabel changeGoalieLossesLabel;
+    JTextField changeGoalieLosses;
+    JLabel changeGoalieOTLabel;
+    JTextField changeGoalieOTLosses;
+    JLabel changeShutoutsLabel;
+
+    JButton editGoalie;
+    JButton resetGoalieStats;
     JButton deleteGoalie;
 
     // View Stats
     JTextArea viewGoalieStats;
-
-    // Reset Stats
-    JButton resetGoalieStats;
 
     // Enter Game Stats
 
@@ -2130,6 +2156,36 @@ public class TeamGUI implements Runnable {
         skaterTabs.add("View Skater Stats", viewSkaterStats);
 
         mainTabs.add("Manage Skaters", manageSkaterContent);
+
+        // Manage Goalies
+
+        Container manageGoalieContent = new Container();
+        manageGoalieContent.setLayout(new BoxLayout(manageGoalieContent, BoxLayout.Y_AXIS));
+        selectedGoalieLabel = new JLabel("Selected Goalie:");
+        createPanelForContainer(new JComponent[]{selectedGoalieLabel, goalieOptions}, manageGoalieContent);
+        goalieTabs = new JTabbedPane();
+        createPanelForContainer(new JComponent[]{goalieTabs}, manageGoalieContent);
+
+        // Create Goalie
+
+        // Edit/Delete Goalie
+
+        // View Goalie Stats
+        viewGoalieStats = new JTextArea();
+        goalieTabs.add("View Goalie Stats", viewGoalieStats);
+
+        // Updates view goalie stats text area with proper stats
+        goalieOptions.addItemListener(e -> {
+            Goalie selectedGoalie = (Goalie) goalieOptions.getSelectedItem();
+            if (e.getStateChange() == ItemEvent.SELECTED && selectedGoalie != null) {
+                viewGoalieStats.setText(selectedGoalie.statsDisplay());
+            } else if (selectedGoalie == null) {
+                viewGoalieStats.setText("");
+            }
+            mainFrame.repaint();
+        });
+
+        mainTabs.add("Manage Goalies", manageGoalieContent);
 
         // Sets team to null and re displays SelectTeamGUI when window is closed
         mainFrame.addWindowListener(new WindowAdapter() {
