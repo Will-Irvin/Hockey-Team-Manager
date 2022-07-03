@@ -62,9 +62,11 @@ public class TeamGUI implements Runnable {
     private static final String PIM_STRING = "Enter Penalty Minutes:";
     private static final String SHOT_BLOCK_STRING = "Enter Shots Blocked:";
     private static final String FACE_OFF_STRING = "Enter Face Off % / Face Off Total:";
-    private static final String WINS_STRING = "Enter number of wins:";
-    private static final String LOSSES_STRING = "Enter number of losses:";
-    private static final String OT_STRING = "Enter number of overtime losses or ties:";
+    private static final String WINS_STRING = "Enter wins:";
+    private static final String LOSSES_STRING = "Enter losses:";
+    private static final String OT_STRING = "Enter overtime losses or ties:";
+    private static final String SHUTOUTS_STRING = "Select Shutouts:";
+    private static final String SV_PERCENT_STRING = "Enter Save % / Total Shots Faced:";
     private static final String UPDATE = "Update Changes";
     private static final String CONFIRM_DELETE = "Are you sure you would like to delete ";
     private static final String EDIT_INSTRUCTIONS = "<html><center>Enter changes for the information that you would " +
@@ -266,10 +268,6 @@ public class TeamGUI implements Runnable {
     JLabel enterGoalieNumberLabel;
     JSlider selectGoalieNumber;
     JToggleButton assignGoalieStats;
-    JLabel enterSVPercentageLabel;
-    JTextField enterSavePercentage;
-    JLabel enterShotsAgainstLabel;
-    JTextField enterGoalieShotsAgainst;
     JLabel enterGoalieWinsLabel;
     JTextField enterGoalieWins;
     JLabel enterGoalieLossesLabel;
@@ -278,6 +276,9 @@ public class TeamGUI implements Runnable {
     JTextField enterGoalieOTLosses;
     JLabel enterShutoutsLabel;
     JSlider enterShutouts;
+    JLabel enterSVPercentageLabel;
+    JTextField enterSavePercentage;
+    JTextField enterGoalieShotsAgainst;
 
     JButton createGoalie;
 
@@ -287,9 +288,7 @@ public class TeamGUI implements Runnable {
     JTextField changeGoalieName;
     JCheckBox changeGoalieNumberCheck;
     JSlider changeGoalieNumber;
-    JLabel changeSVPercentageLabel;
-    JTextField changeSavePercentage;
-    JLabel changeShotsAgainstLabel;
+
     JTextField changeGoalieShotsAgainst;
     JLabel changeGoalieWinsLabel;
     JTextField changeGoalieWins;
@@ -298,6 +297,9 @@ public class TeamGUI implements Runnable {
     JLabel changeGoalieOTLabel;
     JTextField changeGoalieOTLosses;
     JLabel changeShutoutsLabel;
+    JLabel changeSVPercentageLabel;
+    JTextField changeSavePercentage;
+    JLabel changeShotsAgainstLabel;
 
     JButton editGoalie;
     JButton resetGoalieStats;
@@ -2167,6 +2169,63 @@ public class TeamGUI implements Runnable {
         createPanelForContainer(new JComponent[]{goalieTabs}, manageGoalieContent);
 
         // Create Goalie
+        Container createGoalieContent = new Container();
+        createGoalieContent.setLayout(new BoxLayout(createGoalieContent, BoxLayout.Y_AXIS));
+
+        enterGoalieNameLabel = new JLabel(NAME_STRING);
+        enterGoalieName = new JTextField(ENTER_NAME_SIZE);
+        selectGoalieNumber = new JSlider(1, 99);
+        enterGoalieNumberLabel = new JLabel(PLAYER_NUMBER_STRING + " " + selectGoalieNumber.getValue());
+        createPanelForContainer(new JComponent[]{enterGoalieNameLabel, enterGoalieName, enterGoalieNumberLabel,
+                selectGoalieNumber}, createGoalieContent);
+
+        // Updates value displayed by select number value
+        selectGoalieNumber.addChangeListener(e ->
+                enterGoalieNumberLabel.setText(PLAYER_NUMBER_STRING + " " + selectGoalieNumber.getValue()));
+
+        assignGoalieStats = new JToggleButton("Initialize Goalie Stats");
+        createPanelForContainer(new JComponent[]{assignGoalieStats}, createGoalieContent);
+
+        // Enter Record
+        enterGoalieWinsLabel = new JLabel(WINS_STRING);
+        enterGoalieWins = new JTextField(ENTER_STAT_SIZE);
+        enterGoalieLossesLabel = new JLabel(LOSSES_STRING);
+        enterGoalieLosses = new JTextField(ENTER_STAT_SIZE);
+        enterGoalieOTLabel = new JLabel(OT_STRING);
+        enterGoalieOTLosses = new JTextField(ENTER_STAT_SIZE);
+        JPanel goalieRecordPanel = createPanel(new JComponent[]{enterGoalieWinsLabel, enterGoalieWins,
+                enterGoalieLossesLabel, enterGoalieLosses, enterGoalieOTLabel, enterGoalieOTLosses});
+
+        // Other Stats
+        enterShutouts = new JSlider(0, 20);
+        enterShutoutsLabel = new JLabel(SHUTOUTS_STRING + " " + enterShutouts.getValue());
+        // Updates value displayed by enter shutouts label
+        enterShutouts.addChangeListener(e ->
+                enterShutoutsLabel.setText(SHUTOUTS_STRING + " " + enterShutouts.getValue()));
+        enterSVPercentageLabel = new JLabel(SV_PERCENT_STRING);
+        enterSavePercentage = new JTextField(ENTER_STAT_SIZE);
+        enterGoalieShotsAgainst = new JTextField(ENTER_STAT_SIZE);
+        JPanel otherGoalieStatsPanel = createPanel(new JComponent[]{enterShutoutsLabel, enterShutouts,
+                enterSVPercentageLabel, enterSavePercentage, enterGoalieShotsAgainst});
+
+        createGoalie = new JButton("Create Goalie");
+        createPanelForContainer(new JComponent[]{createGoalie}, createGoalieContent);
+
+        assignGoalieStats.addActionListener(e -> {
+            if (assignGoalieStats.isSelected()) {
+                createGoalieContent.add(goalieRecordPanel, createGoalieContent.getComponentCount() - 1);
+                createGoalieContent.add(otherGoalieStatsPanel, createGoalieContent.getComponentCount() - 1);
+            } else {
+                createGoalieContent.remove(goalieRecordPanel);
+                createGoalieContent.remove(otherGoalieStatsPanel);
+            }
+            mainFrame.repaint();
+        });
+
+        createGoalie.addActionListener(e -> {
+            // TODO
+        });
+        goalieTabs.add("Create Goalie", createGoalieContent);
 
         // Edit/Delete Goalie
 
