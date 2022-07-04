@@ -725,68 +725,86 @@ public class TeamGUI implements Runnable {
     }
 
     /**
-     * Removes the old skater from relevant combo boxes and adds the new skater to the appropriate combo boxes in the
-     * GUI.
-     * @param oldSkater Skater being removed
-     * @param newSkater Skater being added
-     * @param index Index where the new skater will be added in full combo boxes
+     * Removes the old player from relevant combo boxes and adds the new player to the appropriate combo boxes in the
+     * GUI. Also updates appropriate stat display areas (JTable and JTextAreas).
+     * @param oldPlayer Player being removed
+     * @param newPlayer Player being added
+     * @param oldIndex Index where the old skater was in the combo boxes
+     * @param index Index where the new skater was added to the team ArrayList
      */
-    private void updateSkaterComponents(Skater oldSkater, Skater newSkater, int oldIndex, int index) {
-        if (oldSkater != null) {  // Remove old skater
-            pickLeftWing.removeItem(oldSkater);
-            pickRightWing.removeItem(oldSkater);
-            skaterOptions.removeItem(oldSkater);
-            skaterStats.removeRow(oldIndex);
-            if (oldSkater instanceof Center) {
-                centerOptions.removeItem(oldSkater);
-            }
-            if (oldSkater instanceof Defenseman) {
-                pickLeftDe.removeItem(oldSkater);
-                pickRightDe.removeItem(oldSkater);
+    private void updatePlayerComponents(Player oldPlayer, Player newPlayer, int oldIndex, int index) {
+        if (oldPlayer != null) {  // Remove old skater
+            if (oldPlayer instanceof Skater oldSkater) {
+                pickLeftWing.removeItem(oldSkater);
+                pickRightWing.removeItem(oldSkater);
+                skaterOptions.removeItem(oldSkater);
+                skaterStats.removeRow(oldIndex);
+                if (oldSkater instanceof Center) {
+                    centerOptions.removeItem(oldSkater);
+                }
+                if (oldSkater instanceof Defenseman) {
+                    pickLeftDe.removeItem(oldSkater);
+                    pickRightDe.removeItem(oldSkater);
+                }
+            } else if (oldPlayer instanceof Goalie oldGoalie) {
+                goalieOptions.removeItem(oldGoalie);
+                goalieStats.removeRow(oldIndex);
             }
         }
 
-        if (oldSkater == null && oldIndex == index) {
-            skaterStats.removeRow(oldIndex);
-            skaterStats.insertRow(index, newSkater.getStatsArray());
-            viewSkaterStats.setText(newSkater.statsDisplay());
+        if (oldPlayer == null && oldIndex == index) {
+            if (newPlayer instanceof Skater newSkater) {
+                skaterStats.removeRow(oldIndex);
+                skaterStats.insertRow(index, newSkater.getStatsArray());
+                viewSkaterStats.setText(newSkater.statsDisplay());
+            } else if (newPlayer instanceof Goalie newGoalie) {
+                goalieStats.removeRow(oldIndex);
+                goalieStats.insertRow(index, newGoalie.getStatsArray());
+                viewGoalieStats.setText(newGoalie.statsDisplay());
+            }
             return;
         }
 
-        if (newSkater != null) {
-            pickLeftWing.insertItemAt(newSkater, index + 1);
-            pickRightWing.insertItemAt(newSkater, index + 1);
-            skaterOptions.insertItemAt(newSkater, index + 1);
-            skaterStats.insertRow(index, newSkater.getStatsArray());
+        if (newPlayer != null) {
+            if (newPlayer instanceof Skater newSkater) {
+                pickLeftWing.insertItemAt(newSkater, index + 1);
+                pickRightWing.insertItemAt(newSkater, index + 1);
+                skaterOptions.insertItemAt(newSkater, index + 1);
+                skaterStats.insertRow(index, newSkater.getStatsArray());
 
-            if (newSkater instanceof Center c) {  // Finds proper spot in center combo box if the player is a center
-                for (int i = 1; i < centerOptions.getItemCount(); i++) {
-                    if (i == centerOptions.getItemCount() - 1) {
-                        centerOptions.addItem(c);
-                        break;
-                    }
-                    if (centerOptions.getItemAt(i).getPlayerNumber() < c.getPlayerNumber() &&
-                            c.getPlayerNumber() < centerOptions.getItemAt(i + 1).getPlayerNumber()) {
-                        centerOptions.insertItemAt(c, i + 1);
-                        break;
+                if (newSkater instanceof Center c) {  // Finds proper spot in center combo box if the player is a center
+                    for (int i = 1; i < centerOptions.getItemCount(); i++) {
+                        if (i == centerOptions.getItemCount() - 1) {
+                            centerOptions.addItem(c);
+                            break;
+                        }
+                        if (centerOptions.getItemAt(i).getPlayerNumber() < c.getPlayerNumber() &&
+                                c.getPlayerNumber() < centerOptions.getItemAt(i + 1).getPlayerNumber()) {
+                            centerOptions.insertItemAt(c, i + 1);
+                            break;
+                        }
                     }
                 }
-            }
 
-            if (newSkater instanceof Defenseman de) {  // Finds proper spot in defenseman combo boxes if player is de
-                for (int i = 1; i < pickLeftDe.getItemCount(); i++) {
-                    if (i == pickLeftDe.getItemCount() - 1) {
-                        pickLeftDe.addItem(de);
-                        pickRightDe.addItem(de);
-                        break;
-                    }
-                    if (pickLeftDe.getItemAt(i).getPlayerNumber() < de.getPlayerNumber() &&
-                            de.getPlayerNumber() < pickLeftDe.getItemAt(i + 1).getPlayerNumber()) {
-                        pickLeftDe.insertItemAt(de, i + 1);
-                        pickRightDe.insertItemAt(de, i + 1);
-                        break;
+                // Finds proper spot in defenseman combo boxes if player is de
+                if (newSkater instanceof Defenseman de) {
+                    for (int i = 1; i < pickLeftDe.getItemCount(); i++) {
+                        if (i == pickLeftDe.getItemCount() - 1) {
+                            pickLeftDe.addItem(de);
+                            pickRightDe.addItem(de);
+                            break;
+                        }
+                        if (pickLeftDe.getItemAt(i).getPlayerNumber() < de.getPlayerNumber() &&
+                                de.getPlayerNumber() < pickLeftDe.getItemAt(i + 1).getPlayerNumber()) {
+                            pickLeftDe.insertItemAt(de, i + 1);
+                            pickRightDe.insertItemAt(de, i + 1);
+                            break;
+                        }
                     }
                 }
+            } else if (newPlayer instanceof Goalie newGoalie) {
+                goalieOptions.insertItemAt(newGoalie, index + 1);
+                goalieStats.insertRow(index, newGoalie.getStatsArray());
             }
         }
     }
@@ -1766,7 +1784,7 @@ public class TeamGUI implements Runnable {
                         JOptionPane.ERROR_MESSAGE);
                 return;
             }
-            updateSkaterComponents(null, newSkater, -1, index);
+            updatePlayerComponents(null, newSkater, -1, index);
 
             try {
                 updateFile();
@@ -2074,9 +2092,9 @@ public class TeamGUI implements Runnable {
                                 JOptionPane.ERROR_MESSAGE);
                         return;
                     }
-                    updateSkaterComponents(editingSkater, newSkater, oldIndex, index);
+                    updatePlayerComponents(editingSkater, newSkater, oldIndex, index);
                 } else {
-                    updateSkaterComponents(null, editingSkater, oldIndex, oldIndex);
+                    updatePlayerComponents(null, editingSkater, oldIndex, oldIndex);
                 }
 
                 try {
@@ -2102,7 +2120,7 @@ public class TeamGUI implements Runnable {
                         selectedSkater.getName() + "'s stats to 0?", "Edit Skater", JOptionPane.YES_NO_OPTION);
                 if (confirm == JOptionPane.YES_OPTION) {
                     selectedSkater.resetStats();
-                    updateSkaterComponents(null, selectedSkater, skaterOptions.getSelectedIndex() - 1,
+                    updatePlayerComponents(null, selectedSkater, skaterOptions.getSelectedIndex() - 1,
                             skaterOptions.getSelectedIndex() - 1);
                     try {
                         updateFile();
@@ -2132,7 +2150,7 @@ public class TeamGUI implements Runnable {
                     + "?", "Delete Skater", JOptionPane.YES_NO_OPTION);
             if (selection == JOptionPane.YES_OPTION) {
                 team.removePlayer(deletingSkater);
-                updateSkaterComponents(deletingSkater, null, skaterOptions.getSelectedIndex() - 1,
+                updatePlayerComponents(deletingSkater, null, skaterOptions.getSelectedIndex() - 1,
                         -1);
 
                 try {
@@ -2222,15 +2240,68 @@ public class TeamGUI implements Runnable {
             mainFrame.repaint();
         });
 
+        /*
+           Parses stats from relevant text fields, creates new goalie, adds it to the team, and updates relevant GUI
+           elements.
+         */
         createGoalie.addActionListener(e -> {
-            // TODO
+            String name = enterGoalieName.getText();
+            int goalieNum = selectGoalieNumber.getValue();
+            Goalie newGoalie;
+            try {
+                if (assignGoalieStats.isSelected()) {
+                    int wins = Integer.parseInt(enterGoalieWins.getText());
+                    int losses = Integer.parseInt(enterGoalieLosses.getText());
+                    int otLosses = Integer.parseInt(enterGoalieOTLosses.getText());
+                    int shutouts = enterShutouts.getValue();
+                    double savePercent = Double.parseDouble(enterSavePercentage.getText());
+                    int shotsFaced = Integer.parseInt(enterGoalieShotsAgainst.getText());
+                    newGoalie = new Goalie(name, goalieNum, savePercent, shotsFaced, wins, losses, otLosses, shutouts);
+                } else {
+                    newGoalie = new Goalie(name, goalieNum);
+                }
+            } catch (NumberFormatException ex) {
+                JOptionPane.showMessageDialog(mainFrame, NUMBER_ERROR, "Create Goalie", JOptionPane.ERROR_MESSAGE);
+                return;
+            } catch (NullPointerException | IllegalArgumentException ex) {
+                JOptionPane.showMessageDialog(mainFrame, ex.getMessage(), "Create Goalie",
+                        JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+
+            int index = team.addPlayer(newGoalie);
+            if (index == -1) {
+                JOptionPane.showMessageDialog(mainFrame, PLAYER_DUPLICATE, "Create Goalie",
+                        JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+
+            try {
+                updateFile();
+                updatePlayerComponents(null, newGoalie, -1, index);
+                enterGoalieName.setText("");
+                enterGoalieWins.setText("");
+                enterGoalieLosses.setText("");
+                enterGoalieOTLosses.setText("");
+                enterSavePercentage.setText("");
+                enterGoalieShotsAgainst.setText("");
+                JOptionPane.showMessageDialog(mainFrame, "Goalie successfully created", "Create Goalie",
+                        JOptionPane.INFORMATION_MESSAGE);
+            } catch (IOException ex) {
+                JOptionPane.showMessageDialog(mainFrame, FILE_ERROR, "Create Goalie", JOptionPane.ERROR_MESSAGE);
+            } catch (Exception ex) {
+                JOptionPane.showMessageDialog(mainFrame, ex.getMessage(), "Create Goalie",
+                        JOptionPane.ERROR_MESSAGE);
+            }
         });
+
         goalieTabs.add("Create Goalie", createGoalieContent);
 
         // Edit/Delete Goalie
 
         // View Goalie Stats
         viewGoalieStats = new JTextArea();
+        viewGoalieStats.setEditable(false);
         goalieTabs.add("View Goalie Stats", viewGoalieStats);
 
         // Updates view goalie stats text area with proper stats
