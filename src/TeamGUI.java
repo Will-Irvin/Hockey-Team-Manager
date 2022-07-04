@@ -1,3 +1,4 @@
+import javax.management.InstanceNotFoundException;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
@@ -31,8 +32,8 @@ public class TeamGUI implements Runnable {
             + "\" which was automatically created when you first launched this application.\n" +
             "This file is not readable nor transferable between most devices. The file is automatically updated and " +
             "saved every time a change is made, and changes cannot be undone.\n" +
-            "If the file is deleted or lost, when the application launches, a new file will be created, and there " +
-            "will only be the sample team. There is no way to recover any data without the file.";
+            "If the file is deleted or lost, when the application launches, a new file will be created, and it " +
+            "will only contain the sample team. There is no way to recover any data without the file.";
 
     // JComponents
     JFrame selectFrame;
@@ -51,6 +52,7 @@ public class TeamGUI implements Runnable {
     // Reused String expressions
     private static final String NAME_STRING = "Enter Name:";
     private static final String PLAYER_NUMBER_STRING = "Select Player Number:";
+    private static final String CHANGE_NUMBER = "Change Number?";
     private static final String LEFT_HANDED = "Left-handed (Click to switch)";
     private static final String RIGHT_HANDED = "Right-handed (Click to switch)";
     private static final String STICK_HAND_STRING = "Current Stick Hand: ";
@@ -68,6 +70,8 @@ public class TeamGUI implements Runnable {
     private static final String SHUTOUTS_STRING = "Select Shutouts:";
     private static final String SV_PERCENT_STRING = "Enter Save % / Total Shots Faced:";
     private static final String UPDATE = "Update Changes";
+    private static final String RESET_CONFIRM = "Are you sure you want to reset ";
+    private static final String TO_ZERO = "'s stats to 0?";
     private static final String CONFIRM_DELETE = "Are you sure you would like to delete ";
     private static final String EDIT_INSTRUCTIONS = "<html><center>Enter changes for the information that you would " +
             "like to change.<br>If a field is left blank, no changes will be made for the corresponding information." +
@@ -228,7 +232,6 @@ public class TeamGUI implements Runnable {
     JLabel changeSkaterNameLabel;
     JTextField changeSkaterName;
     JCheckBox changeSkaterNumberCheck;
-    JLabel changeSkaterNumberLabel;
     JSlider changeSkaterNumber;
     JCheckBox changePositionCheck;
     JComboBox<Position> changePosition;
@@ -288,8 +291,6 @@ public class TeamGUI implements Runnable {
     JTextField changeGoalieName;
     JCheckBox changeGoalieNumberCheck;
     JSlider changeGoalieNumber;
-
-    JTextField changeGoalieShotsAgainst;
     JLabel changeGoalieWinsLabel;
     JTextField changeGoalieWins;
     JLabel changeGoalieLossesLabel;
@@ -297,9 +298,10 @@ public class TeamGUI implements Runnable {
     JLabel changeGoalieOTLabel;
     JTextField changeGoalieOTLosses;
     JLabel changeShutoutsLabel;
+    JTextField changeShutouts;
     JLabel changeSVPercentageLabel;
     JTextField changeSavePercentage;
-    JLabel changeShotsAgainstLabel;
+    JTextField changeGoalieShotsAgainst;
 
     JButton editGoalie;
     JButton resetGoalieStats;
@@ -311,7 +313,6 @@ public class TeamGUI implements Runnable {
     // Enter Game Stats
 
     JTabbedPane enterStatsTabs;
-    JToggleButton useOffenseDefenseLines;
 
     // Enter Live
     JButton goalLive;
@@ -322,9 +323,7 @@ public class TeamGUI implements Runnable {
     JButton shotAgainstOnGoalLive;
     JButton scoredAgainstLive;
     JButton specialTeamsExpiredLive;
-    JButton winLive;
-    JButton lossLive;
-    JButton tieLive;
+    JButton gameOver;
 
     // Enter Post Game
     JTextField finalScoreTeam;
@@ -1813,7 +1812,7 @@ public class TeamGUI implements Runnable {
 
         skaterTabs.add("Create Skater", createSkaterScroll);
 
-        // Edit Skater
+        // Edit/Delete Skater
 
         Container editSkaterContent = new Container();
         editSkaterContent.setLayout(new BoxLayout(editSkaterContent, BoxLayout.Y_AXIS));
@@ -1825,10 +1824,8 @@ public class TeamGUI implements Runnable {
 
         changeSkaterNameLabel = new JLabel(NAME_STRING);
         changeSkaterName = new JTextField(ENTER_NAME_SIZE);
-        changeSkaterNumberCheck = new JCheckBox("Change Number?");
+        changeSkaterNumberCheck = new JCheckBox(CHANGE_NUMBER);
         changeSkaterNumber = new JSlider(1, 99);
-        changeSkaterNumberLabel = new JLabel(Integer.toString(changeSkaterNumber.getValue()));
-        JComponent[] changeNumberComponents = new JComponent[]{changeSkaterNumberLabel, changeSkaterNumber};
 
         JPanel nameAndNumberPanel = createPanel(new JComponent[]{changeSkaterNameLabel, changeSkaterName,
                 changeSkaterNumberCheck});
@@ -1837,11 +1834,10 @@ public class TeamGUI implements Runnable {
         // Adds/Removes proper components when user wants to change the player's number
         changeSkaterNumberCheck.addActionListener(e -> {
             if (changeSkaterNumberCheck.isSelected()) {
-                for (JComponent component: changeNumberComponents) {
-                    nameAndNumberPanel.add(component);
-                }
+                changeSkaterNumberCheck.setText(CHANGE_NUMBER + " " + changeSkaterNumber.getValue());
+                nameAndNumberPanel.add(changeSkaterNumber);
             } else {
-                nameAndNumberPanel.remove(changeSkaterNumberLabel);
+                changeSkaterNumberCheck.setText(CHANGE_NUMBER);
                 nameAndNumberPanel.remove(changeSkaterNumber);
             }
             mainFrame.repaint();
@@ -1849,7 +1845,7 @@ public class TeamGUI implements Runnable {
 
         // Updates label to display currently selected value
         changeSkaterNumber.addChangeListener(e ->
-                changeSkaterNumberLabel.setText(Integer.toString(changeSkaterNumber.getValue())));
+                changeSkaterNumberCheck.setText(CHANGE_NUMBER + " " + changeSkaterNumber.getValue()));
 
         changePositionCheck = new JCheckBox(CHANGE_POSITION);
         JPanel secondEditSkaterPanel = createPanel(new JComponent[]{changePositionCheck});
@@ -2078,6 +2074,7 @@ public class TeamGUI implements Runnable {
                 }
                 newSkater.setPlayerNumber(changeSkaterNumber.getValue());
                 changeSkaterNumberCheck.setSelected(false);
+                changeSkaterNumberCheck.setText(CHANGE_NUMBER);
                 change = true;
             }
 
@@ -2116,8 +2113,8 @@ public class TeamGUI implements Runnable {
         resetPlayerStats.addActionListener(e -> {
             Skater selectedSkater = (Skater) skaterOptions.getSelectedItem();
             if (selectedSkater != null) {
-                int confirm = JOptionPane.showConfirmDialog(mainFrame, "Are you sure you want to reset " +
-                        selectedSkater.getName() + "'s stats to 0?", "Edit Skater", JOptionPane.YES_NO_OPTION);
+                int confirm = JOptionPane.showConfirmDialog(mainFrame, RESET_CONFIRM +
+                        selectedSkater.getName() + TO_ZERO, "Edit Skater", JOptionPane.YES_NO_OPTION);
                 if (confirm == JOptionPane.YES_OPTION) {
                     selectedSkater.resetStats();
                     updatePlayerComponents(null, selectedSkater, skaterOptions.getSelectedIndex() - 1,
@@ -2298,6 +2295,192 @@ public class TeamGUI implements Runnable {
         goalieTabs.add("Create Goalie", createGoalieContent);
 
         // Edit/Delete Goalie
+        Container editGoalieContent = new Container();
+        editGoalieContent.setLayout(new BoxLayout(editGoalieContent, BoxLayout.Y_AXIS));
+
+        editGoalieInstructions = new JLabel(EDIT_PLAYER_INSTRUCTIONS);
+        createPanelForContainer(new JComponent[]{editGoalieInstructions}, editGoalieContent);
+        changeGoalieNameLabel = new JLabel(NAME_STRING);
+        changeGoalieName = new JTextField(ENTER_NAME_SIZE);
+        changeGoalieNumberCheck = new JCheckBox(CHANGE_NUMBER);
+        changeGoalieNumber = new JSlider(1, 99);
+        JPanel changeBasicStatsPanel = createPanel(new JComponent[]{changeGoalieNameLabel, changeGoalieName,
+                changeGoalieNumberCheck});
+        editGoalieContent.add(changeBasicStatsPanel);
+
+        // Displays number slider when user wants to change the goalie's number
+        changeGoalieNumberCheck.addActionListener(e -> {
+            if (changeGoalieNumberCheck.isSelected()) {
+                changeGoalieNumberCheck.setText(CHANGE_NUMBER + " " + changeGoalieNumber.getValue());
+                changeBasicStatsPanel.add(changeGoalieNumber);
+            } else {
+                changeGoalieNumberCheck.setText(CHANGE_NUMBER);
+                changeBasicStatsPanel.remove(changeGoalieNumber);
+            }
+            mainFrame.repaint();
+        });
+
+        // Updates value of check box text to reflect current value of the slider
+        changeGoalieNumber.addChangeListener(e ->
+                changeGoalieNumberCheck.setText(CHANGE_NUMBER + " " + changeGoalieNumber.getValue()));
+
+        changeGoalieWinsLabel = new JLabel(WINS_STRING);
+        changeGoalieWins = new JTextField(ENTER_STAT_SIZE);
+        changeGoalieLossesLabel = new JLabel(LOSSES_STRING);
+        changeGoalieLosses = new JTextField(ENTER_STAT_SIZE);
+        changeGoalieOTLabel = new JLabel(OT_STRING);
+        changeGoalieOTLosses = new JTextField(ENTER_STAT_SIZE);
+        createPanelForContainer(new JComponent[]{changeGoalieWinsLabel, changeGoalieWins, changeGoalieLossesLabel,
+                changeGoalieLosses, changeGoalieOTLabel, changeGoalieOTLosses}, editGoalieContent);
+
+        changeShutoutsLabel = new JLabel("Enter Shutouts:");
+        changeShutouts = new JTextField(ENTER_STAT_SIZE);
+        changeSVPercentageLabel = new JLabel(SV_PERCENT_STRING);
+        changeSavePercentage = new JTextField(ENTER_STAT_SIZE);
+        changeGoalieShotsAgainst = new JTextField(ENTER_STAT_SIZE);
+        createPanelForContainer(new JComponent[]{changeShutoutsLabel, changeShutouts, changeSVPercentageLabel,
+                changeSavePercentage, changeGoalieShotsAgainst}, editGoalieContent);
+
+        editGoalie = new JButton(UPDATE);
+        createPanelForContainer(new JComponent[]{editGoalie}, editGoalieContent);
+        resetGoalieStats = new JButton("Reset Goalie Stats");
+        createPanelForContainer(new JComponent[]{resetGoalieStats}, editGoalieContent);
+        deleteGoalie = new JButton("Delete Goalie");
+        createPanelForContainer(new JComponent[]{deleteGoalie}, editGoalieContent);
+
+        editGoalie.addActionListener(e -> {
+            Goalie editingGoalie = (Goalie) goalieOptions.getSelectedItem();
+            if (editingGoalie == null) {
+                JOptionPane.showMessageDialog(mainFrame, SELECT, "Edit Goalie", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+
+            String name = changeGoalieName.getText();
+            String wins = changeGoalieWins.getText();
+            String losses = changeGoalieLosses.getText();
+            String otLosses = changeGoalieOTLosses.getText();
+            String shutouts = changeShutouts.getText();
+            String svPercent = changeSavePercentage.getText();
+            String shotsFaced = changeGoalieShotsAgainst.getText();
+            try {
+                if (!name.isBlank()) {
+                    editingGoalie.setName(name);
+                    changeGoalieName.setText("");
+                }
+                if (!wins.isBlank()) {
+                    editingGoalie.setWins(Integer.parseInt(wins));
+                    changeGoalieWins.setText("");
+                }
+                if (!losses.isBlank()) {
+                    editingGoalie.setLosses(Integer.parseInt(losses));
+                    changeGoalieLosses.setText("");
+                }
+                if (!otLosses.isBlank()) {
+                    editingGoalie.setOtLosses(Integer.parseInt(otLosses));
+                    changeGoalieOTLosses.setText("");
+                }
+                if (!shutouts.isBlank()) {
+                    editingGoalie.setShutouts(Integer.parseInt(shutouts));
+                    changeShutouts.setText("");
+                }
+                if (!svPercent.isBlank()) {
+                    editingGoalie.setSavePercentage(Double.parseDouble(svPercent), Integer.parseInt(shotsFaced));
+                    changeSavePercentage.setText("");
+                    changeGoalieShotsAgainst.setText("");
+                }
+            } catch (NumberFormatException ex) {
+                JOptionPane.showMessageDialog(mainFrame, NUMBER_ERROR, "Edit Goalie", JOptionPane.ERROR_MESSAGE);
+                return;
+            } catch (NullPointerException | IllegalArgumentException ex) {
+                JOptionPane.showMessageDialog(mainFrame, ex.getMessage(), "Edit Goalie",
+                        JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+            Goalie newGoalie = null;
+
+            if (changeGoalieNumberCheck.isSelected()) {
+                newGoalie = new Goalie(editingGoalie);
+                newGoalie.setPlayerNumber(changeGoalieNumber.getValue());
+            }
+
+            int oldIndex = goalieOptions.getSelectedIndex() - 1;
+            if (newGoalie != null) {
+                int index = team.changePlayer(editingGoalie, newGoalie);
+                if (index == -1) {
+                    JOptionPane.showMessageDialog(mainFrame, PLAYER_DUPLICATE, "Edit Goalie",
+                            JOptionPane.ERROR_MESSAGE);
+                    return;
+                }
+                updatePlayerComponents(editingGoalie, newGoalie, oldIndex, index);
+            } else {
+                updatePlayerComponents(null, editingGoalie, oldIndex, oldIndex);
+            }
+
+            try {
+                updateFile();
+                JOptionPane.showMessageDialog(mainFrame, "Goalie Successfully Updated",
+                        "Edit Goalie", JOptionPane.INFORMATION_MESSAGE);
+            } catch (IOException ex) {
+                JOptionPane.showMessageDialog(mainFrame, FILE_ERROR, "Edit Goalie", JOptionPane.ERROR_MESSAGE);
+            } catch (Exception ex) {
+                JOptionPane.showMessageDialog(mainFrame, ex.getMessage(), "Edit Goalie", JOptionPane.ERROR_MESSAGE);
+            }
+        });
+
+        resetGoalieStats.addActionListener(e -> {
+            Goalie editingGoalie = (Goalie) goalieOptions.getSelectedItem();
+            if (editingGoalie == null) {
+                JOptionPane.showMessageDialog(mainFrame, SELECT, "Edit Goalie", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+
+            int confirm = JOptionPane.showConfirmDialog(mainFrame, RESET_CONFIRM + editingGoalie.getName() +
+                    TO_ZERO, "Edit Goalie", JOptionPane.YES_NO_OPTION);
+            if (confirm == JOptionPane.YES_OPTION) {
+                editingGoalie.resetStats();
+                updatePlayerComponents(null, editingGoalie, goalieOptions.getSelectedIndex() - 1,
+                        goalieOptions.getSelectedIndex() - 1);
+                try {
+                    updateFile();
+                    JOptionPane.showMessageDialog(mainFrame, "Goalie Successfully Updated", "Edit Goalie",
+                            JOptionPane.INFORMATION_MESSAGE);
+                } catch (IOException ex) {
+                    JOptionPane.showMessageDialog(mainFrame, FILE_ERROR, "Edit Goalie", JOptionPane.ERROR_MESSAGE);
+                } catch (Exception ex) {
+                    JOptionPane.showMessageDialog(mainFrame, ex.getMessage(), "Edit Goalie",
+                            JOptionPane.ERROR_MESSAGE);
+                }
+            }
+        });
+
+        deleteGoalie.addActionListener(e -> {
+            Goalie deletingGoalie = (Goalie) goalieOptions.getSelectedItem();
+            if (deletingGoalie == null) {
+                JOptionPane.showMessageDialog(mainFrame, SELECT, "Delete Goalie", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+
+            int confirm = JOptionPane.showConfirmDialog(mainFrame, CONFIRM_DELETE + deletingGoalie.getName()
+                    + "?", "Delete Goalie", JOptionPane.YES_NO_OPTION);
+            if (confirm == JOptionPane.YES_OPTION) {
+                team.removePlayer(deletingGoalie);
+                updatePlayerComponents(deletingGoalie, null, goalieOptions.getSelectedIndex() - 1,
+                        -1);
+                try {
+                    updateFile();
+                    JOptionPane.showMessageDialog(mainFrame, "Goalie Successfully Deleted",
+                            "Delete Goalie", JOptionPane.INFORMATION_MESSAGE);
+                } catch (IOException ex) {
+                    JOptionPane.showMessageDialog(mainFrame, FILE_ERROR, "Delete Goalie",
+                            JOptionPane.ERROR_MESSAGE);
+                } catch (Exception ex) {
+                    JOptionPane.showMessageDialog(mainFrame, ex.getMessage(), "Delete Goalie",
+                            JOptionPane.ERROR_MESSAGE);
+                }
+            }
+        });
+
+        goalieTabs.add("Edit / Delete Goalie", editGoalieContent);
 
         // View Goalie Stats
         viewGoalieStats = new JTextArea();

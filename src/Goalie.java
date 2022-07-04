@@ -64,7 +64,38 @@ public class Goalie extends Player {
         this.shutouts = shutouts;
     }
 
+    // Shallow Copy Constructor
+    public Goalie(Goalie goalie) {
+        super(goalie.getName(), goalie.getPlayerNumber());
+        this.wins = goalie.wins;
+        this.losses = goalie.losses;
+        this.otLosses = goalie.otLosses;
+        this.shotsBlocked = goalie.shotsBlocked;
+        this.shotsAgainst = goalie.shotsAgainst;
+        this.shutouts = goalie.shutouts;
+    }
+
     // Getter Methods
+
+    public int getWins() {
+        return wins;
+    }
+
+    public int getLosses() {
+        return losses;
+    }
+
+    public int getOtLosses() {
+        return otLosses;
+    }
+
+    public int getShutouts() {
+        return shutouts;
+    }
+
+    public int getShotsAgainst() {
+        return shotsAgainst;
+    }
 
     /**
      * Calculates and returns the goalie's save percentage based on the shotsBlocked and shotsAgainst stat (returns 0 if
@@ -88,28 +119,6 @@ public class Goalie extends Player {
             return 0;
         }
         return (double) (shotsAgainst - shotsBlocked) / (wins + losses + otLosses);
-    }
-
-    // Getter Methods
-
-    public int getWins() {
-        return wins;
-    }
-
-    public int getLosses() {
-        return losses;
-    }
-
-    public int getOtLosses() {
-        return otLosses;
-    }
-
-    public int getShutouts() {
-        return shutouts;
-    }
-
-    public int getShotsAgainst() {
-        return shotsAgainst;
     }
 
     /**
