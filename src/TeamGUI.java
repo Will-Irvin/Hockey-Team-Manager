@@ -1,4 +1,3 @@
-import javax.management.InstanceNotFoundException;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
@@ -69,6 +68,10 @@ public class TeamGUI implements Runnable {
     private static final String OT_STRING = "Enter overtime losses or ties:";
     private static final String SHUTOUTS_STRING = "Select Shutouts:";
     private static final String SV_PERCENT_STRING = "Enter Save % / Total Shots Faced:";
+    private static final String ENTER_PENALTIES = "Select Number of Penalties called on your Players: ";
+    private static final String POST_SHOTS_BLOCKED = "Select Number of Shots Blocked by your Skaters: ";
+    private static final String POST_SHOTS_AGAINST = "Select Number of Shots Against your Goalie: ";
+    private static final String POST_HITS = "Select Number of Hits made by your Team: ";
     private static final String UPDATE = "Update Changes";
     private static final String RESET_CONFIRM = "Are you sure you want to reset ";
     private static final String TO_ZERO = "'s stats to 0?";
@@ -105,6 +108,7 @@ public class TeamGUI implements Runnable {
     private static final int ENTER_NAME_SIZE = 30;
     private static final int ENTER_STAT_SIZE = 5;
     private static final int NAME_COLUMN_WIDTH = 100;
+    private static final int POST_GAME_MAX = 50;
 
     // JComponents
 
@@ -326,12 +330,21 @@ public class TeamGUI implements Runnable {
     JButton gameOver;
 
     // Enter Post Game
+    JLabel finalScorePost;
     JTextField finalScoreTeam;
     JTextField finalScoreOpp;
+    JLabel postGamePenaltiesLabel;
+    JSlider postGamePenalties;
+    JLabel postGameShotsBlockedLabel;
     JSlider postGameShotsBlocked;
-    JSlider postGameFaceOffs;
+    JLabel postGameFaceOffLabel;
+    JTextField postGameFaceOffWins;
+    JTextField postGameFaceOffLosses;
+    JLabel postGameShotsLabel;
     JSlider postGameShotsAgainst;
+    JLabel postGameHitsLabel;
     JSlider postGameHits;
+    JButton enterStats;
 
     /**
      * Creates a sample team that is pre-generated for a user who has no file. Allows the user to get accustomed to the
@@ -2345,7 +2358,7 @@ public class TeamGUI implements Runnable {
         createPanelForContainer(new JComponent[]{editGoalie}, editGoalieContent);
         resetGoalieStats = new JButton("Reset Goalie Stats");
         createPanelForContainer(new JComponent[]{resetGoalieStats}, editGoalieContent);
-        deleteGoalie = new JButton("Delete Goalie");
+        deleteGoalie = new JButton("Delete Selected Goalie");
         createPanelForContainer(new JComponent[]{deleteGoalie}, editGoalieContent);
 
         editGoalie.addActionListener(e -> {
@@ -2499,6 +2512,62 @@ public class TeamGUI implements Runnable {
         });
 
         mainTabs.add("Manage Goalies", manageGoalieContent);
+
+        // Enter Game Stats
+
+        enterStatsTabs = new JTabbedPane();
+
+        // Live
+        Container liveStats = new Container();
+        liveStats.setLayout(new BoxLayout(liveStats, BoxLayout.Y_AXIS));
+
+        enterStatsTabs.add("Enter Live", liveStats);
+
+        // Post Game
+        Container postGameStats = new Container();
+        postGameStats.setLayout(new BoxLayout(postGameStats, BoxLayout.Y_AXIS));
+        finalScorePost = new JLabel("Enter Final Score: (Your Team - Opponent)");
+        finalScoreTeam = new JTextField(ENTER_STAT_SIZE);
+        finalScoreOpp = new JTextField(ENTER_STAT_SIZE);
+        createPanelForContainer(new JComponent[]{finalScorePost, finalScoreTeam, new JLabel("-"), finalScoreOpp},
+                postGameStats);
+
+        postGameShotsAgainst = new JSlider(0, POST_GAME_MAX, 0);
+        postGameShotsLabel = new JLabel(POST_SHOTS_AGAINST + postGameShotsAgainst.getValue());
+        createPanelForContainer(new JComponent[]{postGameShotsLabel, postGameShotsAgainst}, postGameStats);
+        postGameShotsAgainst.addChangeListener(e ->
+                postGameShotsLabel.setText(POST_SHOTS_AGAINST + postGameShotsAgainst.getValue()));
+
+        postGameFaceOffLabel = new JLabel("Enter Face Off Stats: (Wins - Losses)");
+        postGameFaceOffWins = new JTextField(ENTER_STAT_SIZE);
+        postGameFaceOffLosses = new JTextField(ENTER_STAT_SIZE);
+        createPanelForContainer(new JComponent[]{postGameFaceOffLabel, postGameFaceOffWins, new JLabel("-"),
+                postGameFaceOffLosses}, postGameStats);
+
+        postGameShotsBlocked = new JSlider(0, POST_GAME_MAX, 0);
+        postGameShotsBlockedLabel = new JLabel(POST_SHOTS_BLOCKED + postGameShotsBlocked.getValue());
+        createPanelForContainer(new JComponent[]{postGameShotsBlockedLabel, postGameShotsBlocked}, postGameStats);
+        postGameShotsBlocked.addChangeListener(e ->
+                postGameShotsBlockedLabel.setText(POST_SHOTS_BLOCKED + postGameShotsBlocked.getValue()));
+
+        postGameHits = new JSlider(0, POST_GAME_MAX, 0);
+        postGameHitsLabel = new JLabel(POST_HITS + postGameHits.getValue());
+        createPanelForContainer(new JComponent[]{postGameHitsLabel, postGameHits}, postGameStats);
+        postGameHits.addChangeListener(e ->
+                postGameHitsLabel.setText(POST_HITS + postGameHits.getValue()));
+
+        postGamePenalties = new JSlider(0, 15, 0);
+        postGamePenaltiesLabel = new JLabel(ENTER_PENALTIES + postGamePenalties.getValue());
+        createPanelForContainer(new JComponent[]{postGamePenaltiesLabel, postGamePenalties}, postGameStats);
+        postGamePenalties.addChangeListener(e ->
+                postGamePenaltiesLabel.setText(ENTER_PENALTIES + postGamePenalties.getValue()));
+
+        enterStats = new JButton("Continue");
+        createPanelForContainer(new JComponent[]{enterStats}, postGameStats);
+
+        enterStatsTabs.add("Enter After Game", postGameStats);
+
+        mainTabs.add("Enter Stats from Game", enterStatsTabs);
 
         // Sets team to null and re displays SelectTeamGUI when window is closed
         mainFrame.addWindowListener(new WindowAdapter() {
