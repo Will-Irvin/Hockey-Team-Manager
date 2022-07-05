@@ -1,5 +1,6 @@
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
+import javax.tools.JavaCompiler;
 import java.awt.*;
 import java.awt.event.*;
 import java.io.*;
@@ -317,6 +318,8 @@ public class TeamGUI implements Runnable {
     // Enter Game Stats
 
     JTabbedPane enterStatsTabs;
+    JComboBox<OffenseLine> offenseLines;
+    JComboBox<DefenseLine> defenseLines;
 
     // Enter Live
     JButton goalLive;
@@ -681,38 +684,42 @@ public class TeamGUI implements Runnable {
     private void setUpComboBoxes() {
         lineOptions = new JComboBox<>();
         lineOptions.addItem(null);
+        offenseLines = new JComboBox<>();
+        offenseLines.addItem(null);
+        defenseLines = new JComboBox<>();
+        defenseLines.addItem(null);
         for (Line line: team.getLines()) {
             lineOptions.addItem(line);
+            if (line instanceof OffenseLine o) {
+                offenseLines.addItem(o);
+            }
+            if (line instanceof DefenseLine d) {
+                defenseLines.addItem(d);
+            }
         }
 
         centerOptions = new JComboBox<>();
         centerOptions.addItem(null);
-        for (Skater player: team.getSkaters()) {
-            if (player instanceof Center center) {
-                centerOptions.addItem(center);
-            }
-        }
-
         pickLeftWing = new JComboBox<>();
         pickRightWing = new JComboBox<>();
         skaterOptions = new JComboBox<>();
         pickLeftWing.addItem(null);
         pickRightWing.addItem(null);
         skaterOptions.addItem(null);
-        for (Skater player: team.getSkaters()) {
-            pickLeftWing.addItem(player);
-            pickRightWing.addItem(player);
-            skaterOptions.addItem(player);
-        }
-
         pickLeftDe = new JComboBox<>();
         pickRightDe = new JComboBox<>();
         pickLeftDe.addItem(null);
         pickRightDe.addItem(null);
         for (Skater player: team.getSkaters()) {
+            pickLeftWing.addItem(player);
+            pickRightWing.addItem(player);
+            skaterOptions.addItem(player);
             if (player instanceof Defenseman de) {
                 pickLeftDe.addItem(de);
                 pickRightDe.addItem(de);
+            }
+            if (player instanceof Center center) {
+                centerOptions.addItem(center);
             }
         }
 
@@ -2564,6 +2571,77 @@ public class TeamGUI implements Runnable {
 
         enterStats = new JButton("Continue");
         createPanelForContainer(new JComponent[]{enterStats}, postGameStats);
+
+        enterStats.addActionListener(e -> {
+            JWindow scoreTeamGoals = new JWindow();
+            scoreTeamGoals.setLocationRelativeTo(mainFrame);
+            Container scoreGoalsContent = scoreTeamGoals.getContentPane();
+            scoreGoalsContent.setLayout(new BoxLayout(scoreGoalsContent, BoxLayout.Y_AXIS));
+
+            JLabel offenseLineLabel = new JLabel(OFFENSE_LINE + ":");
+            JLabel defenseLineLabel = new JLabel(DEFENSE_LINE + ":");
+            JTextArea offenseLineRoster = new JTextArea();
+            JTextArea defenseLineRoster = new JTextArea();
+            offenseLineRoster.setEditable(false);
+            defenseLineRoster.setEditable(false);
+
+            createPanelForContainer(new JComponent[]{offenseLineLabel, offenseLines, offenseLineRoster},
+                    scoreGoalsContent);
+            createPanelForContainer(new JComponent[]{defenseLineLabel, defenseLines, defenseLineRoster},
+                    scoreGoalsContent);
+
+            offenseLines.addItemListener(e1 -> {
+                OffenseLine line = (OffenseLine) offenseLines.getSelectedItem();
+                if (line != null) {
+                    offenseLineRoster.setText(line.lineRoster());
+                } else {
+                    offenseLineRoster.setText("");
+                }
+                scoreTeamGoals.pack();
+            });
+
+            defenseLines.addItemListener(e1 -> {
+                DefenseLine line = (DefenseLine) defenseLines.getSelectedItem();
+                if (line != null) {
+                    defenseLineRoster.setText(line.lineRoster());
+                } else {
+                    defenseLineRoster.setText("");
+                }
+                scoreTeamGoals.pack();
+            });
+
+            JLabel scorerLabel = new JLabel("Position of Scorer:");
+            JComboBox<Position> scorer = new JComboBox<>();
+            scorer.addItem(Position.Center);
+            scorer.addItem(Position.Left_Wing);
+            scorer.addItem(Position.Right_Wing);
+            scorer.addItem(Position.Left_Defense);
+            scorer.addItem(Position.Right_Defense);
+            createPanelForContainer(new JComponent[]{scorerLabel, scorer}, scoreGoalsContent);
+
+            JLabel assistLabel1 = new JLabel("Position of Assist 1 (if assisted):");
+            JComboBox<Position> assist1 = new JComboBox<>();
+            assist1.addItem(null);
+            assist1.addItem(Position.Center);
+            assist1.addItem(Position.Left_Wing);
+            assist1.addItem(Position.Right_Wing);
+            assist1.addItem(Position.Left_Defense);
+            assist1.addItem(Position.Right_Defense);
+            createPanelForContainer(new JComponent[]{assistLabel1, assist1}, scoreGoalsContent);
+
+            JLabel assistLabel2 = new JLabel("Position of Assist 2 (if assisted):");
+            JComboBox<Position> assist2 = new JComboBox<>();
+            assist2.addItem(null);
+            assist2.addItem(Position.Center);
+            assist2.addItem(Position.Left_Wing);
+            assist2.addItem(Position.Right_Wing);
+            assist2.addItem(Position.Left_Defense);
+            assist2.addItem(Position.Right_Defense);
+            createPanelForContainer(new JComponent[]{assistLabel2, assist2}, scoreGoalsContent);
+
+            scoreTeamGoals.pack();
+            scoreTeamGoals.setVisible(true);
+        });
 
         enterStatsTabs.add("Enter After Game", postGameStats);
 
