@@ -94,6 +94,20 @@ public class Center extends Skater {
         }
     }
 
+    /**
+     * Updates face off stats to reflect given arguments from after a game
+     * @param wins Number of wins throughout the game
+     * @param losses Number of losses throughout the game
+     * @throws IllegalArgumentException If either of the arguments are negative
+     */
+    public void enterFaceOffsPostGame(int wins, int losses) throws IllegalArgumentException {
+        if (wins < 0 || losses < 0) {
+            throw new IllegalArgumentException("Given values must be positive");
+        }
+        faceOffWins += wins;
+        faceOffTotal += wins + losses;
+    }
+
     // Resets stats to 0
     @Override
     public void resetStats() {
