@@ -60,6 +60,17 @@ public class Defenseman extends Skater {
     }
 
     /**
+     * Adds given argument to the defenseman's shot block total
+     * @throws IllegalArgumentException If given argument is negative
+     */
+    public void addShotsBlocked(int shotsBlocked) throws IllegalArgumentException {
+        if (shotsBlocked < 0) {
+            throw new IllegalArgumentException("Shots Blocked stat must be positive");
+        }
+        this.shotsBlocked += shotsBlocked;
+    }
+
+    /**
      * @throws IllegalArgumentException Thrown if given argument is negative
      */
     public void setShotsBlocked(int shotsBlocked) throws IllegalArgumentException {

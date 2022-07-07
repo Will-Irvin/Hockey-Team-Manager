@@ -152,6 +152,17 @@ public class Skater extends Player {
     }
 
     /**
+     * Adds given argument to the skater's hit total
+     * @throws IllegalArgumentException If given argument is negative
+     */
+    public void addHits(int hits) throws IllegalArgumentException {
+        if (hits < 0) {
+            throw new IllegalArgumentException("Given value must be positive");
+        }
+        this.hits += hits;
+    }
+
+    /**
      * @throws IllegalArgumentException If the given argument is negative
      */
     public void setHits(int hits) throws IllegalArgumentException {

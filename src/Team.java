@@ -177,29 +177,6 @@ public class Team implements Serializable {
         this.otLosses = otLosses;
     }
 
-
-    // Generates and returns a list containing every OffenseLine in the team
-    public ArrayList<OffenseLine> getOffenseLines() {
-        ArrayList<OffenseLine> result = new ArrayList<>();
-        for (Line line: lines) {
-            if (line instanceof OffenseLine offense) {
-                result.add(offense);
-            }
-        }
-        return result;
-    }
-
-    // Generates and returns a list containing every DefenseLine in the team
-    public ArrayList<DefenseLine> getDefenseLines() {
-        ArrayList<DefenseLine> result = new ArrayList<>();
-        for (Line line: lines) {
-            if (line instanceof DefenseLine de) {
-                result.add(de);
-            }
-        }
-        return result;
-    }
-
     // Increments wins up by 1
     public void win() {
         wins++;

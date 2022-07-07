@@ -2580,6 +2580,13 @@ public class TeamGUI implements Runnable {
         createPanelForContainer(new JComponent[]{enterStats}, postGameStats);
 
         enterStats.addActionListener(e -> {
+            if (team.getSkaters().length < 5 || team.getGoalies().length == 0 || pickLeftDe.getItemCount() < 2 ||
+                    centerOptions.getItemCount() < 2) {
+                JOptionPane.showMessageDialog(mainFrame, "You must have at least 5 players and 1 goalie in" +
+                        "order to enter stats after a game. At least one of your players must be a defenseman and " +
+                        "at least one of your players must be a center.", "Enter Stats", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
             int goalsScored;
             int goalsAgainst;
             int shotsAgainst = postGameShotsAgainst.getValue();
@@ -2600,6 +2607,12 @@ public class TeamGUI implements Runnable {
                 }
             } catch (NumberFormatException ex) {
                 JOptionPane.showMessageDialog(mainFrame, NUMBER_ERROR, "Enter Stats", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+
+            if (goalsAgainst > shotsAgainst) {
+                JOptionPane.showMessageDialog(mainFrame, "Opponent's score cannot be greater than the number" +
+                        " of shots against your goalie.", "Enter Stats", JOptionPane.ERROR_MESSAGE);
                 return;
             }
 
@@ -2653,7 +2666,7 @@ public class TeamGUI implements Runnable {
                     if (e1.getStateChange() == ItemEvent.SELECTED) {
                         Line selection = (Line) nonDefenseLines.getSelectedItem();
                         if (selection instanceof OffenseLine) {
-                            scoreGoalsContent.add(defenseLinePanel, 1);
+                            scoreGoalsContent.add(defenseLinePanel, 2);
                         } else {
                             scoreGoalsContent.remove(defenseLinePanel);
                         }
@@ -2752,7 +2765,7 @@ public class TeamGUI implements Runnable {
                         scoreGoalsContent.remove(otherPlayersPanel);
                         scoreGoalsContent.remove(assistPlayerPanel1);
                         scoreGoalsContent.remove(assistPlayerPanel2);
-                        scoreGoalsContent.remove(playerScorePanel);
+                        scoreGoalsContent.remove(selectOtherPlayersPanel);
 
                         scoreGoalsContent.add(assistPanel2, 1);
                         scoreGoalsContent.add(assistPanel1, 1);
@@ -2968,27 +2981,130 @@ public class TeamGUI implements Runnable {
                 enterTeamFaceOffs.pack();
             } else {
                 enterTeamFaceOffs.dispose();
-                if (shotsBlocked > 0) {
-                    enterTeamShotBlocks.setVisible(true);
-                } else if (hits > 0) {
-                    enterTeamHits.setVisible(true);
-                } else if (powerPlays > 0) {
-                    enterTeamPPs.setVisible(true);
-                } else if (penalties > 0) {
-                    enterTeamPKs.setVisible(true);
-                } else {
-                    mainFrame.setVisible(true);
-                    updateEntireTeamComponents();
-                    try {
-                        updateFile();
-                    } catch (IOException ex) {
-                        JOptionPane.showMessageDialog(mainFrame, FILE_ERROR, "Enter Stats",
+            }
+
+            if (shotsBlocked > 0) {
+                Container enterShotsBlockedContent = enterTeamShotBlocks.getContentPane();
+                enterShotsBlockedContent.setLayout(new BoxLayout(enterShotsBlockedContent, BoxLayout.Y_AXIS));
+                enterShotsBlockedContent.add(selectLDPanel);
+                selectLDLabel.setText("Select Defenseman:");
+
+                JSlider shotsBlockedSlider = new JSlider(1, shotsBlocked);
+                JLabel shotsBlockedLabel = new JLabel(SHOT_BLOCK_STRING + " " + shotsBlockedSlider.getValue());
+                shotsBlockedSlider.addChangeListener(e1 ->
+                        shotsBlockedLabel.setText(SHOT_BLOCK_STRING + " " + shotsBlockedSlider.getValue()));
+                createPanelForContainer(new JComponent[]{shotsBlockedLabel, shotsBlockedSlider},
+                        enterShotsBlockedContent);
+
+                JButton shotsBlockedButton = new JButton("Enter Shots Blocked");
+                createPanelForContainer(new JComponent[]{shotsBlockedButton}, enterShotsBlockedContent);
+
+                shotsBlockedButton.addActionListener(e1 -> {
+                    Defenseman selectedDe = (Defenseman) pickLeftDe.getSelectedItem();
+                    if (selectedDe == null) {
+                        JOptionPane.showMessageDialog(enterTeamShotBlocks, SELECT, "Enter Shots Blocked",
                                 JOptionPane.ERROR_MESSAGE);
-                    } catch (Exception ex) {
-                        JOptionPane.showMessageDialog(mainFrame, ex.getMessage(), "Enter Stats",
-                                JOptionPane.ERROR_MESSAGE);
+                        return;
                     }
-                }
+                    int addShots = shotsBlockedSlider.getValue();
+                    selectedDe.addShotsBlocked(addShots);
+                    shotsBlockedSlider.setMaximum(shotsBlockedSlider.getMaximum() - addShots);
+
+                    if (shotsBlockedSlider.getMaximum() == 0) {
+                        enterTeamShotBlocks.dispose();
+                        selectLDLabel.setText("Left Defense:");
+                        if (hits > 0) {
+                            enterTeamHits.setVisible(true);
+                        } else if (powerPlays > 0) {
+                            enterTeamPPs.setVisible(true);
+                        } else if (penalties > 0) {
+                            enterTeamPKs.setVisible(true);
+                        } else {
+                            updateEntireTeamComponents();
+                            try {
+                                updateFile();
+                            } catch (IOException ex) {
+                                JOptionPane.showMessageDialog(mainFrame, FILE_ERROR, "Enter Stats",
+                                        JOptionPane.ERROR_MESSAGE);
+                            } catch (Exception ex) {
+                                JOptionPane.showMessageDialog(mainFrame, ex.getMessage(), "Enter Stats",
+                                        JOptionPane.ERROR_MESSAGE);
+                            }
+                            mainFrame.setVisible(true);
+                        }
+                    } else {
+                        enterTeamShotBlocks.pack();
+                    }
+                });
+
+                enterTeamShotBlocks.pack();
+            } else {
+                enterTeamShotBlocks.dispose();
+            }
+
+            if (hits > 0) {
+                Container enterHitsContent = enterTeamHits.getContentPane();
+                enterHitsContent.setLayout(new BoxLayout(enterHitsContent, BoxLayout.Y_AXIS));
+                enterHitsContent.add(selectLWPanel);
+                selectLWLabel.setText("Select Skater:");
+
+                JSlider hitsSlider = new JSlider(1, hits);
+                JLabel hitsLabel = new JLabel(HITS_STRING + " " + hitsSlider.getValue());
+                hitsSlider.addChangeListener(e1 ->
+                        hitsLabel.setText(HITS_STRING + " " + hitsSlider.getValue()));
+                createPanelForContainer(new JComponent[]{hitsLabel, hitsSlider}, enterHitsContent);
+
+                JButton hitsButton = new JButton("Enter Hits");
+                createPanelForContainer(new JComponent[]{hitsButton}, enterHitsContent);
+                hitsButton.addActionListener(e1 -> {
+                    Skater selectedSkater = (Skater) pickLeftWing.getSelectedItem();
+                    if (selectedSkater == null) {
+                        JOptionPane.showMessageDialog(enterTeamHits, SELECT, "Enter Hits",
+                                JOptionPane.ERROR_MESSAGE);
+                        return;
+                    }
+
+                    int addHits = hitsSlider.getValue();
+                    selectedSkater.addHits(addHits);
+                    hitsSlider.setMaximum(hitsSlider.getMaximum() - addHits);
+                    if (hitsSlider.getMaximum() == 0) {
+                        enterTeamHits.dispose();
+                        selectLWLabel.setText("Left Wing:");
+                        if (powerPlays > 0) {
+                            enterTeamPPs.setVisible(true);
+                        } else if (penalties > 0) {
+                            enterTeamPKs.setVisible(true);
+                        } else {
+                            updateEntireTeamComponents();
+                            try {
+                                updateFile();
+                            } catch (IOException ex) {
+                                JOptionPane.showMessageDialog(mainFrame, FILE_ERROR, "Enter Stats",
+                                        JOptionPane.ERROR_MESSAGE);
+                            } catch (Exception ex) {
+                                JOptionPane.showMessageDialog(mainFrame, ex.getMessage(), "Enter Stats",
+                                        JOptionPane.ERROR_MESSAGE);
+                            }
+                            mainFrame.setVisible(true);
+                        }
+                    }
+                });
+
+                enterTeamHits.pack();
+            } else {
+                enterTeamHits.dispose();
+            }
+
+            if (powerPlays > 0) {
+
+            } else {
+                enterTeamPPs.dispose();
+            }
+
+            if (penalties > 0) {
+
+            } else {
+                enterTeamPKs.dispose();
             }
         });
 
