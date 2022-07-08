@@ -81,6 +81,16 @@ public abstract class SpecialTeamsLine extends Line {
         attempts++;
     }
 
+    /**
+     * @param failures Adds to this object's attempts variable
+     * @throws IllegalArgumentException If given argument is negative
+     */
+    public void addFailures(int failures) throws IllegalArgumentException {
+        if (failures < 0) {
+            throw new IllegalArgumentException("Given value must be positive");
+        }
+        this.attempts += failures;
+    }
     // Score Abstract Methods
 
     public abstract void score(Position position);
