@@ -96,6 +96,7 @@ public class TeamGUI implements Runnable {
     private static final String BLANK_UPDATED = " (Any blank fields have already been updated)";
     private static final String PLAYER_DUPLICATE = "New player cannot share the same number as another player";
     private static final String SELECT_LINE = "Selected Line:";
+    private static final String SELECT_GOALIE = "Selected Goalie:";
     private static final String OFFENSE_LINE = "Offense Line";
     private static final String DEFENSE_LINE = "Defense Pair";
     private static final String PP_LINE = "Power Play Line";
@@ -323,6 +324,7 @@ public class TeamGUI implements Runnable {
     JTabbedPane enterStatsTabs;
     JComboBox<Line> nonDefenseLines;
     JComboBox<DefenseLine> defenseLines;
+    JComboBox<Goalie> selectGoaliesForStats;
 
     // Enter Live
     JButton goalLive;
@@ -735,9 +737,11 @@ public class TeamGUI implements Runnable {
         }
 
         goalieOptions = new JComboBox<>();
+        selectGoaliesForStats = new JComboBox<>();
         goalieOptions.addItem(null);
         for (Goalie goalie: team.getGoalies()) {
             goalieOptions.addItem(goalie);
+            selectGoaliesForStats.addItem(goalie);
         }
 
         positionOptions = new JComboBox<>();
@@ -752,6 +756,46 @@ public class TeamGUI implements Runnable {
         changePosition.addItem(Position.Right_Wing);
         changePosition.addItem(Position.Left_Defense);
         changePosition.addItem(Position.Right_Defense);
+    }
+
+    /**
+     *
+     * @param oldLine
+     * @param newLine
+     * @param newIndex
+     */
+    private void updateLineComboBoxes(Line oldLine, Line newLine, int newIndex) {
+        if (oldLine != null) {
+            lineOptions.removeItem(oldLine);
+            if (oldLine instanceof DefenseLine) {
+                defenseLines.removeItem(oldLine);
+            } else if (oldLine instanceof PPLine) {
+                nonDefenseLines.removeItem(oldLine);
+                ppOptions.removeItem(oldLine);
+            } else if (oldLine instanceof PKLine) {
+                nonDefenseLines.removeItem(oldLine);
+                pkOptions.removeItem(oldLine);
+            } else if (oldLine instanceof OffenseLine) {
+                nonDefenseLines.removeItem(oldLine);
+            }
+        }
+
+        if (newLine != null) {
+            lineOptions.insertItemAt(newLine, newIndex + 1);
+
+            if (newLine instanceof DefenseLine de) {
+                if (defenseLines.getItemCount() > 0) {
+                    for (int i = 0; i < defenseLines.getItemCount(); i++) {
+                        if (i == defenseLines.getItemCount() - 1) {
+                            defenseLines.addItem(de);
+                        }
+                        if ()
+                    }
+                } else {
+                    defenseLines.addItem((DefenseLine) de);
+                }
+            }
+        }
     }
 
     /**
@@ -834,6 +878,7 @@ public class TeamGUI implements Runnable {
                 }
             } else if (newPlayer instanceof Goalie newGoalie) {
                 goalieOptions.insertItemAt(newGoalie, index + 1);
+                selectGoaliesForStats.insertItemAt(newGoalie, index);
                 goalieStats.insertRow(index, newGoalie.getStatsArray());
             }
         }
@@ -851,6 +896,7 @@ public class TeamGUI implements Runnable {
         mainFrame.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
         Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
         mainFrame.setSize(new Dimension(screenSize.width * 2 / 3, screenSize.height * 2 / 3));
+        mainFrame.setLocationRelativeTo(null);
         Container mainContent = mainFrame.getContentPane();
         mainContent.setLayout(new BoxLayout(mainContent, BoxLayout.Y_AXIS));
 
@@ -1268,18 +1314,17 @@ public class TeamGUI implements Runnable {
             enterNumOpps.setText("");
 
             lineOptions.insertItemAt(newLine, index);
+
             try {
                 updateFile();
+                JOptionPane.showMessageDialog(mainFrame, "New line has successfully been created",
+                        "Create Line", JOptionPane.INFORMATION_MESSAGE);
             } catch (IOException ex) {
                 JOptionPane.showMessageDialog(mainFrame, FILE_ERROR, "Create Line", JOptionPane.ERROR_MESSAGE);
-                return;
             } catch (Exception ex) {
                 JOptionPane.showMessageDialog(mainFrame, ex.getMessage(), "Create Line",
                         JOptionPane.ERROR_MESSAGE);
-                return;
             }
-            JOptionPane.showMessageDialog(mainFrame, "New line has successfully been created",
-                    "Create Line", JOptionPane.INFORMATION_MESSAGE);
         });
 
         lineTabs.add("Create Line", createLineContent);
@@ -2209,7 +2254,7 @@ public class TeamGUI implements Runnable {
 
         Container manageGoalieContent = new Container();
         manageGoalieContent.setLayout(new BoxLayout(manageGoalieContent, BoxLayout.Y_AXIS));
-        selectedGoalieLabel = new JLabel("Selected Goalie:");
+        selectedGoalieLabel = new JLabel(SELECT_GOALIE);
         createPanelForContainer(new JComponent[]{selectedGoalieLabel, goalieOptions}, manageGoalieContent);
         goalieTabs = new JTabbedPane();
         createPanelForContainer(new JComponent[]{goalieTabs}, manageGoalieContent);
@@ -2636,23 +2681,194 @@ public class TeamGUI implements Runnable {
 
                     // Window for each stat that needs further clarification from user
                     goalieWindow = new JWindow(mainFrame);
+                    goalieWindow.setLocationRelativeTo(mainFrame);
                     JWindow scoreTeamGoals = new JWindow(mainFrame);
+                    scoreTeamGoals.setLocationRelativeTo(mainFrame);
                     JWindow enterTeamFaceOffs = new JWindow(mainFrame);
-                    enterTeamFaceOffs.setVisible(false);
+                    enterTeamFaceOffs.setLocationRelativeTo(mainFrame);
                     JWindow enterTeamShotBlocks = new JWindow(mainFrame);
-                    enterTeamShotBlocks.setVisible(false);
+                    enterTeamShotBlocks.setLocationRelativeTo(mainFrame);
                     JWindow enterTeamHits = new JWindow(mainFrame);
-                    enterTeamHits.setVisible(false);
+                    enterTeamHits.setLocationRelativeTo(mainFrame);
                     JWindow enterTeamPPs = new JWindow(mainFrame);
-                    enterTeamPPs.setVisible(false);
+                    enterTeamPPs.setLocationRelativeTo(mainFrame);
                     JWindow enterTeamPKs = new JWindow(mainFrame);
-                    enterTeamPKs.setVisible(false);
+                    enterTeamPKs.setLocationRelativeTo(mainFrame);
 
+                    if (shotsAgainst > 0) {
+                        int multipleGoalies;
+                        do {
+                            multipleGoalies = JOptionPane.showConfirmDialog(mainFrame, "Did multiple goalies play in " +
+                                    "this game?", "Enter Stats", JOptionPane.YES_NO_OPTION);
+                        } while (multipleGoalies != JOptionPane.YES_OPTION && multipleGoalies != JOptionPane.NO_OPTION);
+                        int finalInput = multipleGoalies;
+
+                        Container enterGoalieContent = goalieWindow.getContentPane();
+                        enterGoalieContent.setLayout(new BoxLayout(enterGoalieContent, BoxLayout.Y_AXIS));
+
+                        JLabel selectGoalieLabel = new JLabel(SELECT_GOALIE);
+                        createPanelForContainer(new JComponent[]{selectGoalieLabel, selectGoaliesForStats},
+                                enterGoalieContent);
+
+                        JSlider goalsAgainstSlider = new JSlider(0, goalsAgainst);
+                        JSlider shotsAgainstSlider = new JSlider(1, shotsAgainst);
+                        ArrayList<Goalie> selectedGoalies = new ArrayList<>();
+                        if (finalInput == JOptionPane.YES_OPTION) {
+                            JLabel goalsAgainstLabel = new JLabel("Select Number of Goals Scored on this Goalie: " +
+                                    goalsAgainstSlider.getValue());
+                            goalsAgainstSlider.addChangeListener(e1 -> {
+                                goalsAgainstLabel.setText("Select Number of Goals Scored on this Goalie: " +
+                                        goalsAgainstSlider.getValue());
+                                goalieWindow.pack();
+                            });
+                            JLabel shotsAgainstLabel = new JLabel(POST_SHOTS_AGAINST + shotsAgainstSlider.getValue());
+                            shotsAgainstSlider.addChangeListener(e1 -> {
+                                shotsAgainstLabel.setText(POST_SHOTS_AGAINST + shotsAgainstSlider.getValue());
+                                goalieWindow.pack();
+                            });
+                            createPanelForContainer(new JComponent[]{goalsAgainstLabel, goalsAgainstSlider},
+                                    enterGoalieContent);
+                            createPanelForContainer(new JComponent[]{shotsAgainstLabel, shotsAgainstSlider},
+                                    enterGoalieContent);
+                        }
+
+                        JButton enterGoalie = new JButton("Enter Goalie");
+                        createPanelForContainer(new JComponent[]{enterGoalie}, enterGoalieContent);
+
+                        enterGoalie.addActionListener(e1 -> {
+                            Goalie selectedGoalie;
+                            if (finalInput == JOptionPane.YES_OPTION) {
+                                selectedGoalie = (Goalie) selectGoaliesForStats.getSelectedItem();
+                                if (selectedGoalie == null) {
+                                    JOptionPane.showMessageDialog(mainFrame, SELECT, "Enter Goalie Stats",
+                                            JOptionPane.ERROR_MESSAGE);
+                                    return;
+                                }
+
+                                int shotsAgainstOneGoalie = shotsAgainstSlider.getValue();
+                                int goalsAgainstOneGoalie = goalsAgainstSlider.getValue();
+                                selectedGoalie.enterSaves(goalsAgainstOneGoalie, shotsAgainstOneGoalie);
+                                selectedGoalies.add(selectedGoalie);
+                                goalsAgainstSlider.setMaximum(goalsAgainstSlider.getMaximum() - goalsAgainstOneGoalie);
+                                shotsAgainstSlider.setMaximum(shotsAgainstSlider.getMaximum() - shotsAgainstOneGoalie);
+
+                                if (goalsAgainstSlider.getMaximum() == 0 && shotsAgainstSlider.getMaximum() == 0) {
+                                    while (true) {
+                                        int index = JOptionPane.showOptionDialog(goalieWindow, "Which goalie " +
+                                                        "should receive credit on their record? (Goalie who was in " +
+                                                        "net for the game deciding goal)", "Enter Goalie Stats",
+                                                JOptionPane.DEFAULT_OPTION, JOptionPane.QUESTION_MESSAGE, null,
+                                                selectedGoalies.toArray(), selectedGoalies.get(0));
+                                        if (index >= 0 && index < selectedGoalies.size()) {
+                                            selectedGoalie = selectedGoalies.get(index);
+                                            break;
+                                        }
+                                    }
+                                } else {
+                                    return;
+                                }
+                            } else {
+                                selectedGoalie = (Goalie) selectGoaliesForStats.getSelectedItem();
+                                if (selectedGoalie == null) {
+                                    JOptionPane.showMessageDialog(mainFrame, SELECT, "Enter Goalie Stats",
+                                            JOptionPane.ERROR_MESSAGE);
+                                    return;
+                                }
+                                selectedGoalie.enterSaves(goalsAgainst, shotsAgainst);
+                            }
+
+                            if (goalsScored > goalsAgainst) {
+                                team.win();
+                                if (goalsAgainst == 0) {
+                                    selectedGoalie.shutoutWin();
+                                } else {
+                                    selectedGoalie.win();
+                                }
+                            } else if (goalsScored == goalsAgainst) {
+                                team.tie();
+                                selectedGoalie.loseOT();
+                            } else if (goalsScored == goalsAgainst - 1) {
+                                int input;
+                                while (true) {
+                                    input = JOptionPane.showConfirmDialog(mainFrame, "Was this a regulation loss?",
+                                            "Enter Stats", JOptionPane.YES_NO_OPTION);
+                                    if (input == JOptionPane.YES_OPTION) {
+                                        team.lose();
+                                        selectedGoalie.lose();
+                                        break;
+                                    } else if (input == JOptionPane.NO_OPTION) {
+                                        team.tie();
+                                        selectedGoalie.loseOT();
+                                        break;
+                                    }
+                                }
+                            } else {
+                                team.lose();
+                                selectedGoalie.lose();
+                            }
+
+                            goalieWindow.dispose();
+                            if (goalsScored > 0) {
+                                scoreTeamGoals.setVisible(true);
+                            } else if (faceOffWins > 0 || faceOffLosses > 0) {
+                                enterTeamFaceOffs.setVisible(true);
+                            } else if (shotsBlocked > 0) {
+                                enterTeamShotBlocks.setVisible(true);
+                            } else if (hits > 0) {
+                                enterTeamHits.setVisible(true);
+                            } else if (powerPlays.get() > 0 && ppOptions.getItemCount() > 0) {
+                                enterTeamPPs.setVisible(true);
+                            } else if (penalties > 0 && pkOptions.getItemCount() > 0) {
+                                enterTeamPKs.setVisible(true);
+                            } else {
+                                updateEntireTeamComponents();
+                                goalieWindow = null;
+                                try {
+                                    updateFile();
+                                } catch (IOException ex) {
+                                    JOptionPane.showMessageDialog(mainFrame, FILE_ERROR, "Enter Stats",
+                                            JOptionPane.ERROR_MESSAGE);
+                                } catch (Exception ex) {
+                                    JOptionPane.showMessageDialog(mainFrame, ex.getMessage(), "Enter Stats",
+                                            JOptionPane.ERROR_MESSAGE);
+                                }
+                            }
+                        });
+
+                        goalieWindow.pack();
+                        goalieWindow.setVisible(true);
+                    } else {
+                        goalieWindow.dispose();
+                        if (goalsScored > 0) {
+                            scoreTeamGoals.setVisible(true);
+                        } else if (faceOffWins > 0 || faceOffLosses > 0) {
+                            enterTeamFaceOffs.setVisible(true);
+                        } else if (shotsBlocked > 0) {
+                            enterTeamShotBlocks.setVisible(true);
+                        } else if (hits > 0) {
+                            enterTeamHits.setVisible(true);
+                        } else if (powerPlays.get() > 0 && ppOptions.getItemCount() > 0) {
+                            enterTeamPPs.setVisible(true);
+                        } else if (penalties > 0 && pkOptions.getItemCount() > 0) {
+                            enterTeamPKs.setVisible(true);
+                        } else {
+                            updateEntireTeamComponents();
+                            goalieWindow = null;
+                            try {
+                                updateFile();
+                            } catch (IOException ex) {
+                                JOptionPane.showMessageDialog(mainFrame, FILE_ERROR, "Enter Stats",
+                                        JOptionPane.ERROR_MESSAGE);
+                            } catch (Exception ex) {
+                                JOptionPane.showMessageDialog(mainFrame, ex.getMessage(), "Enter Stats",
+                                        JOptionPane.ERROR_MESSAGE);
+                            }
+                        }
+                    }
                     AtomicInteger ppGoals = new AtomicInteger();
                     if (goalsScored > 0) {
                         AtomicInteger enteredGoals = new AtomicInteger();
 
-                        scoreTeamGoals.setLocationRelativeTo(mainFrame);
                         Container scoreGoalsContent = scoreTeamGoals.getContentPane();
                         scoreGoalsContent.setLayout(new BoxLayout(scoreGoalsContent, BoxLayout.Y_AXIS));
 
@@ -2784,8 +3000,8 @@ public class TeamGUI implements Runnable {
                                 scoreGoalsContent.add(assistPanel2, 1);
                                 scoreGoalsContent.add(assistPanel1, 1);
                                 scoreGoalsContent.add(scorerPanel, 1);
-                                scoreGoalsContent.add(defenseLinePanel, 1);
                                 scoreGoalsContent.add(otherLinePanel, 1);
+                                nonDefenseLines.setSelectedIndex(0);
                             }
                             scoreTeamGoals.pack();
                             scoreTeamGoals.repaint();
@@ -2911,32 +3127,8 @@ public class TeamGUI implements Runnable {
                         });
 
                         scoreTeamGoals.pack();
-                        scoreTeamGoals.setVisible(true);
                     } else {
                         scoreTeamGoals.dispose();
-                        if (faceOffWins > 0 || faceOffLosses > 0) {
-                            enterTeamFaceOffs.setVisible(true);
-                        } else if (shotsBlocked > 0) {
-                            enterTeamShotBlocks.setVisible(true);
-                        } else if (hits > 0) {
-                            enterTeamHits.setVisible(true);
-                        } else if (powerPlays.get() > 0 && ppOptions.getItemCount() > 0) {
-                            enterTeamPPs.setVisible(true);
-                        } else if (penalties > 0 && pkOptions.getItemCount() > 0) {
-                            enterTeamPKs.setVisible(true);
-                        } else {
-                            updateEntireTeamComponents();
-                            goalieWindow = null;
-                            try {
-                                updateFile();
-                            } catch (IOException ex) {
-                                JOptionPane.showMessageDialog(mainFrame, FILE_ERROR, "Enter Stats",
-                                        JOptionPane.ERROR_MESSAGE);
-                            } catch (Exception ex) {
-                                JOptionPane.showMessageDialog(mainFrame, ex.getMessage(), "Enter Stats",
-                                        JOptionPane.ERROR_MESSAGE);
-                            }
-                        }
                     }
 
                     // Enter Face Offs
