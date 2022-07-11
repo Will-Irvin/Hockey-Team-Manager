@@ -784,15 +784,9 @@ public class TeamGUI implements Runnable {
             lineOptions.insertItemAt(newLine, newIndex + 1);
 
             if (newLine instanceof DefenseLine de) {
-                if (defenseLines.getItemCount() > 0) {
-                    for (int i = 0; i < defenseLines.getItemCount(); i++) {
-                        if (i == defenseLines.getItemCount() - 1) {
-                            defenseLines.addItem(de);
-                        }
-                        if ()
-                    }
-                } else {
-                    defenseLines.addItem((DefenseLine) de);
+                if (defenseLines.getItemCount() == 0) defenseLines.addItem(de);
+                else {
+
                 }
             }
         }
@@ -2867,7 +2861,8 @@ public class TeamGUI implements Runnable {
                     }
                     AtomicInteger ppGoals = new AtomicInteger();
                     if (goalsScored > 0) {
-                        AtomicInteger enteredGoals = new AtomicInteger();
+                        AtomicInteger enteredGoalsScored = new AtomicInteger();
+                        AtomicInteger enteredGoalsAgainst = new AtomicInteger();
 
                         Container scoreGoalsContent = scoreTeamGoals.getContentPane();
                         scoreGoalsContent.setLayout(new BoxLayout(scoreGoalsContent, BoxLayout.Y_AXIS));
@@ -2875,7 +2870,7 @@ public class TeamGUI implements Runnable {
                         JToggleButton useLinesOrPlayers = new JToggleButton("Select Players Manually");
                         createPanelForContainer(new JComponent[]{useLinesOrPlayers}, scoreGoalsContent);
 
-                        JLabel otherLineLabel = new JLabel(SELECT_LINE);
+                        JLabel otherLineLabel = new JLabel("Line on Ice: ");
                         JLabel defenseLineLabel = new JLabel(DEFENSE_LINE + ":");
                         JTextArea otherLineRoster = new JTextArea();
                         JTextArea defenseLineRoster = new JTextArea();
@@ -3007,9 +3002,12 @@ public class TeamGUI implements Runnable {
                             scoreTeamGoals.repaint();
                         });
 
-                        JButton enterGoal = new JButton("Enter Goal");
-                        createPanelForContainer(new JComponent[]{enterGoal}, scoreGoalsContent);
-                        enterGoal.addActionListener(e1 -> {
+                        JButton enterTeamGoal = new JButton("Enter Team Goal");
+                        JButton enterOpponentGoal = new JButton("Enter Opponent Goal");
+                        JPanel scoreButtonsPanel = createPanel(new JComponent[]{enterTeamGoal, enterOpponentGoal});
+                        scoreGoalsContent.add(scoreButtonsPanel);
+
+                        ActionListener enterGoalsListener = e1 -> {
                             if (useLinesOrPlayers.isSelected()) {
                                 Skater scorer = (Skater) scorerPlayerOptions.getSelectedItem();
                                 Skater assist1 = (Skater) assistPlayer1Options.getSelectedItem();
@@ -3025,27 +3023,35 @@ public class TeamGUI implements Runnable {
                                 }
 
                                 if (scorer.equals(assist1) || scorer.equals(assist2) || scorer.equals(onIce1) ||
-                                        scorer.equals(onIce2) || assist1.equals(assist2) || assist1.equals(onIce1) ||
-                                        assist1.equals(onIce2) || assist2.equals(onIce1) || assist2.equals(onIce2) ||
-                                        onIce1.equals(onIce2)) {
+                                        scorer.equals(onIce2) || assist1.equals(assist2) || assist1.equals(onIce1)
+                                        || assist1.equals(onIce2) || assist2.equals(onIce1) ||
+                                        assist2.equals(onIce2) || onIce1.equals(onIce2)) {
                                     JOptionPane.showMessageDialog(scoreTeamGoals, "Selected Players must " +
-                                                    "be different", "Enter Goals", JOptionPane.ERROR_MESSAGE);
+                                            "be different", "Enter Goals", JOptionPane.ERROR_MESSAGE);
                                     return;
                                 }
 
-                                scorer.score();
-                                if (assist1Check.isSelected()) {
-                                    assist1.assist();
+                                if (e1.getActionCommand().equals(enterTeamGoal.getActionCommand())) {
+                                    scorer.score();
+                                    if (assist1Check.isSelected()) {
+                                        assist1.assist();
+                                    } else {
+                                        assist1.scoredOnIce();
+                                    }
+                                    if (assist2Check.isSelected()) {
+                                        assist2.assist();
+                                    } else {
+                                        assist2.scoredOnIce();
+                                    }
+                                    onIce1.scoredOnIce();
+                                    onIce2.scoredOnIce();
                                 } else {
-                                    assist1.scoredOnIce();
+                                    scorer.scoredAgainst();
+                                    assist1.scoredAgainst();
+                                    assist2.scoredAgainst();
+                                    onIce1.scoredAgainst();
+                                    onIce2.scoredAgainst();
                                 }
-                                if (assist2Check.isSelected()) {
-                                    assist2.assist();
-                                } else {
-                                    assist2.scoredOnIce();
-                                }
-                                onIce1.scoredOnIce();
-                                onIce2.scoredOnIce();
 
                             } else {
                                 Position scorer = (Position) scorerOptions.getSelectedItem();
@@ -3053,8 +3059,8 @@ public class TeamGUI implements Runnable {
                                 Position assist2 = (Position) assistOptions2.getSelectedItem();
 
                                 if (assist1 == null && assist2 != null) {
-                                    JOptionPane.showMessageDialog(scoreTeamGoals, "Please select Assist 1 " +
-                                            "instead of Assist 2", "Enter Goals", JOptionPane.ERROR_MESSAGE);
+                                    JOptionPane.showMessageDialog(scoreTeamGoals, "Please select Assist 1 "
+                                            + "instead of Assist 2", "Enter Goals", JOptionPane.ERROR_MESSAGE);
                                     return;
                                 }
 
@@ -3062,23 +3068,37 @@ public class TeamGUI implements Runnable {
                                 try {
                                     if (selection instanceof OffenseLine oLine) {
                                         DefenseLine dLine = (DefenseLine) defenseLines.getSelectedItem();
-                                        if (assist1 != null && assist2 != null) {
-                                            oLine.score(scorer, assist1, assist2, dLine);
-                                        } else if (assist1 != null) {
-                                            oLine.score(scorer, assist1, dLine);
+                                        if (dLine == null) {
+                                            JOptionPane.showMessageDialog(scoreTeamGoals, SELECT, "Enter Goals",
+                                                    JOptionPane.ERROR_MESSAGE);
+                                            return;
+                                        }
+                                        if (e1.getActionCommand().equals(enterTeamGoal.getActionCommand())) {
+                                            if (assist1 != null && assist2 != null) {
+                                                oLine.score(scorer, assist1, assist2, dLine);
+                                            } else if (assist1 != null) {
+                                                oLine.score(scorer, assist1, dLine);
+                                            } else {
+                                                oLine.score(scorer, dLine);
+                                            }
                                         } else {
-                                            oLine.score(scorer, dLine);
+                                            oLine.lineScoredOn();
+                                            dLine.lineScoredOn();
                                         }
                                     } else if (selection instanceof SpecialTeamsLine specialTeamsLine) {
-                                        if (specialTeamsLine instanceof PPLine) {
-                                            ppGoals.getAndIncrement();
-                                        }
-                                        if (assist1 != null && assist2 != null) {
-                                            specialTeamsLine.score(scorer, assist1, assist2);
-                                        } else if (assist1 != null) {
-                                            specialTeamsLine.score(scorer, assist1);
+                                        if (e1.getActionCommand().equals(enterTeamGoal.getActionCommand())) {
+                                            if (specialTeamsLine instanceof PPLine) {
+                                                ppGoals.getAndIncrement();
+                                            }
+                                            if (assist1 != null && assist2 != null) {
+                                                specialTeamsLine.score(scorer, assist1, assist2);
+                                            } else if (assist1 != null) {
+                                                specialTeamsLine.score(scorer, assist1);
+                                            } else {
+                                                specialTeamsLine.score(scorer);
+                                            }
                                         } else {
-                                            specialTeamsLine.score(scorer);
+                                            specialTeamsLine.lineScoredOn();
                                         }
                                     } else {
                                         JOptionPane.showMessageDialog(scoreTeamGoals, SELECT, "Enter Goals",
@@ -3086,45 +3106,95 @@ public class TeamGUI implements Runnable {
                                         return;
                                     }
                                 } catch (NullPointerException | IllegalArgumentException ex) {
-                                    JOptionPane.showMessageDialog(scoreTeamGoals, ex.getMessage(), "Enter Goals",
-                                            JOptionPane.ERROR_MESSAGE);
+                                    JOptionPane.showMessageDialog(scoreTeamGoals, ex.getMessage(),
+                                            "Enter Goals", JOptionPane.ERROR_MESSAGE);
                                     return;
                                 }
                             }
-                            enteredGoals.getAndIncrement();
-                            JOptionPane.showMessageDialog(scoreTeamGoals, "Goal " + enteredGoals.get() + " " +
-                                    "successfully entered", "Enter Goal", JOptionPane.INFORMATION_MESSAGE);
-                            if (enteredGoals.get() == goalsScored) {
-                                scoreTeamGoals.dispose();
-                                if (ppGoals.get() >= powerPlays.get()) {
-                                    enterTeamPPs.dispose();
-                                    powerPlays.set(0);
+                            if (e1.getActionCommand().equals(enterTeamGoal.getActionCommand())) {
+                                enteredGoalsScored.getAndIncrement();
+                                JOptionPane.showMessageDialog(scoreTeamGoals, "Team Goal " +
+                                        enteredGoalsScored.get() + " successfully entered", "Enter Goal",
+                                        JOptionPane.INFORMATION_MESSAGE);
+                            } else {
+                                enteredGoalsAgainst.getAndIncrement();
+                                JOptionPane.showMessageDialog(scoreTeamGoals, "Opponent Goal " +
+                                        enteredGoalsAgainst.get() + " successfully entered", "Enter Goal",
+                                        JOptionPane.INFORMATION_MESSAGE);
+                            }
+                            if (enteredGoalsScored.get() == goalsScored) {
+                                scoreButtonsPanel.remove(enterTeamGoal);
+                                scoreTeamGoals.repaint();
+                                if (enteredGoalsAgainst.get() == goalsAgainst) {
+                                    scoreTeamGoals.dispose();
+                                    if (ppGoals.get() >= powerPlays.get()) {
+                                        enterTeamPPs.dispose();
+                                        powerPlays.set(0);
+                                    }
+                                    if (faceOffWins > 0 || faceOffLosses > 0) {
+                                        enterTeamFaceOffs.setVisible(true);
+                                    } else if (shotsBlocked > 0) {
+                                        enterTeamShotBlocks.setVisible(true);
+                                    } else if (hits > 0) {
+                                        enterTeamHits.setVisible(true);
+                                    } else if (powerPlays.get() > 0 && ppOptions.getItemCount() > 0) {
+                                        enterTeamPPs.setVisible(true);
+                                    } else if (penalties > 0 && pkOptions.getItemCount() > 0) {
+                                        enterTeamPKs.setVisible(true);
+                                    } else {
+                                        updateEntireTeamComponents();
+                                        goalieWindow = null;
+                                        try {
+                                            updateFile();
+                                        } catch (IOException ex) {
+                                            JOptionPane.showMessageDialog(mainFrame, FILE_ERROR, "Enter Stats",
+                                                    JOptionPane.ERROR_MESSAGE);
+                                        } catch (Exception ex) {
+                                            JOptionPane.showMessageDialog(mainFrame, ex.getMessage(),
+                                                    "Enter Stats", JOptionPane.ERROR_MESSAGE);
+                                        }
+                                    }
                                 }
-                                if (faceOffWins > 0 || faceOffLosses > 0) {
-                                    enterTeamFaceOffs.setVisible(true);
-                                } else if (shotsBlocked > 0) {
-                                    enterTeamShotBlocks.setVisible(true);
-                                } else if (hits > 0) {
-                                    enterTeamHits.setVisible(true);
-                                } else if (powerPlays.get() > 0 && ppOptions.getItemCount() > 0) {
-                                    enterTeamPPs.setVisible(true);
-                                } else if (penalties > 0 && pkOptions.getItemCount() > 0) {
-                                    enterTeamPKs.setVisible(true);
-                                } else {
-                                    updateEntireTeamComponents();
-                                    goalieWindow = null;
-                                    try {
-                                        updateFile();
-                                    } catch (IOException ex) {
-                                        JOptionPane.showMessageDialog(mainFrame, FILE_ERROR, "Enter Stats",
-                                                JOptionPane.ERROR_MESSAGE);
-                                    } catch (Exception ex) {
-                                        JOptionPane.showMessageDialog(mainFrame, ex.getMessage(), "Enter Stats",
-                                                JOptionPane.ERROR_MESSAGE);
+                                return;
+                            }
+                            if (enteredGoalsAgainst.get() == goalsAgainst) {
+                                scoreButtonsPanel.remove(enterOpponentGoal);
+                                scoreTeamGoals.repaint();
+                                if (enteredGoalsScored.get() == goalsScored) {
+                                    scoreTeamGoals.dispose();
+                                    if (ppGoals.get() >= powerPlays.get()) {
+                                        enterTeamPPs.dispose();
+                                        powerPlays.set(0);
+                                    }
+                                    if (faceOffWins > 0 || faceOffLosses > 0) {
+                                        enterTeamFaceOffs.setVisible(true);
+                                    } else if (shotsBlocked > 0) {
+                                        enterTeamShotBlocks.setVisible(true);
+                                    } else if (hits > 0) {
+                                        enterTeamHits.setVisible(true);
+                                    } else if (powerPlays.get() > 0 && ppOptions.getItemCount() > 0) {
+                                        enterTeamPPs.setVisible(true);
+                                    } else if (penalties > 0 && pkOptions.getItemCount() > 0) {
+                                        enterTeamPKs.setVisible(true);
+                                    } else {
+                                        updateEntireTeamComponents();
+                                        goalieWindow = null;
+                                        try {
+                                            updateFile();
+                                        } catch (IOException ex) {
+                                            JOptionPane.showMessageDialog(mainFrame, FILE_ERROR, "Enter Stats",
+                                                    JOptionPane.ERROR_MESSAGE);
+                                        } catch (Exception ex) {
+                                            JOptionPane.showMessageDialog(mainFrame, ex.getMessage(),
+                                                    "Enter Stats", JOptionPane.ERROR_MESSAGE);
+                                        }
                                     }
                                 }
                             }
-                        });
+                        };
+
+                        enterTeamGoal.addActionListener(enterGoalsListener);
+                        enterOpponentGoal.addActionListener(enterGoalsListener);
 
                         scoreTeamGoals.pack();
                     } else {
