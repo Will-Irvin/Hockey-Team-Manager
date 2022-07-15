@@ -1,4 +1,6 @@
 import javax.swing.*;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.awt.event.*;
@@ -2689,6 +2691,14 @@ public class TeamGUI implements Runnable {
                     JWindow enterTeamPKs = new JWindow(mainFrame);
                     enterTeamPKs.setLocationRelativeTo(mainFrame);
 
+                    // Ensures that no other tabs can be accessed while these windows are open
+                    ChangeListener haltTabs = e1 -> {
+                        mainTabs.setSelectedIndex(mainTabs.getTabCount() - 1);
+                        enterStatsTabs.setSelectedIndex(enterStatsTabs.getTabCount() - 1);
+                    };
+                    mainTabs.addChangeListener(haltTabs);
+                    enterStatsTabs.addChangeListener(haltTabs);
+
                     if (shotsAgainst > 0) {
                         int multipleGoalies;
                         do {
@@ -2816,6 +2826,8 @@ public class TeamGUI implements Runnable {
                                 enterTeamPKs.setVisible(true);
                             } else {
                                 updateEntireTeamComponents();
+                                mainTabs.removeChangeListener(haltTabs);
+                                enterStatsTabs.removeChangeListener(haltTabs);
                                 goalieWindow = null;
                                 try {
                                     updateFile();
@@ -2847,6 +2859,8 @@ public class TeamGUI implements Runnable {
                             enterTeamPKs.setVisible(true);
                         } else {
                             updateEntireTeamComponents();
+                            mainTabs.removeChangeListener(haltTabs);
+                            enterStatsTabs.removeChangeListener(haltTabs);
                             goalieWindow = null;
                             try {
                                 updateFile();
@@ -3143,6 +3157,8 @@ public class TeamGUI implements Runnable {
                                         enterTeamPKs.setVisible(true);
                                     } else {
                                         updateEntireTeamComponents();
+                                        mainTabs.removeChangeListener(haltTabs);
+                                        enterStatsTabs.removeChangeListener(haltTabs);
                                         goalieWindow = null;
                                         try {
                                             updateFile();
@@ -3178,6 +3194,8 @@ public class TeamGUI implements Runnable {
                                         enterTeamPKs.setVisible(true);
                                     } else {
                                         updateEntireTeamComponents();
+                                        mainTabs.removeChangeListener(haltTabs);
+                                        enterStatsTabs.removeChangeListener(haltTabs);
                                         goalieWindow = null;
                                         try {
                                             updateFile();
@@ -3252,6 +3270,8 @@ public class TeamGUI implements Runnable {
                                     enterTeamPKs.setVisible(true);
                                 } else {
                                     updateEntireTeamComponents();
+                                    mainTabs.removeChangeListener(haltTabs);
+                                    enterStatsTabs.removeChangeListener(haltTabs);
                                     goalieWindow = null;
                                     try {
                                         updateFile();
@@ -3314,6 +3334,8 @@ public class TeamGUI implements Runnable {
                                     enterTeamPKs.setVisible(true);
                                 } else {
                                     updateEntireTeamComponents();
+                                    mainTabs.removeChangeListener(haltTabs);
+                                    enterStatsTabs.removeChangeListener(haltTabs);
                                     try {
                                         updateFile();
                                     } catch (IOException ex) {
@@ -3375,6 +3397,8 @@ public class TeamGUI implements Runnable {
                                     enterTeamPKs.setVisible(true);
                                 } else {
                                     updateEntireTeamComponents();
+                                    mainTabs.removeChangeListener(haltTabs);
+                                    enterStatsTabs.removeChangeListener(haltTabs);
                                     try {
                                         updateFile();
                                     } catch (IOException ex) {
@@ -3427,6 +3451,8 @@ public class TeamGUI implements Runnable {
                                     enterTeamPKs.setVisible(true);
                                 } else {
                                     updateEntireTeamComponents();
+                                    mainTabs.removeChangeListener(haltTabs);
+                                    enterStatsTabs.removeChangeListener(haltTabs);
                                     try {
                                         updateFile();
                                     } catch (IOException ex) {
@@ -3449,6 +3475,8 @@ public class TeamGUI implements Runnable {
                                     enterTeamPKs.setVisible(true);
                                 } else {
                                     updateEntireTeamComponents();
+                                    mainTabs.removeChangeListener(haltTabs);
+                                    enterStatsTabs.removeChangeListener(haltTabs);
                                     try {
                                         updateFile();
                                     } catch (IOException ex) {
@@ -3498,6 +3526,8 @@ public class TeamGUI implements Runnable {
                             if (pkLine == null) {
                                 enterTeamPKs.dispose();
                                 updateEntireTeamComponents();
+                                mainTabs.removeChangeListener(haltTabs);
+                                enterStatsTabs.removeChangeListener(haltTabs);
                                 try {
                                     updateFile();
                                 } catch (IOException ex) {
@@ -3541,6 +3571,8 @@ public class TeamGUI implements Runnable {
                             if (enteredPenalties.get() == penalties) {
                                 enterTeamPKs.dispose();
                                 updateEntireTeamComponents();
+                                mainTabs.removeChangeListener(haltTabs);
+                                enterStatsTabs.removeChangeListener(haltTabs);
                                 try {
                                     updateFile();
                                 } catch (IOException ex) {
