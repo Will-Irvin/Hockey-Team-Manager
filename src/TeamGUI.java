@@ -123,8 +123,6 @@ public class TeamGUI implements Runnable {
     // Team Lists
     JLabel currentLineLabel;
     JComboBox<Line> lineOptions;
-    JComboBox<PPLine> ppOptions;
-    JComboBox<PKLine> pkOptions;
     JComboBox<Skater> skaterOptions;
     JComboBox<Center> centerOptions;
     JComboBox<Goalie> goalieOptions;
@@ -326,6 +324,8 @@ public class TeamGUI implements Runnable {
     JTabbedPane enterStatsTabs;
     JComboBox<Line> nonDefenseLines;
     JComboBox<DefenseLine> defenseLines;
+    JComboBox<PPLine> ppOptions;
+    JComboBox<PKLine> pkOptions;
     JComboBox<Goalie> selectGoaliesForStats;
 
     // Enter Live
@@ -761,10 +761,10 @@ public class TeamGUI implements Runnable {
     }
 
     /**
-     *
-     * @param oldLine
-     * @param newLine
-     * @param newIndex
+     * Adds the given line to the appropriate combo boxes and removes the old line from the appropriate combo boxes
+     * @param oldLine Line being removed from combo boxes
+     * @param newLine Line being added to combo boxes
+     * @param newIndex Index where the new line falls in the team line ArrayList
      */
     private void updateLineComboBoxes(Line oldLine, Line newLine, int newIndex) {
         if (oldLine != null) {
@@ -785,10 +785,115 @@ public class TeamGUI implements Runnable {
         if (newLine != null) {
             lineOptions.insertItemAt(newLine, newIndex + 1);
 
+            int low;
+            int high;
+            int i;
             if (newLine instanceof DefenseLine de) {
                 if (defenseLines.getItemCount() == 0) defenseLines.addItem(de);
                 else {
+                    low = 0;
+                    high = defenseLines.getItemCount();
+                    while (true) {
+                        i = (low + high) / 2;
+                        if (de.getName().compareTo(defenseLines.getItemAt(i).getName()) < 0) {
+                            if (i == 0 || de.getName().compareTo(defenseLines.getItemAt(i - 1).getName()) > 0) {
+                                defenseLines.insertItemAt(de, i);
+                                break;
+                            }
+                            high = i;
+                        } else {
+                            if (i == defenseLines.getItemCount() - 1) {
+                                defenseLines.addItem(de);
+                                break;
+                            }
+                            if (de.getName().compareTo(defenseLines.getItemAt(i + 1).getName()) < 0) {
+                                defenseLines.insertItemAt(de, i + 1);
+                                break;
+                            }
+                            low = i;
+                        }
+                    }
+                }
+            } else {
+                if (nonDefenseLines.getItemCount() == 1) nonDefenseLines.addItem(newLine);
+                else {
+                    low = 1;
+                    high = nonDefenseLines.getItemCount();
+                    while (true) {
+                        i = (high + low) / 2;
+                        if (newLine.getName().compareTo(nonDefenseLines.getItemAt(i).getName()) < 0) {
+                            if (i == 1 ||
+                                    newLine.getName().compareTo(nonDefenseLines.getItemAt(i - 1).getName()) > 0) {
+                                nonDefenseLines.insertItemAt(newLine, i);
+                                break;
+                            }
+                            high = i;
+                        } else {
+                            if (i == nonDefenseLines.getItemCount() - 1) {
+                                nonDefenseLines.addItem(newLine);
+                                break;
+                            }
+                            if (newLine.getName().compareTo(nonDefenseLines.getItemAt(i + 1).getName()) < 0) {
+                                nonDefenseLines.insertItemAt(newLine, i + 1);
+                                break;
+                            }
+                            low = i;
+                        }
+                    }
+                }
 
+                if (newLine instanceof PPLine pp) {
+                    if (ppOptions.getItemCount() == 0) ppOptions.addItem(pp);
+                    else {
+                        low = 0;
+                        high = ppOptions.getItemCount();
+                        while (true) {
+                            i = (high + low) / 2;
+                            if (pp.getName().compareTo(ppOptions.getItemAt(i).getName()) < 0) {
+                                if (i == 0 || pp.getName().compareTo(ppOptions.getItemAt(i - 1).getName()) > 0) {
+                                    ppOptions.insertItemAt(pp, i);
+                                    break;
+                                }
+                                high = i;
+                            } else {
+                                if (i == ppOptions.getItemCount() - 1) {
+                                    ppOptions.addItem(pp);
+                                    break;
+                                }
+                                if (pp.getName().compareTo(ppOptions.getItemAt(i + 1).getName()) < 0) {
+                                    ppOptions.insertItemAt(pp, i + 1);
+                                    break;
+                                }
+                                low = i;
+                            }
+                        }
+                    }
+                } else if (newLine instanceof PKLine pk) {
+                    if (pkOptions.getItemCount() == 0) pkOptions.addItem(pk);
+                    else {
+                        low = 0;
+                        high = pkOptions.getItemCount();
+                        while (true) {
+                            i = (high + low) / 2;
+                            if (pk.getName().compareTo(pkOptions.getItemAt(i).getName()) < 0) {
+                                if (i == 0 || pk.getName().compareTo(pkOptions.getItemAt(i - 1).getName()) > 0) {
+                                    pkOptions.insertItemAt(pk, i);
+                                    break;
+                                }
+                                high = i;
+                            } else {
+                                if (i == pkOptions.getItemCount() - 1) {
+                                    pkOptions.addItem(pk);
+                                    break;
+                                }
+                                if (pk.getName().compareTo(pkOptions.getItemAt(i + 1).getName()) < 0) {
+                                    pkOptions.insertItemAt(pk, i + 1);
+                                    break;
+                                }
+                                low = i;
+                            }
+                        }
+                    }
                 }
             }
         }
@@ -843,15 +948,33 @@ public class TeamGUI implements Runnable {
                 skaterStats.insertRow(index, newSkater.getStatsArray());
 
                 if (newSkater instanceof Center c) {  // Finds proper spot in center combo box if the player is a center
-                    for (int i = 1; i < centerOptions.getItemCount(); i++) {
-                        if (i == centerOptions.getItemCount() - 1) {
-                            centerOptions.addItem(c);
-                            break;
-                        }
-                        if (centerOptions.getItemAt(i).getPlayerNumber() < c.getPlayerNumber() &&
-                                c.getPlayerNumber() < centerOptions.getItemAt(i + 1).getPlayerNumber()) {
-                            centerOptions.insertItemAt(c, i + 1);
-                            break;
+                    if (centerOptions.getItemCount() == 1) centerOptions.addItem(c);
+                    else {
+                        int low = 1;
+                        int high = centerOptions.getItemCount();
+                        while (true) {
+                            int i = (low + high) / 2;
+                            if (c.getPlayerNumber() < centerOptions.getItemAt(i).getPlayerNumber()) {
+                                if (i == 1) {
+                                    centerOptions.insertItemAt(c, 1);
+                                    break;
+                                }
+                                if (c.getPlayerNumber() > centerOptions.getItemAt(i - 1).getPlayerNumber()) {
+                                    centerOptions.insertItemAt(c, i);
+                                    break;
+                                }
+                                high = i;
+                            } else {
+                                if (i == centerOptions.getItemCount() - 1) {
+                                    centerOptions.addItem(c);
+                                    break;
+                                }
+                                if (c.getPlayerNumber() < centerOptions.getItemAt(i + 1).getPlayerNumber()) {
+                                    centerOptions.insertItemAt(c, i + 1);
+                                    break;
+                                }
+                                low = i;
+                            }
                         }
                     }
                 }
@@ -1309,7 +1432,7 @@ public class TeamGUI implements Runnable {
             enterSuccessPercentage.setText("");
             enterNumOpps.setText("");
 
-            lineOptions.insertItemAt(newLine, index);
+            updateLineComboBoxes(null, newLine, index);
 
             try {
                 updateFile();
@@ -1461,8 +1584,8 @@ public class TeamGUI implements Runnable {
                         "Edit Line", JOptionPane.ERROR_MESSAGE);
                 return;
             }
-            lineOptions.removeItem(editingLine);
-            lineOptions.insertItemAt(newLine, index + 1);
+            updateLineComboBoxes(editingLine, newLine, index);
+
             try {
                 updateFile();
                 viewLine.setText(editingLine.lineRoster());
@@ -1659,7 +1782,7 @@ public class TeamGUI implements Runnable {
                     removingLine.getName() + "?", "Delete Line", JOptionPane.YES_NO_OPTION);
             if (response == JOptionPane.YES_OPTION) {
                 if (team.removeLine(removingLine)) {
-                    lineOptions.removeItem(removingLine);
+                    updateLineComboBoxes(removingLine, null, -1);
                     try {
                         updateFile();
                         JOptionPane.showMessageDialog(mainFrame, "Line successfully deleted", "Delete Line",
@@ -2634,7 +2757,6 @@ public class TeamGUI implements Runnable {
             private JWindow goalieWindow = null;
             @Override
             public void actionPerformed(ActionEvent e) {
-                // TODO Update new Combo boxes with changes
                 if (goalieWindow == null) {
                     if (team.getSkaters().length < 5 || team.getGoalies().length == 0 || pickLeftDe.getItemCount() < 2
                             || centerOptions.getItemCount() < 2) {
