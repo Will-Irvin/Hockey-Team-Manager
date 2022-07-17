@@ -103,6 +103,7 @@ public class TeamGUI implements Runnable {
     private static final String DEFENSE_LINE = "Defense Pair";
     private static final String PP_LINE = "Power Play Line";
     private static final String PK_LINE = "Penalty Kill Line";
+    private static final String CURRENT_SCORE = "Current Score: (Your Team - Opponent) ";
     private static final String[] SKATER_STATS_COLUMNS = {"Skater Name", "Player #", "Position", "Goals", "Assists",
             "Points", "+/-"};
     private static final String[] GOALIE_STATS_COLUMNS = {"Goalie Name", "Player #", "Wins", "Losses", "OT L / Ties",
@@ -323,20 +324,27 @@ public class TeamGUI implements Runnable {
 
     JTabbedPane enterStatsTabs;
     JComboBox<Line> nonDefenseLines;
+    JLabel deLinesLabel;
     JComboBox<DefenseLine> defenseLines;
     JComboBox<PPLine> ppOptions;
     JComboBox<PKLine> pkOptions;
+    JLabel goaliesForStatsLabel;
     JComboBox<Goalie> selectGoaliesForStats;
 
     // Enter Live
+    JLabel offenseLinesLabel;
+    JComboBox<OffenseLine> offenseLines;
+    JLabel currentScore;
     JButton goalLive;
-    JButton shotBlockLive;
-    JButton faceOffLive;
-    JButton penaltyLive;
-    JButton hitLive;
-    JButton shotAgainstOnGoalLive;
     JButton scoredAgainstLive;
-    JButton specialTeamsExpiredLive;
+    JButton shotAgainstOnGoalLive;
+    JButton faceOffLive;
+    ButtonGroup penaltyOptionsLive;
+    JToggleButton powerPlayLive;
+    JToggleButton penaltyLive;
+    JButton penaltyOver;
+    JButton shotBlockLive;
+    JButton hitLive;
     JButton gameOver;
 
     // Enter Post Game
@@ -695,6 +703,7 @@ public class TeamGUI implements Runnable {
         lineOptions.addItem(null);
         nonDefenseLines = new JComboBox<>();
         nonDefenseLines.addItem(null);
+        offenseLines = new JComboBox<>();
         defenseLines = new JComboBox<>();
         ppOptions = new JComboBox<>();
         pkOptions = new JComboBox<>();
@@ -708,6 +717,9 @@ public class TeamGUI implements Runnable {
                 }
                 if (line instanceof PKLine pk) {
                     pkOptions.addItem(pk);
+                }
+                if (line instanceof OffenseLine o) {
+                    offenseLines.addItem(o);
                 }
                 nonDefenseLines.addItem(line);
             }
@@ -888,6 +900,33 @@ public class TeamGUI implements Runnable {
                                 }
                                 if (pk.getName().compareTo(pkOptions.getItemAt(i + 1).getName()) < 0) {
                                     pkOptions.insertItemAt(pk, i + 1);
+                                    break;
+                                }
+                                low = i;
+                            }
+                        }
+                    }
+                } else if (newLine instanceof OffenseLine o) {
+                    if (offenseLines.getItemCount() == 0) offenseLines.addItem(o);
+                    else {
+                        low = 0;
+                        high = offenseLines.getItemCount();
+                        while (true) {
+                            i = (high + low) / 2;
+                            if (o.getName().compareTo(offenseLines.getItemAt(i).getName()) < 0) {
+                                if (i == 0 ||
+                                        o.getName().compareTo(offenseLines.getItemAt(i - 1).getName()) > 0) {
+                                    offenseLines.insertItemAt(o, i);
+                                    break;
+                                }
+                                high = i;
+                            } else {
+                                if (i == offenseLines.getItemCount() - 1) {
+                                    offenseLines.addItem(o);
+                                    break;
+                                }
+                                if (o.getName().compareTo(offenseLines.getItemAt(i + 1).getName()) < 0) {
+                                    offenseLines.insertItemAt(o, i + 1);
                                     break;
                                 }
                                 low = i;
@@ -2703,6 +2742,53 @@ public class TeamGUI implements Runnable {
         Container liveStats = new Container();
         liveStats.setLayout(new BoxLayout(liveStats, BoxLayout.Y_AXIS));
 
+        // TODO
+        offenseLinesLabel = new JLabel("Select Current Offense Line:");
+        JPanel offenseLinePanel = createPanel(new JComponent[]{offenseLinesLabel, offenseLines});
+        liveStats.add(offenseLinePanel);
+
+        deLinesLabel = new JLabel("Select Current Defense Pair:");
+        JPanel defenseLinePanel = createPanel(new JComponent[]{deLinesLabel, defenseLines});
+        liveStats.add(defenseLinePanel);
+
+        goaliesForStatsLabel = new JLabel("Select Goalie in Net:");
+        JPanel selectGoaliePanel = createPanel(new JComponent[]{goaliesForStatsLabel, selectGoaliesForStats});
+        liveStats.add(selectGoaliePanel);
+
+        AtomicInteger teamGoals = new AtomicInteger();
+        AtomicInteger opponentGoals = new AtomicInteger();
+        currentScore = new JLabel(CURRENT_SCORE + teamGoals.get() + "-" +
+                opponentGoals.get());
+        createPanelForContainer(new JComponent[]{currentScore}, liveStats);
+
+        goalLive = new JButton("Team Scored");
+        scoredAgainstLive = new JButton("Opponent Scored");
+        createPanelForContainer(new JComponent[]{goalLive, scoredAgainstLive}, liveStats);
+
+        shotAgainstOnGoalLive = new JButton("Shot Against On Goal");
+        createPanelForContainer(new JComponent[]{shotAgainstOnGoalLive}, liveStats);
+
+        faceOffLive = new JButton("Face Off");
+        createPanelForContainer(new JComponent[]{faceOffLive}, liveStats);
+
+        penaltyOptionsLive = new ButtonGroup();
+        powerPlayLive = new JToggleButton("Power Play");
+        penaltyLive = new JToggleButton("Penalty Kill");
+        penaltyOptionsLive.add(powerPlayLive);
+        penaltyOptionsLive.add(penaltyLive);
+        createPanelForContainer(new JComponent[]{powerPlayLive, penaltyLive}, liveStats);
+
+        penaltyOver = new JButton("Penalty Expired");
+        JPanel penaltyOverPanel = new JPanel();
+        penaltyOverPanel.add(penaltyOver);
+
+        shotBlockLive = new JButton("Shot Block");
+        hitLive = new JButton("Hit");
+        createPanelForContainer(new JComponent[]{shotBlockLive, hitLive}, liveStats);
+
+        gameOver = new JButton("Game Over");
+        createPanelForContainer(new JComponent[]{gameOver}, liveStats);
+
         enterStatsTabs.add("Enter Live", liveStats);
 
         // Post Game
@@ -2755,6 +2841,36 @@ public class TeamGUI implements Runnable {
 
         enterStats.addActionListener(new ActionListener() {
             private JWindow goalieWindow = null;
+
+            // Ensures that no other tabs can be accessed while these windows are open
+            private final ChangeListener haltTabs = e1 -> {
+                mainTabs.setSelectedIndex(mainTabs.getTabCount() - 1);
+                enterStatsTabs.setSelectedIndex(enterStatsTabs.getTabCount() - 1);
+            };
+
+            /**
+             * Makes any necessary changes to the GUI and updates the file after all necessary stats have been entered
+             */
+            public void finishedEntering() {
+                updateEntireTeamComponents();
+                mainTabs.removeChangeListener(haltTabs);
+                enterStatsTabs.removeChangeListener(haltTabs);
+                goalieWindow = null;
+                liveStats.add(selectGoaliePanel, 1);
+                // TODO Check
+                defenseLinePanel.remove(defenseLinePanel.getComponentCount() - 1);
+                liveStats.add(defenseLinePanel, 1);
+                try {
+                    updateFile();
+                } catch (IOException ex) {
+                    JOptionPane.showMessageDialog(mainFrame, FILE_ERROR, "Enter Stats",
+                            JOptionPane.ERROR_MESSAGE);
+                } catch (Exception ex) {
+                    JOptionPane.showMessageDialog(mainFrame, ex.getMessage(), "Enter Stats",
+                            JOptionPane.ERROR_MESSAGE);
+                }
+            }
+
             @Override
             public void actionPerformed(ActionEvent e) {
                 if (goalieWindow == null) {
@@ -2813,11 +2929,6 @@ public class TeamGUI implements Runnable {
                     JWindow enterTeamPKs = new JWindow(mainFrame);
                     enterTeamPKs.setLocationRelativeTo(mainFrame);
 
-                    // Ensures that no other tabs can be accessed while these windows are open
-                    ChangeListener haltTabs = e1 -> {
-                        mainTabs.setSelectedIndex(mainTabs.getTabCount() - 1);
-                        enterStatsTabs.setSelectedIndex(enterStatsTabs.getTabCount() - 1);
-                    };
                     mainTabs.addChangeListener(haltTabs);
                     enterStatsTabs.addChangeListener(haltTabs);
 
@@ -2831,9 +2942,7 @@ public class TeamGUI implements Runnable {
                     Container enterGoalieContent = goalieWindow.getContentPane();
                     enterGoalieContent.setLayout(new BoxLayout(enterGoalieContent, BoxLayout.Y_AXIS));
 
-                    JLabel selectGoalieLabel = new JLabel(SELECT_GOALIE);
-                    createPanelForContainer(new JComponent[]{selectGoalieLabel, selectGoaliesForStats},
-                            enterGoalieContent);
+                    enterGoalieContent.add(selectGoaliePanel);
 
                     JSlider goalsAgainstSlider = new JSlider(0, goalsAgainst);
                     JSlider shotsAgainstSlider = new JSlider(1, shotsAgainst);
@@ -2947,19 +3056,7 @@ public class TeamGUI implements Runnable {
                         } else if (penalties > 0 && pkOptions.getItemCount() > 0) {
                             enterTeamPKs.setVisible(true);
                         } else {
-                            updateEntireTeamComponents();
-                            mainTabs.removeChangeListener(haltTabs);
-                            enterStatsTabs.removeChangeListener(haltTabs);
-                            goalieWindow = null;
-                            try {
-                                updateFile();
-                            } catch (IOException ex) {
-                                JOptionPane.showMessageDialog(mainFrame, FILE_ERROR, "Enter Stats",
-                                        JOptionPane.ERROR_MESSAGE);
-                            } catch (Exception ex) {
-                                JOptionPane.showMessageDialog(mainFrame, ex.getMessage(), "Enter Stats",
-                                        JOptionPane.ERROR_MESSAGE);
-                            }
+                            finishedEntering();
                         }
                     });
 
@@ -2992,8 +3089,7 @@ public class TeamGUI implements Runnable {
                         JPanel otherLinePanel = createPanel(new JComponent[]{otherLineLabel, nonDefenseLines,
                                 otherLineRoster});
                         scoreGoalsContent.add(otherLinePanel);
-                        JPanel defenseLinePanel = createPanel(new JComponent[]{defenseLineLabel, defenseLines,
-                                defenseLineRoster});
+                        defenseLinePanel.add(defenseLineRoster);
 
                         nonDefenseLines.addItemListener(e1 -> {
                             if (e1.getStateChange() == ItemEvent.SELECTED) {
@@ -3251,19 +3347,7 @@ public class TeamGUI implements Runnable {
                                     } else if (penalties > 0 && pkOptions.getItemCount() > 0) {
                                         enterTeamPKs.setVisible(true);
                                     } else {
-                                        updateEntireTeamComponents();
-                                        mainTabs.removeChangeListener(haltTabs);
-                                        enterStatsTabs.removeChangeListener(haltTabs);
-                                        goalieWindow = null;
-                                        try {
-                                            updateFile();
-                                        } catch (IOException ex) {
-                                            JOptionPane.showMessageDialog(mainFrame, FILE_ERROR, "Enter Stats",
-                                                    JOptionPane.ERROR_MESSAGE);
-                                        } catch (Exception ex) {
-                                            JOptionPane.showMessageDialog(mainFrame, ex.getMessage(),
-                                                    "Enter Stats", JOptionPane.ERROR_MESSAGE);
-                                        }
+                                        finishedEntering();
                                     }
                                 }
                                 return;
@@ -3288,19 +3372,7 @@ public class TeamGUI implements Runnable {
                                     } else if (penalties > 0 && pkOptions.getItemCount() > 0) {
                                         enterTeamPKs.setVisible(true);
                                     } else {
-                                        updateEntireTeamComponents();
-                                        mainTabs.removeChangeListener(haltTabs);
-                                        enterStatsTabs.removeChangeListener(haltTabs);
-                                        goalieWindow = null;
-                                        try {
-                                            updateFile();
-                                        } catch (IOException ex) {
-                                            JOptionPane.showMessageDialog(mainFrame, FILE_ERROR, "Enter Stats",
-                                                    JOptionPane.ERROR_MESSAGE);
-                                        } catch (Exception ex) {
-                                            JOptionPane.showMessageDialog(mainFrame, ex.getMessage(),
-                                                    "Enter Stats", JOptionPane.ERROR_MESSAGE);
-                                        }
+                                        finishedEntering();
                                     }
                                 }
                             }
@@ -3364,19 +3436,7 @@ public class TeamGUI implements Runnable {
                                 } else if (penalties > 0 && pkOptions.getItemCount() > 0) {
                                     enterTeamPKs.setVisible(true);
                                 } else {
-                                    updateEntireTeamComponents();
-                                    mainTabs.removeChangeListener(haltTabs);
-                                    enterStatsTabs.removeChangeListener(haltTabs);
-                                    goalieWindow = null;
-                                    try {
-                                        updateFile();
-                                    } catch (IOException ex) {
-                                        JOptionPane.showMessageDialog(mainFrame, FILE_ERROR, "Enter Stats",
-                                                JOptionPane.ERROR_MESSAGE);
-                                    } catch (Exception ex) {
-                                        JOptionPane.showMessageDialog(mainFrame, ex.getMessage(), "Enter Stats",
-                                                JOptionPane.ERROR_MESSAGE);
-                                    }
+                                    finishedEntering();
                                 }
                             }
                         });
@@ -3428,19 +3488,7 @@ public class TeamGUI implements Runnable {
                                 } else if (penalties > 0 && pkOptions.getItemCount() > 0) {
                                     enterTeamPKs.setVisible(true);
                                 } else {
-                                    updateEntireTeamComponents();
-                                    mainTabs.removeChangeListener(haltTabs);
-                                    enterStatsTabs.removeChangeListener(haltTabs);
-                                    try {
-                                        updateFile();
-                                    } catch (IOException ex) {
-                                        JOptionPane.showMessageDialog(mainFrame, FILE_ERROR, "Enter Stats",
-                                                JOptionPane.ERROR_MESSAGE);
-                                    } catch (Exception ex) {
-                                        JOptionPane.showMessageDialog(mainFrame, ex.getMessage(), "Enter Stats",
-                                                JOptionPane.ERROR_MESSAGE);
-                                    }
-                                    goalieWindow = null;
+                                    finishedEntering();
                                 }
                             } else {
                                 enterTeamShotBlocks.pack();
@@ -3491,19 +3539,7 @@ public class TeamGUI implements Runnable {
                                 } else if (penalties > 0 && pkOptions.getItemCount() > 0) {
                                     enterTeamPKs.setVisible(true);
                                 } else {
-                                    updateEntireTeamComponents();
-                                    mainTabs.removeChangeListener(haltTabs);
-                                    enterStatsTabs.removeChangeListener(haltTabs);
-                                    try {
-                                        updateFile();
-                                    } catch (IOException ex) {
-                                        JOptionPane.showMessageDialog(mainFrame, FILE_ERROR, "Enter Stats",
-                                                JOptionPane.ERROR_MESSAGE);
-                                    } catch (Exception ex) {
-                                        JOptionPane.showMessageDialog(mainFrame, ex.getMessage(), "Enter Stats",
-                                                JOptionPane.ERROR_MESSAGE);
-                                    }
-                                    goalieWindow = null;
+                                    finishedEntering();
                                 }
                             }
                         });
@@ -3545,19 +3581,7 @@ public class TeamGUI implements Runnable {
                                 if (penalties > 0 && pkOptions.getItemCount() > 0) {
                                     enterTeamPKs.setVisible(true);
                                 } else {
-                                    updateEntireTeamComponents();
-                                    mainTabs.removeChangeListener(haltTabs);
-                                    enterStatsTabs.removeChangeListener(haltTabs);
-                                    try {
-                                        updateFile();
-                                    } catch (IOException ex) {
-                                        JOptionPane.showMessageDialog(mainFrame, FILE_ERROR, "Enter Stats",
-                                                JOptionPane.ERROR_MESSAGE);
-                                    } catch (Exception ex) {
-                                        JOptionPane.showMessageDialog(mainFrame, ex.getMessage(), "Enter Stats",
-                                                JOptionPane.ERROR_MESSAGE);
-                                    }
-                                    goalieWindow = null;
+                                    finishedEntering();
                                 }
                                 return;
                             }
@@ -3569,19 +3593,7 @@ public class TeamGUI implements Runnable {
                                 if (penalties > 0 && pkOptions.getItemCount() > 0) {
                                     enterTeamPKs.setVisible(true);
                                 } else {
-                                    updateEntireTeamComponents();
-                                    mainTabs.removeChangeListener(haltTabs);
-                                    enterStatsTabs.removeChangeListener(haltTabs);
-                                    try {
-                                        updateFile();
-                                    } catch (IOException ex) {
-                                        JOptionPane.showMessageDialog(mainFrame, FILE_ERROR, "Enter Stats",
-                                                JOptionPane.ERROR_MESSAGE);
-                                    } catch (Exception ex) {
-                                        JOptionPane.showMessageDialog(mainFrame, ex.getMessage(), "Enter Stats",
-                                                JOptionPane.ERROR_MESSAGE);
-                                    }
-                                    mainFrame.setVisible(true);
+                                    finishedEntering();
                                 }
                             }
                         });
@@ -3620,20 +3632,7 @@ public class TeamGUI implements Runnable {
                             PKLine pkLine = (PKLine) pkOptions.getSelectedItem();
                             if (pkLine == null) {
                                 enterTeamPKs.dispose();
-                                updateEntireTeamComponents();
-                                mainTabs.removeChangeListener(haltTabs);
-                                enterStatsTabs.removeChangeListener(haltTabs);
-                                try {
-                                    updateFile();
-                                } catch (IOException ex) {
-                                    JOptionPane.showMessageDialog(mainFrame, FILE_ERROR, "Enter Stats",
-                                            JOptionPane.ERROR_MESSAGE);
-                                } catch (Exception ex) {
-                                    JOptionPane.showMessageDialog(mainFrame, ex.getMessage(), "Enter Stats",
-                                            JOptionPane.ERROR_MESSAGE);
-                                }
-                                goalieWindow = null;
-                                return;
+                                finishedEntering();
                             }
                             if (guiltyPlayer == null) {
                                 JOptionPane.showMessageDialog(enterTeamPKs, SELECT, "Enter Penalty",
@@ -3665,19 +3664,7 @@ public class TeamGUI implements Runnable {
                                     JOptionPane.INFORMATION_MESSAGE);
                             if (enteredPenalties.get() == penalties) {
                                 enterTeamPKs.dispose();
-                                updateEntireTeamComponents();
-                                mainTabs.removeChangeListener(haltTabs);
-                                enterStatsTabs.removeChangeListener(haltTabs);
-                                try {
-                                    updateFile();
-                                } catch (IOException ex) {
-                                    JOptionPane.showMessageDialog(mainFrame, FILE_ERROR, "Enter Stats",
-                                            JOptionPane.ERROR_MESSAGE);
-                                } catch (Exception ex) {
-                                    JOptionPane.showMessageDialog(mainFrame, ex.getMessage(), "Enter Stats",
-                                            JOptionPane.ERROR_MESSAGE);
-                                }
-                                goalieWindow = null;
+                                finishedEntering();
                             }
                         });
                         enterTeamPKs.pack();
