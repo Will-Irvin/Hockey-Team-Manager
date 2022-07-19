@@ -2863,21 +2863,22 @@ public class TeamGUI implements Runnable {
             JButton cancelButton = new JButton("Cancel");
             createPanelForContainer(new JComponent[]{enterGoalButton, cancelButton}, liveGoalContent);
 
+            Line scoringLine;
             if (powerPlayLive.isSelected()) {
-                PPLine scoringLine = (PPLine) ppOptions.getSelectedItem();
+                scoringLine = (PPLine) ppOptions.getSelectedItem();
                 if (scoringLine != null) {
                     lineRosterArea.setText(scoringLine.lineRoster());
                 }
             } else if (penaltyLive.isSelected()) {
-                PKLine scoringLine = (PKLine) pkOptions.getSelectedItem();
+                scoringLine = (PKLine) pkOptions.getSelectedItem();
                 if (scoringLine != null) {
                     lineRosterArea.setText(scoringLine.lineRoster());
                 }
             } else {
-                OffenseLine oLine = (OffenseLine) offenseLines.getSelectedItem();
+                scoringLine = (OffenseLine) offenseLines.getSelectedItem();
                 DefenseLine dLine = (DefenseLine) defenseLines.getSelectedItem();
-                if (oLine != null && dLine != null) {
-                    lineRosterArea.setText(oLine.lineRoster() + '\n' + dLine.lineRoster());
+                if (scoringLine != null && dLine != null) {
+                    lineRosterArea.setText(scoringLine.lineRoster() + '\n' + dLine.lineRoster());
                 }
             }
 
@@ -2910,6 +2911,96 @@ public class TeamGUI implements Runnable {
                 enterGoalLive.pack();
             });
 
+            ActionListener enterGoal = e1 -> {
+                if (e1.getActionCommand().equals(enterGoalButton.getActionCommand())) {
+                    if (useLinesOrPlayers.isSelected()) {
+                        Skater scorer = (Skater) scorerPlayerOptions.getSelectedItem();
+                        Skater assist1 = (Skater) assistPlayer1Options.getSelectedItem();
+                        Skater assist2 = (Skater) assistPlayer2Options.getSelectedItem();
+                        Skater other1 = (Skater) otherPlayer1Options.getSelectedItem();
+                        Skater other2 = (Skater) otherPlayer2Options.getSelectedItem();
+                        if (scorer == null || assist1 == null || assist2 == null || other1 == null || other2 == null) {
+                            JOptionPane.showMessageDialog(enterGoalLive, SELECT, "Enter Goal Live",
+                                    JOptionPane.ERROR_MESSAGE);
+                            return;
+                        }
+                        if (scorer.equals(assist1) || scorer.equals(assist2) || scorer.equals(other1) ||
+                                scorer.equals(other2) || assist1.equals(assist2) || assist1.equals(other1)
+                                || assist1.equals(other2) || assist2.equals(other1) ||
+                                assist2.equals(other2) || other1.equals(other2)) {
+                            JOptionPane.showMessageDialog(enterGoalLive, "Selected Players must " +
+                                    "be different", "Enter Goals", JOptionPane.ERROR_MESSAGE);
+                            return;
+                        }
+                        scorer.score();
+                        if (assist1Check.isSelected()) {
+                            assist1.assist();
+                        } else {
+                            assist1.scoredOnIce();
+                        }
+                        if (assist2Check.isSelected()) {
+                            assist2.assist();
+                        } else {
+                            assist2.scoredOnIce();
+                        }
+                        other1.scoredOnIce();
+                        other2.scoredOnIce();
+                    } else {
+                        if (scoringLine != null) {
+                            Position scorer = (Position) scorerOptions.getSelectedItem();
+                            Position assist1 = (Position) assistOptions1.getSelectedItem();
+                            Position assist2 = (Position) assistOptions2.getSelectedItem();
+                            if (assist1 == null && assist2 != null) {
+                                JOptionPane.showMessageDialog(enterGoalLive, "Please select Assist 1 " +
+                                        "Instead of Assist 2", "Enter Goal Live", JOptionPane.ERROR_MESSAGE);
+                                return;
+                            }
+                            try {
+                                if (scoringLine instanceof OffenseLine oLine) {
+                                    DefenseLine dLine = (DefenseLine) defenseLines.getSelectedItem();
+                                    if (dLine == null) {
+                                        JOptionPane.showMessageDialog(enterGoalLive, "There are currently no " +
+                                                "lines to select from. Please select players manually or create " +
+                                                "a line.", "Enter Goal Live", JOptionPane.ERROR_MESSAGE);
+                                        return;
+                                    }
+                                    if (assist2 != null) {
+                                        oLine.score(scorer, assist1, assist2, dLine);
+                                    } else if (assist1 != null) {
+                                        oLine.score(scorer, assist1, dLine);
+                                    } else {
+                                        oLine.score(scorer, dLine);
+                                    }
+                                } else {
+                                    SpecialTeamsLine specialTeams = (SpecialTeamsLine) scoringLine;
+                                    if (assist2 != null) {
+                                        specialTeams.score(scorer, assist1, assist2);
+                                    } else if (assist1 != null) {
+                                        specialTeams.score(scorer, assist1);
+                                    } else {
+                                        specialTeams.score(scorer);
+                                    }
+                                }
+                            } catch (IllegalArgumentException ex) {
+                                JOptionPane.showMessageDialog(enterGoalLive, ex.getMessage(), "Enter Goal Live",
+                                        JOptionPane.ERROR_MESSAGE);
+                            }
+                        } else {
+                            JOptionPane.showMessageDialog(enterGoalLive, "There are currently no lines to " +
+                                    "select from. Please select players manually or create a line.",
+                                    "Enter Goal Live", JOptionPane.ERROR_MESSAGE);
+                            return;
+                        }
+                    }
+                    teamGoals.getAndIncrement();
+                    currentScore.setText(CURRENT_SCORE + teamGoals.get() + '-' + opponentGoals.get());
+                }
+                enterGoalLive.dispose();
+            };
+
+            enterGoalButton.addActionListener(enterGoal);
+            cancelButton.addActionListener(enterGoal);
+
             enterGoalLive.addWindowListener(new WindowAdapter() {
                 @Override
                 public void windowClosed(WindowEvent e) {
@@ -2920,7 +3011,6 @@ public class TeamGUI implements Runnable {
             enterGoalLive.pack();
             enterGoalLive.setVisible(true);
         });
-
 
         shotAgainstOnGoalLive = new JButton("Shot Against On Goal");
         createPanelForContainer(new JComponent[]{shotAgainstOnGoalLive}, liveStats);
@@ -3741,6 +3831,7 @@ public class TeamGUI implements Runnable {
                             if (pkLine == null) {
                                 enterTeamPKs.dispose();
                                 finishedEntering();
+                                return;
                             }
                             if (guiltyPlayer == null) {
                                 JOptionPane.showMessageDialog(enterTeamPKs, SELECT, "Enter Penalty",
