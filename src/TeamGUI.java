@@ -1,5 +1,4 @@
 import javax.swing.*;
-import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
@@ -3012,8 +3011,18 @@ public class TeamGUI implements Runnable {
             enterGoalLive.setVisible(true);
         });
 
+        scoredAgainstLive.addActionListener(e -> {
+            Goalie goalieInNet = (Goalie) selectGoaliesForStats.getSelectedItem();
+            if (goalieInNet != null) {
+                goalieInNet.scoredOn();
+            }
+            opponentGoals.getAndIncrement();
+            currentScore.setText(CURRENT_SCORE + teamGoals.get() + '-' + opponentGoals.get());
+        });
+
         shotAgainstOnGoalLive = new JButton("Shot Against On Goal");
         createPanelForContainer(new JComponent[]{shotAgainstOnGoalLive}, liveStats);
+
 
         faceOffLive = new JButton("Face Off");
         createPanelForContainer(new JComponent[]{faceOffLive}, liveStats);
