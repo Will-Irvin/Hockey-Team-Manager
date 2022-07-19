@@ -3021,9 +3021,14 @@ public class TeamGUI implements Runnable {
             currentScore.setText(CURRENT_SCORE + teamGoals.get() + '-' + opponentGoals.get());
         });
 
-        shotAgainstOnGoalLive = new JButton("Shot Against On Goal");
+        shotAgainstOnGoalLive = new JButton("Save by your Goalie");
         createPanelForContainer(new JComponent[]{shotAgainstOnGoalLive}, liveStats);
-
+        shotAgainstOnGoalLive.addActionListener(e -> {
+            Goalie goalieInNet = (Goalie) selectGoaliesForStats.getSelectedItem();
+            if (goalieInNet != null) {
+                goalieInNet.save();
+            }
+        });
 
         faceOffLive = new JButton("Face Off");
         createPanelForContainer(new JComponent[]{faceOffLive}, liveStats);
