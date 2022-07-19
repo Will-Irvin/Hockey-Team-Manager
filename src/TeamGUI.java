@@ -1056,7 +1056,7 @@ public class TeamGUI implements Runnable {
                 }
             } else if (newPlayer instanceof Goalie newGoalie) {
                 goalieOptions.insertItemAt(newGoalie, index + 1);
-                selectGoaliesForStats.insertItemAt(newGoalie, index);
+                selectGoaliesForStats.insertItemAt(newGoalie, index + 1);
                 goalieStats.insertRow(index, newGoalie.getStatsArray());
             }
         }
