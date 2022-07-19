@@ -772,6 +772,7 @@ public class TeamGUI implements Runnable {
         goalieOptions = new JComboBox<>();
         selectGoaliesForStats = new JComboBox<>();
         goalieOptions.addItem(null);
+        selectGoaliesForStats.addItem(null);
         for (Goalie goalie: team.getGoalies()) {
             goalieOptions.addItem(goalie);
             selectGoaliesForStats.addItem(goalie);
@@ -3229,20 +3230,31 @@ public class TeamGUI implements Runnable {
                         Goalie selectedGoalie;
                         if (finalInput == JOptionPane.YES_OPTION) {
                             selectedGoalie = (Goalie) selectGoaliesForStats.getSelectedItem();
-                            if (selectedGoalie == null) {
-                                JOptionPane.showMessageDialog(mainFrame, SELECT, "Enter Goalie Stats",
-                                        JOptionPane.ERROR_MESSAGE);
-                                return;
-                            }
 
                             int shotsAgainstOneGoalie = shotsAgainstSlider.getValue();
                             int goalsAgainstOneGoalie = goalsAgainstSlider.getValue();
-                            selectedGoalie.enterSaves(goalsAgainstOneGoalie, shotsAgainstOneGoalie);
-                            selectedGoalies.add(selectedGoalie);
+                            if (selectedGoalie != null) {
+                                selectedGoalie.enterSaves(goalsAgainstOneGoalie, shotsAgainstOneGoalie);
+                                selectedGoalies.add(selectedGoalie);
+                            }
                             goalsAgainstSlider.setMaximum(goalsAgainstSlider.getMaximum() - goalsAgainstOneGoalie);
                             shotsAgainstSlider.setMaximum(shotsAgainstSlider.getMaximum() - shotsAgainstOneGoalie);
 
                             if (goalsAgainstSlider.getMaximum() == 0 && shotsAgainstSlider.getMaximum() == 0) {
+                                if (selectedGoalies.isEmpty()) {
+                                    JOptionPane.showMessageDialog(goalieWindow, "At least one goalie must be " +
+                                            "in net for the game. Please retry and use a goalie for at least one goal" +
+                                            " or shot.", "Enter Goalie Stats", JOptionPane.ERROR_MESSAGE);
+                                    goalieWindow.dispose();
+                                    scoreTeamGoals.dispose();
+                                    enterTeamFaceOffs.dispose();
+                                    enterTeamShotBlocks.dispose();
+                                    enterTeamHits.dispose();
+                                    enterTeamPPs.dispose();
+                                    enterTeamPKs.dispose();
+                                    finishedEntering();
+                                    return;
+                                }
                                 while (true) {
                                     int index = JOptionPane.showOptionDialog(goalieWindow, "Which goalie " +
                                                     "should receive credit on their record? (Goalie who was in " +
