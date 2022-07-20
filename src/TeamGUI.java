@@ -1,6 +1,7 @@
 import javax.swing.*;
 import javax.swing.event.ChangeListener;
 import javax.swing.table.DefaultTableModel;
+import javax.xml.stream.events.EntityReference;
 import java.awt.*;
 import java.awt.event.*;
 import java.io.*;
@@ -327,7 +328,9 @@ public class TeamGUI implements Runnable {
     JComboBox<Line> nonDefenseLines;
     JLabel deLinesLabel;
     JComboBox<DefenseLine> defenseLines;
+    JLabel ppLineLabel;
     JComboBox<PPLine> ppOptions;
+    JLabel pkOptionsLabel;
     JComboBox<PKLine> pkOptions;
     JLabel goaliesForStatsLabel;
     JComboBox<Goalie> selectGoaliesForStats;
@@ -343,6 +346,8 @@ public class TeamGUI implements Runnable {
     ButtonGroup penaltyOptionsLive;
     JToggleButton powerPlayLive;
     JToggleButton penaltyLive;
+    JLabel penaltyLengthLabel;
+    JTextField penaltyLength;
     JButton penaltyOver;
     JButton shotBlockLive;
     JButton hitLive;
@@ -2834,9 +2839,19 @@ public class TeamGUI implements Runnable {
         JPanel selectOtherPlayersPanel = createPanel(new JComponent[]{otherPlayer1Options,
                 otherPlayer2Options});
 
+        ppLineLabel = new JLabel("Select Power Play Line:");
+        JPanel ppLinePanel = createPanel(new JComponent[]{ppLineLabel, ppOptions});
+
+        pkOptionsLabel = new JLabel("Select Penalty Kill Line:");
+        JPanel pkLinePanel = createPanel(new JComponent[]{pkOptionsLabel, pkOptions});
+
         useLinesOrPlayers = new JToggleButton("Select Players Manually");
         JPanel linesOrPlayersPanel = new JPanel();
         linesOrPlayersPanel.add(useLinesOrPlayers);
+
+        penaltyOver = new JButton("Penalty Expired");
+        JPanel penaltyOverPanel = new JPanel();
+        penaltyOverPanel.add(penaltyOver);
 
         goalLive.addActionListener(e -> {
             mainFrame.setVisible(false);
@@ -2955,35 +2970,48 @@ public class TeamGUI implements Runnable {
                                         "Instead of Assist 2", "Enter Goal Live", JOptionPane.ERROR_MESSAGE);
                                 return;
                             }
-                            try {
-                                if (scoringLine instanceof OffenseLine oLine) {
-                                    DefenseLine dLine = (DefenseLine) defenseLines.getSelectedItem();
-                                    if (dLine == null) {
-                                        JOptionPane.showMessageDialog(enterGoalLive, "There are currently no " +
-                                                "lines to select from. Please select players manually or create " +
-                                                "a line.", "Enter Goal Live", JOptionPane.ERROR_MESSAGE);
-                                        return;
-                                    }
-                                    if (assist2 != null) {
-                                        oLine.score(scorer, assist1, assist2, dLine);
-                                    } else if (assist1 != null) {
-                                        oLine.score(scorer, assist1, dLine);
+                            while (true) {
+                                try {
+                                    if (scoringLine instanceof OffenseLine oLine) {
+                                        DefenseLine dLine = (DefenseLine) defenseLines.getSelectedItem();
+                                        if (dLine == null) {
+                                            JOptionPane.showMessageDialog(enterGoalLive, "There are currently" +
+                                                    " no lines to select from. Please select players manually or " +
+                                                    "create a line.", "Enter Goal Live",
+                                                    JOptionPane.ERROR_MESSAGE);
+                                            return;
+                                        }
+                                        if (assist2 != null) {
+                                            oLine.score(scorer, assist1, assist2, dLine);
+                                        } else if (assist1 != null) {
+                                            oLine.score(scorer, assist1, dLine);
+                                        } else {
+                                            oLine.score(scorer, dLine);
+                                        }
                                     } else {
-                                        oLine.score(scorer, dLine);
+                                        SpecialTeamsLine specialTeams = (SpecialTeamsLine) scoringLine;
+                                        if (assist2 != null) {
+                                            specialTeams.score(scorer, assist1, assist2);
+                                        } else if (assist1 != null) {
+                                            specialTeams.score(scorer, assist1);
+                                        } else {
+                                            specialTeams.score(scorer);
+                                        }
+                                        if (specialTeams instanceof PPLine) {
+                                            specialTeams.success();
+                                            penaltyOptionsLive.clearSelection();
+                                            liveStats.remove(ppLinePanel);
+                                            liveStats.remove(penaltyOverPanel);
+                                            liveStats.add(defenseLinePanel, 0);
+                                            liveStats.add(offenseLinePanel, 0);
+                                            mainFrame.repaint();
+                                        }
                                     }
-                                } else {
-                                    SpecialTeamsLine specialTeams = (SpecialTeamsLine) scoringLine;
-                                    if (assist2 != null) {
-                                        specialTeams.score(scorer, assist1, assist2);
-                                    } else if (assist1 != null) {
-                                        specialTeams.score(scorer, assist1);
-                                    } else {
-                                        specialTeams.score(scorer);
-                                    }
+                                    break;
+                                } catch (IllegalArgumentException ex) {
+                                    JOptionPane.showMessageDialog(enterGoalLive, ex.getMessage(), "Enter Goal Live",
+                                            JOptionPane.ERROR_MESSAGE);
                                 }
-                            } catch (IllegalArgumentException ex) {
-                                JOptionPane.showMessageDialog(enterGoalLive, ex.getMessage(), "Enter Goal Live",
-                                        JOptionPane.ERROR_MESSAGE);
                             }
                         } else {
                             JOptionPane.showMessageDialog(enterGoalLive, "There are currently no lines to " +
@@ -3013,12 +3041,28 @@ public class TeamGUI implements Runnable {
         });
 
         scoredAgainstLive.addActionListener(e -> {
+            if (penaltyLive.isSelected()) {
+                PKLine failedLine = (PKLine) pkOptions.getSelectedItem();
+                if (failedLine != null) {
+                    failedLine.failure();
+                    penaltyOptionsLive.clearSelection();
+                    liveStats.remove(pkLinePanel);
+                    liveStats.remove(penaltyOverPanel);
+                    liveStats.add(defenseLinePanel, 0);
+                    liveStats.add(offenseLinePanel, 0);
+                } else {
+                    JOptionPane.showMessageDialog(mainFrame, "There are currently no lines to select from. " +
+                            "Please create a penalty kill line.", "Enter Stats Live", JOptionPane.ERROR_MESSAGE);
+                    return;
+                }
+            }
             Goalie goalieInNet = (Goalie) selectGoaliesForStats.getSelectedItem();
             if (goalieInNet != null) {
                 goalieInNet.scoredOn();
             }
             opponentGoals.getAndIncrement();
             currentScore.setText(CURRENT_SCORE + teamGoals.get() + '-' + opponentGoals.get());
+            mainFrame.repaint();
         });
 
         shotAgainstOnGoalLive = new JButton("Save by your Goalie");
@@ -3033,6 +3077,10 @@ public class TeamGUI implements Runnable {
         faceOffLive = new JButton("Face Off");
         createPanelForContainer(new JComponent[]{faceOffLive}, liveStats);
 
+        shotBlockLive = new JButton("Shot Block");
+        hitLive = new JButton("Hit");
+        createPanelForContainer(new JComponent[]{shotBlockLive, hitLive}, liveStats);
+
         penaltyOptionsLive = new ButtonGroup();
         powerPlayLive = new JToggleButton("Power Play");
         penaltyLive = new JToggleButton("Penalty Kill");
@@ -3040,13 +3088,58 @@ public class TeamGUI implements Runnable {
         penaltyOptionsLive.add(penaltyLive);
         createPanelForContainer(new JComponent[]{powerPlayLive, penaltyLive}, liveStats);
 
-        penaltyOver = new JButton("Penalty Expired");
-        JPanel penaltyOverPanel = new JPanel();
-        penaltyOverPanel.add(penaltyOver);
+        ActionListener penaltiesListener = e -> {
+            if (ppOptions.getItemCount() == 0 || pkOptions.getItemCount() == 0) {
+                JOptionPane.showMessageDialog(mainFrame, "You must have at least one power play line and one" +
+                        "penalty kill line in order to use these features.", "Enter Stats Live",
+                        JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+            liveStats.remove(offenseLinePanel);
+            liveStats.remove(defenseLinePanel);
+            liveStats.remove(penaltyOverPanel);
+            if (e.getActionCommand().equals(powerPlayLive.getActionCommand())) {
+                liveStats.remove(pkLinePanel);
+                liveStats.add(ppLinePanel, 0);
+            } else if (e.getActionCommand().equals(penaltyLive.getActionCommand())) {
+                liveStats.remove(ppLinePanel);
+                liveStats.add(pkLinePanel, 0);
+            }
+            liveStats.add(penaltyOverPanel, liveStats.getComponentCount() - 1);
+            mainFrame.repaint();
+        };
 
-        shotBlockLive = new JButton("Shot Block");
-        hitLive = new JButton("Hit");
-        createPanelForContainer(new JComponent[]{shotBlockLive, hitLive}, liveStats);
+        powerPlayLive.addActionListener(penaltiesListener);
+        penaltyLive.addActionListener(penaltiesListener);
+
+        penaltyOver.addActionListener(e -> {
+            if (powerPlayLive.isSelected()) {
+                PPLine failedLine = (PPLine) ppOptions.getSelectedItem();
+                if (failedLine != null) {
+                    failedLine.failure();
+                    liveStats.remove(ppLinePanel);
+                } else {
+                    JOptionPane.showMessageDialog(mainFrame, "You must have at least one power play line. " +
+                            "Please create a power play line.", "Enter Stats Live", JOptionPane.ERROR_MESSAGE);
+                    return;
+                }
+            } else if (penaltyLive.isSelected()) {
+                PKLine successLine = (PKLine) pkOptions.getSelectedItem();
+                if (successLine != null) {
+                    successLine.success();
+                    liveStats.remove(pkLinePanel);
+                } else {
+                    JOptionPane.showMessageDialog(mainFrame, "You must have at least one penalty kill line. " +
+                            "Please create a penalty kill line.", "Enter Stats Live", JOptionPane.ERROR_MESSAGE);
+                    return;
+                }
+            }
+            liveStats.add(defenseLinePanel, 0);
+            liveStats.add(offenseLinePanel, 0);
+            liveStats.remove(penaltyOverPanel);
+            penaltyOptionsLive.clearSelection();
+            mainFrame.repaint();
+        });
 
         gameOver = new JButton("Game Over");
         createPanelForContainer(new JComponent[]{gameOver}, liveStats);
@@ -3120,6 +3213,8 @@ public class TeamGUI implements Runnable {
                 liveStats.add(selectGoaliePanel, 1);
                 defenseLinePanel.remove(defenseLinePanel.getComponentCount() - 1);
                 defenseLinePanel.add(defenseLines);
+                pkLinePanel.remove(pkLinePanel.getComponentCount() - 1);
+                pkLinePanel.add(pkOptions);
                 liveStats.add(defenseLinePanel, 1);
                 try {
                     updateFile();
@@ -3778,8 +3873,8 @@ public class TeamGUI implements Runnable {
                         Container enterPPContent = enterTeamPPs.getContentPane();
                         enterPPContent.setLayout(new BoxLayout(enterPPContent, BoxLayout.Y_AXIS));
 
-                        JLabel ppLineLabel = new JLabel("Select Power Play Line:");
-                        createPanelForContainer(new JComponent[]{ppLineLabel, ppOptions}, enterPPContent);
+
+                        enterPPContent.add(ppLinePanel);
 
                         JSlider ppSlider = new JSlider(1, powerPlays.get() - ppGoals.get());
                         JLabel ppSliderLabel = new JLabel("Select Number of Expired Power Play Opportunities: " +
@@ -3842,10 +3937,10 @@ public class TeamGUI implements Runnable {
                         enterTimeLength.setEditable(true);
                         createPanelForContainer(new JComponent[]{timeLabel, enterTimeLength}, enterPKContent);
 
-                        JLabel pkOptionsLabel = new JLabel("Select Penalty Kill Line:");
+
                         JCheckBox checkSuccess = new JCheckBox("Penalty Killed Successfully");
-                        createPanelForContainer(new JComponent[]{pkOptionsLabel, pkOptions, checkSuccess},
-                                enterPKContent);
+                        pkLinePanel.add(checkSuccess);
+                        enterPKContent.add(pkLinePanel);
 
                         JButton enterPenalty = new JButton("Enter Penalty");
                         createPanelForContainer(new JComponent[]{enterPenalty}, enterPKContent);
