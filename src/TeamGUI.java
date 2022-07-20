@@ -347,7 +347,7 @@ public class TeamGUI implements Runnable {
     JToggleButton powerPlayLive;
     JToggleButton penaltyLive;
     JLabel penaltyLengthLabel;
-    JTextField penaltyLength;
+    JTextField penaltyLengthField;
     JButton penaltyOver;
     JButton shotBlockLive;
     JButton hitLive;
@@ -3086,14 +3086,56 @@ public class TeamGUI implements Runnable {
         penaltyLive = new JToggleButton("Penalty Kill");
         penaltyOptionsLive.add(powerPlayLive);
         penaltyOptionsLive.add(penaltyLive);
-        createPanelForContainer(new JComponent[]{powerPlayLive, penaltyLive}, liveStats);
+        penaltyLengthLabel = new JLabel("Enter Penalty Length:");
+        penaltyLengthField = new JTextField("2", ENTER_STAT_SIZE);
+        createPanelForContainer(new JComponent[]{powerPlayLive, penaltyLive, penaltyLengthLabel, penaltyLengthField},
+                liveStats);
 
         ActionListener penaltiesListener = e -> {
             if (ppOptions.getItemCount() == 0 || pkOptions.getItemCount() == 0) {
                 JOptionPane.showMessageDialog(mainFrame, "You must have at least one power play line and one" +
                         "penalty kill line in order to use these features.", "Enter Stats Live",
                         JOptionPane.ERROR_MESSAGE);
+                penaltyOptionsLive.clearSelection();
                 return;
+            }
+            boolean penalty = e.getActionCommand().equals(penaltyLive.getActionCommand());
+            if (penalty && scorerPlayerOptions.getItemCount() == 0) {
+                JOptionPane.showMessageDialog(mainFrame, "You must have a skater who can serve the penalty",
+                        "Enter Stats Live", JOptionPane.ERROR_MESSAGE);
+                penaltyOptionsLive.clearSelection();
+                return;
+            }
+            if (penalty) {  // Adds penalty minutes to player serving the penalty
+                double penaltyLength;
+                try {
+                    penaltyLength = Double.parseDouble(penaltyLengthField.getText());
+                } catch (NumberFormatException ex) {
+                    JOptionPane.showMessageDialog(mainFrame, NUMBER_ERROR, "Enter Stats Live",
+                            JOptionPane.ERROR_MESSAGE);
+                    penaltyOptionsLive.clearSelection();
+                    return;
+                }
+                mainFrame.setVisible(false);
+                JWindow selectPlayer = new JWindow();
+                Container selectPlayerContent = selectPlayer.getContentPane();
+                selectPlayerContent.setLayout(new BoxLayout(selectPlayerContent, BoxLayout.Y_AXIS));
+                selectPlayer.setLocationRelativeTo(mainFrame);
+                playerScoreLabel.setText("Select Player Serving Penalty:");
+                selectPlayerContent.add(playerScorePanel);
+                JButton confirmSelection = new JButton("Select this Player");
+                selectPlayerContent.add(confirmSelection);
+                selectPlayer.pack();
+                selectPlayer.setVisible(true);
+                confirmSelection.addActionListener(e1 -> {
+                    Skater guiltyPlayer = (Skater) scorerPlayerOptions.getSelectedItem();
+                    if (guiltyPlayer != null) {
+                        guiltyPlayer.penalty(penaltyLength);
+                    }
+                    selectPlayer.dispose();
+                    playerScoreLabel.setText("Select Scorer:");
+                    mainFrame.setVisible(true);
+                });
             }
             liveStats.remove(offenseLinePanel);
             liveStats.remove(defenseLinePanel);
@@ -3101,7 +3143,7 @@ public class TeamGUI implements Runnable {
             if (e.getActionCommand().equals(powerPlayLive.getActionCommand())) {
                 liveStats.remove(pkLinePanel);
                 liveStats.add(ppLinePanel, 0);
-            } else if (e.getActionCommand().equals(penaltyLive.getActionCommand())) {
+            } else if (penalty) {
                 liveStats.remove(ppLinePanel);
                 liveStats.add(pkLinePanel, 0);
             }
