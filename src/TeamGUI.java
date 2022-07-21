@@ -1835,6 +1835,14 @@ public class TeamGUI implements Runnable {
                             pkLine.setOffense2((Skater) pickRightWing.getSelectedItem());
                             change = true;
                         }
+                        if (pickLeftDe.getSelectedItem() != null) {
+                            pkLine.setLeftDe((Defenseman) pickLeftDe.getSelectedItem());
+                            change = true;
+                        }
+                        if (pickRightDe.getSelectedItem() != null) {
+                            pkLine.setRightDe((Defenseman) pickRightDe.getSelectedItem());
+                            change = true;
+                        }
                     }
                 } catch (IllegalArgumentException | NullPointerException ex) {
                     JOptionPane.showMessageDialog(playersWindow, ex.getMessage(), EDIT_LINE,
