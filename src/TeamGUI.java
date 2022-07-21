@@ -1018,6 +1018,32 @@ public class TeamGUI implements Runnable {
                     pickLeftDe.removeItem(oldSkater);
                     pickRightDe.removeItem(oldSkater);
                 }
+                // Resets line combo boxes since lines containing this player have been removed
+                lineOptions.removeAllItems();
+                lineOptions.addItem(null);
+                nonDefenseLines.removeAllItems();
+                nonDefenseLines.addItem(null);
+                offenseLines.removeAllItems();
+                defenseLines.removeAllItems();
+                ppOptions.removeAllItems();
+                pkOptions.removeAllItems();
+                for (Line line: team.getLines()) {
+                    lineOptions.addItem(line);
+                    if (line instanceof DefenseLine d) {
+                        defenseLines.addItem(d);
+                    } else {
+                        if (line instanceof PPLine pp) {
+                            ppOptions.addItem(pp);
+                        }
+                        if (line instanceof PKLine pk) {
+                            pkOptions.addItem(pk);
+                        }
+                        if (line instanceof OffenseLine o) {
+                            offenseLines.addItem(o);
+                        }
+                        nonDefenseLines.addItem(line);
+                    }
+                }
             } else if (oldPlayer instanceof Goalie oldGoalie) {
                 goalieOptions.removeItem(oldGoalie);
                 selectGoaliesForStats.removeItem(oldGoalie);

@@ -302,9 +302,10 @@ public class Team implements Serializable {
     public boolean removePlayer(Player player) {
         if (player instanceof Skater s) {
             if (skaters.remove(player)) {
-                for (Line line: lines) {
-                    if (line.contains(s)) {
-                        removeLine(line);
+                for (int i = 0; i < lines.size(); i++) {
+                    if (lines.get(i).contains(s)) {
+                        lines.remove(i);
+                        i--;
                     }
                 }
                 return true;
