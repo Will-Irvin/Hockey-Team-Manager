@@ -20,11 +20,11 @@ public class PKLine extends SpecialTeamsLine {
             throws NullPointerException {
         super(name);
         if (offense1 == null || offense2 == null || leftDe == null || rightDe == null) {
-            throw new NullPointerException(Line.NULL_ERROR);
+            throw new NullPointerException(EMPTY_POSITIONS);
         }
         if (offense1.equals(offense2) || offense1.equals(leftDe) || offense1.equals(rightDe) || offense2.equals(leftDe)
                 || offense2.equals(rightDe) || leftDe.equals(rightDe)) {
-            throw new IllegalArgumentException(Line.PLAYER_DUPLICATES_ERROR);
+            throw new IllegalArgumentException(PLAYER_DUPLICATES_ERROR);
         }
 
         this.offense1 = offense1;
@@ -42,11 +42,11 @@ public class PKLine extends SpecialTeamsLine {
                   int numberAttempts) throws NullPointerException, IllegalArgumentException {
         super(name, pkPercent, numberAttempts);
         if (offense1 == null || offense2 == null || leftDe == null || rightDe == null) {
-            throw new NullPointerException(Line.NULL_ERROR);
+            throw new NullPointerException(EMPTY_POSITIONS);
         }
         if (offense1.equals(offense2) || offense1.equals(leftDe) || offense1.equals(rightDe) || offense2.equals(leftDe)
                 || offense2.equals(rightDe) || leftDe.equals(rightDe)) {
-            throw new IllegalArgumentException(Line.PLAYER_DUPLICATES_ERROR);
+            throw new IllegalArgumentException(PLAYER_DUPLICATES_ERROR);
         }
 
         this.offense1 = offense1;
@@ -75,10 +75,10 @@ public class PKLine extends SpecialTeamsLine {
      */
     public void setOffense1(Skater offense1) throws NullPointerException, IllegalArgumentException {
         if (offense1 == null) {
-            throw new NullPointerException(Line.NULL_ERROR);
+            throw new NullPointerException(EMPTY_POSITIONS);
         }
         if (offense1.equals(offense2) || offense1.equals(leftDe) || offense1.equals(rightDe)) {
-            throw new IllegalArgumentException(Line.PLAYER_DUPLICATES_ERROR);
+            throw new IllegalArgumentException(PLAYER_DUPLICATES_ERROR);
         }
         this.offense1 = offense1;
     }
@@ -89,10 +89,10 @@ public class PKLine extends SpecialTeamsLine {
      */
     public void setOffense2(Skater offense2) throws NullPointerException, IllegalArgumentException {
         if (offense2 == null) {
-            throw new NullPointerException(Line.NULL_ERROR);
+            throw new NullPointerException(EMPTY_POSITIONS);
         }
         if (offense2.equals(offense1) || offense2.equals(leftDe) || offense2.equals(rightDe)) {
-            throw new IllegalArgumentException(Line.PLAYER_DUPLICATES_ERROR);
+            throw new IllegalArgumentException(PLAYER_DUPLICATES_ERROR);
         }
         this.offense2 = offense2;
     }
@@ -103,10 +103,10 @@ public class PKLine extends SpecialTeamsLine {
      */
     public void setLeftDe(Defenseman leftDe) throws NullPointerException, IllegalArgumentException {
         if (leftDe == null) {
-            throw new NullPointerException(Line.NULL_ERROR);
+            throw new NullPointerException(EMPTY_POSITIONS);
         }
         if (leftDe.equals(offense2) || leftDe.equals(offense1) || leftDe.equals(rightDe)) {
-            throw new IllegalArgumentException(Line.PLAYER_DUPLICATES_ERROR);
+            throw new IllegalArgumentException(PLAYER_DUPLICATES_ERROR);
         }
         this.leftDe = leftDe;
     }
@@ -117,10 +117,10 @@ public class PKLine extends SpecialTeamsLine {
      */
     public void setRightDe(Defenseman rightDe) {
         if (rightDe == null) {
-            throw new NullPointerException(Line.NULL_ERROR);
+            throw new NullPointerException(EMPTY_POSITIONS);
         }
         if (rightDe.equals(offense2) || rightDe.equals(offense1) || rightDe.equals(leftDe)) {
-            throw new IllegalArgumentException(Line.PLAYER_DUPLICATES_ERROR);
+            throw new IllegalArgumentException(PLAYER_DUPLICATES_ERROR);
         }
         this.rightDe = rightDe;
     }
@@ -134,7 +134,7 @@ public class PKLine extends SpecialTeamsLine {
     @Override
     public void score(Position position) throws NullPointerException, IllegalArgumentException {
         if (position == null) {
-            throw new NullPointerException(NULL_ERROR);
+            throw new NullPointerException(EMPTY_POSITIONS);
         }
         if (position == Position.Center) {
             throw new IllegalArgumentException(centerError);
@@ -150,16 +150,7 @@ public class PKLine extends SpecialTeamsLine {
         } else {
             offense2.scoredOnIce();
         }
-        if (position == Position.Left_Defense) {
-            leftDe.score();
-        } else {
-            leftDe.scoredOnIce();
-        }
-        if (position == Position.Right_Defense) {
-            rightDe.score();
-        } else {
-            rightDe.scoredOnIce();
-        }
+        scoreDefense(position, rightDe, leftDe);
     }
 
     /**
@@ -173,7 +164,7 @@ public class PKLine extends SpecialTeamsLine {
     @Override
     public void score(Position scorer, Position assist) throws NullPointerException, IllegalArgumentException {
         if (scorer == null || assist == null) {
-            throw new NullPointerException(NULL_ERROR);
+            throw new NullPointerException(EMPTY_POSITIONS);
         }
         if (scorer == Position.Center || assist == Position.Center) {
             throw new IllegalArgumentException(centerError);
@@ -182,37 +173,8 @@ public class PKLine extends SpecialTeamsLine {
             throw new IllegalArgumentException(Line.POSITION_DUPLICATES_ERROR);
         }
 
-        if (scorer == Position.Left_Wing) {
-            offense1.score();
-        } else if (assist == Position.Left_Wing) {
-            offense1.assist();
-        } else {
-            offense1.scoredOnIce();
-        }
-
-        if (scorer == Position.Right_Wing) {
-            offense2.score();
-        } else if (assist == Position.Right_Wing) {
-            offense2.assist();
-        } else {
-            offense2.scoredOnIce();
-        }
-
-        if (scorer == Position.Right_Defense) {
-            rightDe.score();
-        } else if (assist == Position.Right_Defense) {
-            rightDe.assist();
-        } else {
-            rightDe.scoredOnIce();
-        }
-
-        if (scorer == Position.Left_Defense) {
-            leftDe.score();
-        } else if (assist == Position.Left_Defense) {
-            leftDe.assist();
-        } else {
-            leftDe.scoredOnIce();
-        }
+        scoreWingers(scorer, assist, offense1, offense2);
+        scoreDefense(scorer, assist, rightDe, leftDe);
     }
 
     /**
@@ -228,7 +190,7 @@ public class PKLine extends SpecialTeamsLine {
     public void score(Position scorer, Position assist1, Position assist2) throws NullPointerException,
             IllegalArgumentException {
         if (scorer == null || assist1 == null || assist2 == null) {
-            throw new NullPointerException(NULL_ERROR);
+            throw new NullPointerException(EMPTY_POSITIONS);
         }
         if (scorer == Position.Center || assist1 == Position.Center || assist2 == Position.Center) {
             throw new IllegalArgumentException(centerError);
@@ -237,37 +199,8 @@ public class PKLine extends SpecialTeamsLine {
             throw new IllegalArgumentException(Line.POSITION_DUPLICATES_ERROR);
         }
 
-        if (scorer == Position.Left_Wing) {
-            offense1.score();
-        } else if (assist1 == Position.Left_Wing || assist2 == Position.Left_Wing) {
-            offense1.assist();
-        } else {
-            offense1.scoredOnIce();
-        }
-
-        if (scorer == Position.Right_Wing) {
-            offense2.score();
-        } else if (assist1 == Position.Right_Wing || assist2 == Position.Right_Wing) {
-            offense2.assist();
-        } else {
-            offense2.scoredOnIce();
-        }
-
-        if (scorer == Position.Right_Defense) {
-            rightDe.score();
-        } else if (assist1 == Position.Right_Defense || assist2 == Position.Right_Defense) {
-            rightDe.assist();
-        } else {
-            rightDe.scoredOnIce();
-        }
-
-        if (scorer == Position.Left_Defense) {
-            leftDe.score();
-        } else if (assist1 == Position.Left_Defense || assist2 == Position.Left_Defense) {
-            leftDe.assist();
-        } else {
-            leftDe.scoredOnIce();
-        }
+        scoreWingers(scorer, assist1, assist2, offense1, offense2);
+        scoreDefense(scorer, assist1, assist2, rightDe, leftDe);
     }
 
     // Updates stats for when the line is scored on

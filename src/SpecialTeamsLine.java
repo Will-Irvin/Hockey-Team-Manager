@@ -87,10 +87,11 @@ public abstract class SpecialTeamsLine extends Line {
      */
     public void addFailures(int failures) throws IllegalArgumentException {
         if (failures < 0) {
-            throw new IllegalArgumentException("Given value must be positive");
+            throw new IllegalArgumentException("Failures " + Skater.POS_STAT);
         }
         this.attempts += failures;
     }
+
     // Score Abstract Methods
 
     public abstract void score(Position position);

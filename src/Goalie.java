@@ -1,3 +1,5 @@
+import java.security.spec.PSSParameterSpec;
+
 /**
  * Goalie
  *
@@ -10,6 +12,9 @@ public class Goalie extends Player {
     private int losses;
     private int otLosses;
     private int shutouts;
+
+    public static final String SAVE_PER_RANGE = "Save % must be between 0 and 1";
+    public static final String INVALID_SHUTOUT = "Cannot have more shutouts than wins";
 
     /**
      * Initializes instance variables to their respective arguments, initializes stats to 0
@@ -37,29 +42,29 @@ public class Goalie extends Player {
             throws IllegalArgumentException, NullPointerException {
         super(name, playerNumber);
         if (savePercentage < 0 || savePercentage > 1) {
-            throw new IllegalArgumentException("Save % Must be between 0 and 1");
+            throw new IllegalArgumentException(SAVE_PER_RANGE);
         }
         if (shotsAgainst < 0) {
-            throw new IllegalArgumentException("Shots Against stat must be positive");
+            throw new IllegalArgumentException("Shots Against " + Skater.POS_STAT);
         }
         shotsBlocked = (int) (savePercentage * shotsAgainst);
         this.shotsAgainst = shotsAgainst;
         if (wins < 0) {
-            throw new IllegalArgumentException("Wins stat must be positive");
+            throw new IllegalArgumentException("Wins " + Skater.POS_STAT);
         }
         this.wins = wins;
         if (losses < 0) {
-            throw new IllegalArgumentException("Losses stat must be positive");
+            throw new IllegalArgumentException("Losses " + Skater.POS_STAT);
         }
         this.losses = losses;
         if (otLosses < 0) {
-            throw new IllegalArgumentException("OT Losses stat must be positive");
+            throw new IllegalArgumentException("OT Losses " + Skater.POS_STAT);
         }
         this.otLosses = otLosses;
         if (shutouts < 0) {
-            throw new IllegalArgumentException("Shutouts stat must be positive");
+            throw new IllegalArgumentException("Shutouts " + Skater.POS_STAT);
         } else if (shutouts > wins) {
-            throw new IllegalArgumentException("Cannot have more shutouts than wins");
+            throw new IllegalArgumentException(INVALID_SHUTOUT);
         }
         this.shutouts = shutouts;
     }
@@ -126,9 +131,9 @@ public class Goalie extends Player {
      */
     public void setShutouts(int shutouts) throws IllegalArgumentException {
         if (shutouts < 0) {
-            throw new IllegalArgumentException("Shutouts stat must be positive");
+            throw new IllegalArgumentException("Shutouts " + Skater.POS_STAT);
         } else if (shutouts > wins) {
-            throw new IllegalArgumentException("Cannot have more shutouts than wins");
+            throw new IllegalArgumentException(INVALID_SHUTOUT);
         }
         this.shutouts = shutouts;
     }
@@ -138,9 +143,9 @@ public class Goalie extends Player {
      */
     public void setWins(int wins) throws IllegalArgumentException {
         if (wins < 0) {
-            throw new IllegalArgumentException("Wins stat must be positive");
+            throw new IllegalArgumentException("Wins " + Skater.POS_STAT);
         } else if (shutouts > wins) {
-            throw new IllegalArgumentException("Cannot have more shutouts than wins");
+            throw new IllegalArgumentException(INVALID_SHUTOUT);
         }
         this.wins = wins;
     }
@@ -150,7 +155,7 @@ public class Goalie extends Player {
      */
     public void setLosses(int losses) throws IllegalArgumentException {
         if (losses < 0) {
-            throw new IllegalArgumentException("Losses stat must be positive");
+            throw new IllegalArgumentException("Losses " + Skater.POS_STAT);
         }
         this.losses = losses;
     }
@@ -160,7 +165,7 @@ public class Goalie extends Player {
      */
     public void setOtLosses(int otLosses) throws IllegalArgumentException {
         if (otLosses < 0) {
-            throw new IllegalArgumentException("OT Losses stat must be positive");
+            throw new IllegalArgumentException("OT Losses " + Skater.POS_STAT);
         }
         this.otLosses = otLosses;
     }
@@ -173,9 +178,9 @@ public class Goalie extends Player {
      */
     public void setSavePercentage(double savePercentage, int shotsAgainst) throws IllegalArgumentException {
         if (savePercentage < 0 || savePercentage > 1) {
-            throw new IllegalArgumentException("Save Percentage must be between 0-1");
+            throw new IllegalArgumentException(SAVE_PER_RANGE);
         } else if (shotsAgainst < 0) {
-            throw new IllegalArgumentException("Shots against stat must be positive");
+            throw new IllegalArgumentException("Shots against " + Skater.POS_STAT);
         }
         shotsBlocked = (int) ((savePercentage) * shotsAgainst);
         this.shotsAgainst = shotsAgainst;
@@ -221,7 +226,7 @@ public class Goalie extends Player {
      */
     public void enterSaves(int numGoals, int numShots) throws IllegalArgumentException {
         if (numGoals < 0 || numShots < 0) {
-            throw new IllegalArgumentException("Entered values cannot be negative");
+            throw new IllegalArgumentException("Goals and shots against " + Skater.POS_STAT);
         }
         if (numGoals > numShots) {
             throw new IllegalArgumentException("Cannot have more goals scored than shots taken");

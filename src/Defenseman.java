@@ -6,6 +6,7 @@
 public class Defenseman extends Skater {
     private int shotsBlocked;
 
+    public static final String DEFENSE_POS = "Position must be a defensive position";
     /**
      * Acts like basic Skater position and initializes variables with their respective arguments or to 0.
      * @throws IllegalArgumentException Thrown if the given position is not a defensive position
@@ -14,9 +15,8 @@ public class Defenseman extends Skater {
         super(name, playerNumber, stickHand, side);
 
         if (side != Position.Left_Defense && side != Position.Right_Defense) {
-            throw new IllegalArgumentException("Position must be a defensive position");
+            throw new IllegalArgumentException(DEFENSE_POS);
         }
-
         shotsBlocked = 0;
     }
 
@@ -31,10 +31,10 @@ public class Defenseman extends Skater {
         super(name, playerNumber, stickHand, side, goals, assists, plusMinus, hits, penaltyMinutes);
 
         if (side != Position.Left_Defense && side != Position.Right_Defense) {
-            throw new IllegalArgumentException("Position must be a defensive position");
+            throw new IllegalArgumentException(DEFENSE_POS);
         }
         if (shotsBlocked < 0) {
-            throw new IllegalArgumentException("Shots Blocked stat must be positive");
+            throw new IllegalArgumentException("Shots Blocked " + POS_STAT);
         } else {
             this.shotsBlocked = shotsBlocked;
         }
@@ -65,7 +65,7 @@ public class Defenseman extends Skater {
      */
     public void addShotsBlocked(int shotsBlocked) throws IllegalArgumentException {
         if (shotsBlocked < 0) {
-            throw new IllegalArgumentException("Shots Blocked stat must be positive");
+            throw new IllegalArgumentException("Shots Blocked " + POS_STAT);
         }
         this.shotsBlocked += shotsBlocked;
     }
@@ -75,7 +75,7 @@ public class Defenseman extends Skater {
      */
     public void setShotsBlocked(int shotsBlocked) throws IllegalArgumentException {
         if (shotsBlocked < 0) {
-            throw new IllegalArgumentException("Shots Blocked stat must be positive");
+            throw new IllegalArgumentException("Shots Blocked " + POS_STAT);
         } else {
             this.shotsBlocked = shotsBlocked;
         }

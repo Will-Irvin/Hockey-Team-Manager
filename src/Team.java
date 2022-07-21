@@ -25,10 +25,10 @@ public class Team implements Serializable {
      */
     public Team(String name) throws NullPointerException, IllegalArgumentException {
         if (name == null) {
-            throw new NullPointerException("Name cannot be null");
+            throw new NullPointerException(Player.NULL_ERROR);
         }
         if (name.isBlank()) {
-            throw new IllegalArgumentException("Name cannot be empty");
+            throw new IllegalArgumentException(Player.NAME_BLANK);
         }
         this.name = name;
         this.skaters = new ArrayList<>();
@@ -46,43 +46,17 @@ public class Team implements Serializable {
      */
     public Team(String name, int wins, int losses, int lossesOT) throws NullPointerException, IllegalArgumentException {
         if (name == null) {
-            throw new NullPointerException("Name cannot be null");
+            throw new NullPointerException(Player.NULL_ERROR);
         }
         if (name.isBlank()) {
-            throw new IllegalArgumentException("Name cannot be empty");
+            throw new IllegalArgumentException(Player.NAME_BLANK);
         }
         this.name = name;
         this.skaters = new ArrayList<>();
         this.lines = new ArrayList<>();
         this.goalies = new ArrayList<>();
         if (wins < 0 || losses < 0 || lossesOT < 0) {
-            throw new IllegalArgumentException("Win and loss totals cannot be negative");
-        }
-        this.wins = wins;
-        this.losses = losses;
-        this.otLosses = lossesOT;
-    }
-
-    /**
-     * Initializes team with given arguments assigned to their respective instance variables
-     * @throws NullPointerException Thrown if given name or lists are null
-     * @throws IllegalArgumentException Thrown if name is blank or given stats are negative
-     */
-    public Team(String name, ArrayList<Skater> skaters, ArrayList<Line> lines, ArrayList<Goalie> goalies, int wins,
-                int losses, int lossesOT)
-            throws NullPointerException, IllegalArgumentException {
-        if (name == null || skaters == null || lines == null || goalies == null) {
-            throw new NullPointerException("Given arguments cannot be null");
-        }
-        if (name.isBlank()) {
-            throw new IllegalArgumentException("Name cannot be empty");
-        }
-        this.name = name;
-        this.skaters = skaters;
-        this.lines = lines;
-        this.goalies = goalies;
-        if (wins < 0 || losses < 0 || lossesOT < 0) {
-            throw new IllegalArgumentException("Win and loss totals cannot be negative");
+            throw new IllegalArgumentException("Record " + Skater.POS_STAT);
         }
         this.wins = wins;
         this.losses = losses;
@@ -92,7 +66,7 @@ public class Team implements Serializable {
     // Creates shallow copy of the given team
     public Team(Team team) throws NullPointerException {
         if (team == null) {
-            throw new NullPointerException("Given team cannot be null");
+            throw new NullPointerException(Player.NULL_ERROR);
         }
         name = team.getName();
         wins = team.getWins();
@@ -139,10 +113,10 @@ public class Team implements Serializable {
      */
     public void setName(String name) throws NullPointerException, IllegalArgumentException {
         if (name == null) {
-            throw new NullPointerException("Name cannot be null");
+            throw new NullPointerException(Player.NULL_ERROR);
         }
         if (name.isBlank()) {
-            throw new IllegalArgumentException("Name cannot be empty");
+            throw new IllegalArgumentException(Player.NAME_BLANK);
         }
         this.name = name;
     }
@@ -152,7 +126,7 @@ public class Team implements Serializable {
      */
     public void setWins(int wins) {
         if (wins < 0) {
-            throw new IllegalArgumentException("Wins value cannot be negative");
+            throw new IllegalArgumentException("Wins " + Skater.POS_STAT);
         }
         this.wins = wins;
     }
@@ -162,7 +136,7 @@ public class Team implements Serializable {
      */
     public void setLosses(int losses) {
         if (losses < 0) {
-            throw new IllegalArgumentException("Losses value cannot be negative");
+            throw new IllegalArgumentException("Losses " + Skater.POS_STAT);
         }
         this.losses = losses;
     }
@@ -172,7 +146,7 @@ public class Team implements Serializable {
      */
     public void setOtLosses(int otLosses) {
         if (otLosses < 0) {
-            throw new IllegalArgumentException("Overtime loss value cannot be negative");
+            throw new IllegalArgumentException("Overtime loss " + Skater.POS_STAT);
         }
         this.otLosses = otLosses;
     }

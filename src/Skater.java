@@ -13,6 +13,11 @@ public class Skater extends Player {
     private String stickHand;
     private Position position;
 
+    public static final String STICK_LEFT = "Left";
+    public static final String STICK_RIGHT = "Right";
+    public static final String STICK_HAND_ERROR = "Stick Hand must be Left or Right";
+    public static final String POS_STAT = "stat cannot be negative";
+
     /**
      * Sets given arguments to their respective instance variables. Initializes stats such as goals/assists to 0.
      * @throws NullPointerException If a given object argument is null
@@ -22,14 +27,14 @@ public class Skater extends Player {
             throws NullPointerException, IllegalArgumentException{
         super(name, playerNumber);
         if (stickHand == null) {
-            throw new IllegalArgumentException("Stick Hand cannot be null");
-        } else if (!(stickHand.equals("Left")) && !(stickHand.equals("Right"))) {
-            throw new IllegalArgumentException("Stick Hand must be Left or Right");
+            throw new IllegalArgumentException(NULL_ERROR);
+        } else if (!(stickHand.equals(STICK_LEFT)) && !(stickHand.equals(STICK_RIGHT))) {
+            throw new IllegalArgumentException(STICK_HAND_ERROR);
         } else {
             this.stickHand = stickHand;
         }
         if (position == null) {
-            throw new NullPointerException("Position cannot be null");
+            throw new NullPointerException(NULL_ERROR);
         }
         this.position = position;
         goals = 0;
@@ -50,27 +55,26 @@ public class Skater extends Player {
             throws NullPointerException, IllegalArgumentException {
         super(name, playerNumber);
         if (stickHand == null) {
-            throw new IllegalArgumentException("Stick Hand cannot be null");
-        } else if (!(stickHand.equals("Left")) && !(stickHand.equals("Right"))) {
-            throw new IllegalArgumentException("Stick Hand must be Left or Right");
+            throw new IllegalArgumentException(NULL_ERROR);
+        } else if (!(stickHand.equals(STICK_LEFT)) && !(stickHand.equals(STICK_RIGHT))) {
+            throw new IllegalArgumentException(STICK_HAND_ERROR);
         } else {
             this.stickHand = stickHand;
         }
         this.position = position;
         if (goals < 0) {
-            throw new IllegalArgumentException("Goals stat must be positive");
-        } else {
-            this.goals = goals;
+            throw new IllegalArgumentException("Goals " + POS_STAT);
         }
         if (assists < 0) {
-            throw new IllegalArgumentException("Assists stat must be positive");
+            throw new IllegalArgumentException("Assists " + POS_STAT);
         }
         if (hits < 0) {
-            throw new IllegalArgumentException("Hits stat must be positive");
+            throw new IllegalArgumentException("Hits " + POS_STAT);
         }
         if (penaltyMinutes < 0) {
-            throw new IllegalArgumentException("Penalty Minutes cannot be negative");
+            throw new IllegalArgumentException("Penalty Minutes " + POS_STAT);
         }
+        this.goals = goals;
         this.assists = assists;
         this.plusMinus = plusMinus;
         this.hits = hits;
@@ -130,7 +134,7 @@ public class Skater extends Player {
      */
     public void setGoals(int goals) throws IllegalArgumentException {
         if (goals < 0) {
-            throw new IllegalArgumentException("Goals stat must be positive");
+            throw new IllegalArgumentException("Goals " + POS_STAT);
         } else {
             this.goals = goals;
         }
@@ -141,7 +145,7 @@ public class Skater extends Player {
      */
     public void setAssists(int assists) throws IllegalArgumentException {
         if (goals < 0) {
-            throw new IllegalArgumentException("Assists stat must be positive");
+            throw new IllegalArgumentException("Assists " + POS_STAT);
         } else {
             this.assists = assists;
         }
@@ -157,7 +161,7 @@ public class Skater extends Player {
      */
     public void addHits(int hits) throws IllegalArgumentException {
         if (hits < 0) {
-            throw new IllegalArgumentException("Given value must be positive");
+            throw new IllegalArgumentException("Hits " + POS_STAT);
         }
         this.hits += hits;
     }
@@ -177,7 +181,7 @@ public class Skater extends Player {
      */
     public void setPenaltyMinutes(double penaltyMinutes) throws IllegalArgumentException {
         if (penaltyMinutes < 0) {
-            throw new IllegalArgumentException("Penalty Minutes cannot be negative");
+            throw new IllegalArgumentException("Penalty Minutes " + POS_STAT);
         }
         this.penaltyMinutes = penaltyMinutes;
     }
@@ -188,9 +192,9 @@ public class Skater extends Player {
      */
     public void setStickHand(String stickHand) throws NullPointerException, IllegalArgumentException {
         if (stickHand == null) {
-            throw new NullPointerException("Stick hand cannot be null");
-        } else if (!stickHand.equals("Left") && !stickHand.equals("Right")) {
-            throw new NullPointerException("Stick hand must be Left or Right");
+            throw new NullPointerException(NULL_ERROR);
+        } else if (!stickHand.equals(STICK_LEFT) && !stickHand.equals(STICK_RIGHT)) {
+            throw new NullPointerException(STICK_HAND_ERROR);
         }
         this.stickHand = stickHand;
     }

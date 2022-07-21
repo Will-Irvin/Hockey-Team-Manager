@@ -1,12 +1,14 @@
 /**
  * Center
  * Class that extends from skater to include information and methods relevant to a player at Center. This information
- * mostly relates to faceoffs.
+ * mostly relates to face offs.
  */
 
 public class Center extends Skater {
     private int faceOffWins;
     private int faceOffTotal;    // Used to calculate face off percentage
+
+    public static final String FACE_OFF_RANGE = "Face Off % must be between 0-100";
 
     /**
      * Behaves like basic Skater constructor and initializes stats to 0. Assigns position as CENTER
@@ -26,10 +28,10 @@ public class Center extends Skater {
                   double penaltyMinutes, double faceOffPercentage, int faceOffTotal) throws IllegalArgumentException {
         super(name, playerNumber, stickHand, Position.Center, goals, assists, plusMinus, hits, penaltyMinutes);
         if (faceOffPercentage < 0 || faceOffPercentage > 100) {
-            throw new IllegalArgumentException("Face Off % must be between 0-100");
+            throw new IllegalArgumentException(FACE_OFF_RANGE);
         }
-        if (faceOffTotal < 1) {
-            throw new IllegalArgumentException("Face Off Total must be at least 1");
+        if (faceOffTotal < 0) {
+            throw new IllegalArgumentException("Face Off Total " + POS_STAT);
         }
         faceOffWins = (int) (faceOffTotal * (faceOffPercentage/100));
         this.faceOffTotal = faceOffTotal;
@@ -62,35 +64,35 @@ public class Center extends Skater {
      * Calculates face off win percentage using the instance variables
      * @return The calculated percentage
      */
-    public double getFaceoffPercent() {
+    public double getFaceOffPercent() {
         return ((double) faceOffWins / faceOffTotal) * 100;
     }
 
     // Increments wins and total up by 1
-    public void winFaceoff() {
+    public void winFaceOff() {
         faceOffTotal++;
         faceOffWins++;
     }
 
     // Only increments total up by 1
-    public void loseFaceoff() {
+    public void loseFaceOff() {
         faceOffTotal++;
     }
 
     /**
      * Update wins and total variables using the given arguments
-     * @param faceoffPercent Percentage of face offs won, used to calculate the faceoffWin variable
-     * @param faceoffTotal Total number of face offs taken
+     * @param faceOffPercent Percentage of face offs won, used to calculate the faceoffWin variable
+     * @param faceOffTotal Total number of face offs taken
      * @throws IllegalArgumentException Thrown if percent is not in range 0-100, or if face off total is negative
      */
-    public void setFaceoffPercent(double faceoffPercent, int faceoffTotal) throws IllegalArgumentException {
-        if (faceoffPercent < 0 || faceoffPercent > 100) {
-            throw new IllegalArgumentException("Face Off % must be between 0-100");
-        } else if (faceoffTotal < 0) {
-            throw new IllegalArgumentException("Face Off total cannot be negative");
+    public void setFaceOffPercent(double faceOffPercent, int faceOffTotal) throws IllegalArgumentException {
+        if (faceOffPercent < 0 || faceOffPercent > 100) {
+            throw new IllegalArgumentException(FACE_OFF_RANGE);
+        } else if (faceOffTotal < 0) {
+            throw new IllegalArgumentException("Face Off Total " + POS_STAT);
         } else {
-            faceOffWins = (int)((faceoffPercent/100) * faceoffTotal);
-            this.faceOffTotal = faceoffTotal;
+            faceOffWins = (int)((faceOffPercent/100) * faceOffTotal);
+            this.faceOffTotal = faceOffTotal;
         }
     }
 
@@ -102,7 +104,7 @@ public class Center extends Skater {
      */
     public void enterFaceOffsPostGame(int wins, int losses) throws IllegalArgumentException {
         if (wins < 0 || losses < 0) {
-            throw new IllegalArgumentException("Given values must be positive");
+            throw new IllegalArgumentException("Wins and losses " + POS_STAT);
         }
         faceOffWins += wins;
         faceOffTotal += wins + losses;
@@ -122,6 +124,6 @@ public class Center extends Skater {
     @Override
     public String statsDisplay() {
         return super.statsDisplay()
-                + String.format("\nFaceoff Percentage: %.2f%%", getFaceoffPercent());
+                + String.format("\nFaceoff Percentage: %.2f%%", getFaceOffPercent());
     }
 }

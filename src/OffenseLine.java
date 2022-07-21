@@ -18,7 +18,7 @@ public class OffenseLine extends Line {
             IllegalArgumentException {
         super(name);
         if (leftWing == null || center == null || rightWing == null) {
-            throw new NullPointerException(NULL_ERROR);
+            throw new NullPointerException(EMPTY_POSITIONS);
         }
         if (center.equals(leftWing) || center.equals(rightWing) || rightWing.equals(leftWing)) {
             throw new IllegalArgumentException(PLAYER_DUPLICATES_ERROR);
@@ -47,7 +47,7 @@ public class OffenseLine extends Line {
      */
     public void setCenter(Center center) throws NullPointerException, IllegalArgumentException {
         if (center == null) {
-            throw new NullPointerException(NULL_ERROR);
+            throw new NullPointerException(EMPTY_POSITIONS);
         }
         if (center.equals(leftWing) || center.equals(rightWing)) {
             throw new IllegalArgumentException(PLAYER_DUPLICATES_ERROR);
@@ -61,7 +61,7 @@ public class OffenseLine extends Line {
      */
     public void setLeftWing(Skater leftWing) throws NullPointerException, IllegalArgumentException {
         if (leftWing == null) {
-            throw new NullPointerException(NULL_ERROR);
+            throw new NullPointerException(EMPTY_POSITIONS);
         }
         if (leftWing.equals(center) || leftWing.equals(rightWing)) {
             throw new NullPointerException(PLAYER_DUPLICATES_ERROR);
@@ -75,7 +75,7 @@ public class OffenseLine extends Line {
      */
     public void setRightWing(Skater rightWing) throws NullPointerException, IllegalArgumentException {
         if (rightWing == null) {
-            throw new NullPointerException(NULL_ERROR);
+            throw new NullPointerException(EMPTY_POSITIONS);
         }
         if (leftWing.equals(center) || leftWing.equals(rightWing)) {
             throw new IllegalArgumentException(PLAYER_DUPLICATES_ERROR);
@@ -91,26 +91,10 @@ public class OffenseLine extends Line {
      */
     public void score(Position scorer, DefenseLine de) throws NullPointerException {
         if (de == null || scorer == null) {
-            throw new NullPointerException("Please enter all given arguments");
+            throw new NullPointerException(Player.NULL_ERROR);
         }
 
-        if (scorer == Position.Center) {
-            center.score();
-        } else {
-            center.scoredOnIce();
-        }
-
-        if (scorer == Position.Left_Wing) {
-            leftWing.score();
-        } else {
-            leftWing.scoredOnIce();
-        }
-
-        if (scorer == Position.Right_Wing) {
-            rightWing.score();
-        } else {
-            rightWing.scoredOnIce();
-        }
+        scoreOffense(scorer, center, leftWing, rightWing);
 
         if (scorer == Position.Right_Defense) {
             de.getRightDe().score();
@@ -136,51 +120,14 @@ public class OffenseLine extends Line {
     public void score(Position scorer, Position assist, DefenseLine de) throws NullPointerException,
             IllegalArgumentException {
         if (de == null || scorer == null || assist == null) {
-            throw new NullPointerException(NULL_ERROR);
+            throw new NullPointerException(EMPTY_POSITIONS);
         }
         if (scorer == assist) {
             throw new IllegalArgumentException(POSITION_DUPLICATES_ERROR);
         }
 
-        if (scorer == Position.Center) {
-            center.score();
-        } else if (assist == Position.Center) {
-            center.assist();
-        } else {
-            center.scoredOnIce();
-        }
-
-        if (scorer == Position.Left_Wing) {
-            leftWing.score();
-        } else if (assist == Position.Left_Wing) {
-            leftWing.assist();
-        } else {
-            leftWing.scoredOnIce();
-        }
-
-        if (scorer == Position.Right_Wing) {
-            rightWing.score();
-        } else if (assist == Position.Right_Wing) {
-            rightWing.assist();
-        } else {
-            rightWing.scoredOnIce();
-        }
-
-        if (scorer == Position.Right_Defense) {
-            de.getRightDe().score();
-        } else if (assist == Position.Right_Defense) {
-            de.getRightDe().assist();
-        } else {
-            de.getRightDe().scoredOnIce();
-        }
-
-        if (scorer == Position.Left_Defense) {
-            de.getLeftDe().score();
-        } else if (assist == Position.Left_Defense) {
-            de.getLeftDe().assist();
-        } else {
-            de.getLeftDe().scoredOnIce();
-        }
+        scoreOffense(scorer, assist, center, leftWing, rightWing);
+        scoreDefense(scorer, assist, de.getRightDe(), de.getLeftDe());
     }
 
     /**
@@ -188,58 +135,21 @@ public class OffenseLine extends Line {
      * @param scorer Position of player who scored
      * @param assist1 Position of player who assisted
      * @param assist2 Position of player who assisted
-     * @param de Defense line on the ice when the goal was scored
+     * @param de The defense line on the ice when the goal was scored
      * @throws NullPointerException If given arguments are null
      * @throws IllegalArgumentException If given positions are the same
      */
     public void score(Position scorer, Position assist1, Position assist2, DefenseLine de) throws NullPointerException,
             IllegalArgumentException {
         if (de == null || scorer == null || assist1 == null || assist2 == null) {
-            throw new NullPointerException(NULL_ERROR);
+            throw new NullPointerException(EMPTY_POSITIONS);
         }
         if (scorer == assist1 || scorer == assist2 || assist1 == assist2) {
             throw new IllegalArgumentException(POSITION_DUPLICATES_ERROR);
         }
 
-        if (scorer == Position.Center) {
-            center.score();
-        } else if (assist1 == Position.Center || assist2 == Position.Center) {
-            center.assist();
-        } else {
-            center.scoredOnIce();
-        }
-
-        if (scorer == Position.Left_Wing) {
-            leftWing.score();
-        } else if (assist1 == Position.Left_Wing || assist2 == Position.Left_Wing) {
-            leftWing.assist();
-        } else {
-            leftWing.scoredOnIce();
-        }
-
-        if (scorer == Position.Right_Wing) {
-            rightWing.score();
-        } else if (assist1 == Position.Right_Wing || assist2 == Position.Right_Wing) {
-            rightWing.assist();
-        } else {
-            rightWing.scoredOnIce();
-        }
-
-        if (scorer == Position.Right_Defense) {
-            de.getRightDe().score();
-        } else if (assist1 == Position.Right_Defense || assist2 == Position.Right_Defense) {
-            de.getRightDe().assist();
-        } else {
-            de.getRightDe().scoredOnIce();
-        }
-
-        if (scorer == Position.Left_Defense) {
-            de.getLeftDe().score();
-        } else if (assist1 == Position.Left_Defense || assist2 == Position.Left_Defense) {
-            de.getLeftDe().assist();
-        } else {
-            de.getLeftDe().scoredOnIce();
-        }
+        scoreOffense(scorer, assist1, assist2, center, leftWing, rightWing);
+        scoreDefense(scorer, assist1, assist2, de.getRightDe(), de.getLeftDe());
     }
 
     // Updates stats for the entire line when they are scored on

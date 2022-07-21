@@ -9,15 +9,20 @@ public abstract class Player implements Serializable {
     private String name;
     private int playerNumber;
 
+    public static final int PLAYER_NUM_MAX = 99;
+    public static final String NULL_ERROR = "Given arguments cannot be null";
+    public static final String NAME_BLANK = "Name cannot be blank";
+    public static final String PLAYER_NUMBER_RANGE = "Player number must be between 1-99";
+
     public Player(String name, int playerNumber) throws IllegalArgumentException, NullPointerException {
         if (name == null) {
-            throw new NullPointerException("Name cannot be null");
+            throw new NullPointerException(NULL_ERROR);
         } else if (name.isBlank()) {
-            throw new IllegalArgumentException("Name cannot be blank");
+            throw new IllegalArgumentException(NAME_BLANK);
         }
         this.name = name;
-        if (playerNumber < 1 || playerNumber > 99) {
-            throw new IllegalArgumentException("Player number must be between 1-99");
+        if (playerNumber < 1 || playerNumber > PLAYER_NUM_MAX) {
+            throw new IllegalArgumentException(PLAYER_NUMBER_RANGE);
         }
         this.playerNumber = playerNumber;
     }
@@ -38,9 +43,9 @@ public abstract class Player implements Serializable {
      */
     public void setName(String name) throws NullPointerException, IllegalArgumentException {
         if (name == null) {
-            throw new NullPointerException("Name cannot be null");
+            throw new NullPointerException(NULL_ERROR);
         } else if (name.isBlank()) {
-            throw new IllegalArgumentException("Name cannot be blank");
+            throw new IllegalArgumentException(NAME_BLANK);
         } else {
             this.name = name;
         }
@@ -51,7 +56,7 @@ public abstract class Player implements Serializable {
      */
     public void setPlayerNumber(int playerNumber) throws IllegalArgumentException {
         if (playerNumber < 1 || playerNumber > 99) {
-            throw new IllegalArgumentException("Player number must be between 1-99");
+            throw new IllegalArgumentException(PLAYER_NUMBER_RANGE);
         }
         this.playerNumber = playerNumber;
     }

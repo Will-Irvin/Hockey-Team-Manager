@@ -2278,7 +2278,7 @@ public class TeamGUI implements Runnable {
                 if (editingSkater instanceof Center c) {
                     String faceOffPercent = changeFaceOffPercent.getText();
                     if (!faceOffPercent.isBlank()) {
-                        c.setFaceoffPercent(Double.parseDouble(faceOffPercent),
+                        c.setFaceOffPercent(Double.parseDouble(faceOffPercent),
                                 Integer.parseInt(changeFaceOffTotal.getText()));
                         changeFaceOffPercent.setText("");
                         changeFaceOffTotal.setText("");

@@ -16,7 +16,7 @@ public class DefenseLine extends Line {
             IllegalArgumentException {
         super(name);
         if (leftDe == null || rightDe == null) {
-            throw new NullPointerException(NULL_ERROR);
+            throw new NullPointerException(EMPTY_POSITIONS);
         }
         if (leftDe.equals(rightDe)) {
             throw new NullPointerException(PLAYER_DUPLICATES_ERROR);
@@ -49,7 +49,7 @@ public class DefenseLine extends Line {
      */
     public void setLeftDe(Defenseman leftDe) throws NullPointerException, IllegalArgumentException {
         if (leftDe == null) {
-            throw new NullPointerException(NULL_ERROR);
+            throw new NullPointerException(EMPTY_POSITIONS);
         }
         if (leftDe.equals(rightDe)) {
             throw new IllegalArgumentException(PLAYER_DUPLICATES_ERROR);
@@ -63,7 +63,7 @@ public class DefenseLine extends Line {
      */
     public void setRightDe(Defenseman rightDe) throws NullPointerException, IllegalArgumentException {
         if (rightDe == null) {
-            throw new NullPointerException(NULL_ERROR);
+            throw new NullPointerException(EMPTY_POSITIONS);
         }
         if (rightDe.equals(leftDe)) {
             throw new IllegalArgumentException(PLAYER_DUPLICATES_ERROR);
