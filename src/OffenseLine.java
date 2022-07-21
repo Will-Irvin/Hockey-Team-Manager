@@ -189,4 +189,13 @@ public class OffenseLine extends Line {
     public Skater[] getSkaters() {
         return new Skater[]{center, leftWing, rightWing};
     }
+
+    /**
+     * @param s Checks the line to see if one of the players is this skater
+     * @return Whether the line contains this skater or not
+     */
+    @Override
+    public boolean contains(Skater s) {
+        return s.equals(center) || s.equals(leftWing) || s.equals(rightWing);
+    }
 }

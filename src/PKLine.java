@@ -235,4 +235,13 @@ public class PKLine extends SpecialTeamsLine {
     public Skater[] getSkaters() {
         return new Skater[]{offense1, offense2, leftDe, rightDe};
     }
+
+    /**
+     * @param s Checks the line to see if one of the players is this skater
+     * @return Whether the line contains this skater or not
+     */
+    @Override
+    public boolean contains(Skater s) {
+        return s.equals(offense1) || s.equals(offense2) || s.equals(leftDe) || s.equals(rightDe);
+    }
 }
