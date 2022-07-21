@@ -88,4 +88,12 @@ public class DefenseLine extends Line {
                 Left Defenseman: %s
                 Right Defenseman: %s""", getName(), leftDe.getName(), rightDe.getName());
     }
+
+    /**
+     * @return An array of the skaters on this line
+     */
+    @Override
+    public Skater[] getSkaters() {
+        return new Skater[]{leftDe, rightDe};
+    }
 }

@@ -152,6 +152,16 @@ public class OffenseLine extends Line {
         scoreDefense(scorer, assist1, assist2, de.getRightDe(), de.getLeftDe());
     }
 
+    // Used to make a center win a face off
+    public void winFaceOff() {
+        center.winFaceOff();
+    }
+
+    // Used to make center lose face off
+    public void loseFaceOff() {
+        center.loseFaceOff();
+    }
+
     // Updates stats for the entire line when they are scored on
     @Override
     public void lineScoredOn() {
@@ -170,5 +180,13 @@ public class OffenseLine extends Line {
                 Center: %s
                 Left Wing: %s
                 Right Wing: %s""", getName(), center.getName(), leftWing.getName(), rightWing.getName());
+    }
+
+    /**
+     * @return An array of the skaters on this line
+     */
+    @Override
+    public Skater[] getSkaters() {
+        return new Skater[]{center, leftWing, rightWing};
     }
 }

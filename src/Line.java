@@ -54,6 +54,8 @@ public abstract class Line implements Serializable {
 
     public abstract String lineRoster();
 
+    public abstract Skater[] getSkaters();
+
     /**
      * @param o Object being compared to the line
      * @return True if the object is a line, has the same name as the current line, and has the same players as the

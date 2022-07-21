@@ -3096,6 +3096,78 @@ public class TeamGUI implements Runnable {
 
         faceOffLive = new JButton("Face Off");
         createPanelForContainer(new JComponent[]{faceOffLive}, liveStats);
+        faceOffLive.addActionListener(e -> {
+            int input;
+            do {
+                input = JOptionPane.showConfirmDialog(mainFrame, "Did your center win this face off?",
+                        "Enter Stats Live", JOptionPane.YES_NO_OPTION);
+            } while (input != JOptionPane.YES_OPTION && input != JOptionPane.NO_OPTION);
+
+            if (powerPlayLive.isSelected()) {
+                PPLine line = (PPLine) ppOptions.getSelectedItem();
+                if (line != null) {
+                    if (input == JOptionPane.YES_OPTION) {
+                        line.winFaceOff();
+                    } else {
+                        line.loseFaceOff();
+                    }
+                } else {
+                    JOptionPane.showMessageDialog(mainFrame, "You do not currently have a line to select. " +
+                            "Please create a new line.", "Enter Stats Live", JOptionPane.ERROR_MESSAGE);
+                }
+            } else if (penaltyLive.isSelected()) {
+                PKLine line = (PKLine) pkOptions.getSelectedItem();
+                if (line != null) {
+                    Skater[] skaters = line.getSkaters();
+                    if (skaters[0] instanceof Center c1 && skaters[1] instanceof Center c2) {
+                        int center;
+                        do {
+                            center = JOptionPane.showOptionDialog(mainFrame, "Please select the player taking" +
+                                            " the face off.", "Enter Stats Live", JOptionPane.DEFAULT_OPTION,
+                                    JOptionPane.QUESTION_MESSAGE, null, new Skater[]{skaters[0], skaters[1]},
+                                    0);
+                        } while (center != 0 && center != 1);
+                        if (center == 0) {
+                            if (input == JOptionPane.YES_OPTION) {
+                                c1.winFaceOff();
+                            } else {
+                                c1.loseFaceOff();
+                            }
+                        } else {
+                            if (input == JOptionPane.YES_OPTION) {
+                                c2.winFaceOff();
+                            } else {
+                                c2.loseFaceOff();
+                            }
+                        }
+                    } else if (skaters[0] instanceof Center c) {
+                        c.winFaceOff();
+                    } else if (skaters[1] instanceof Center c) {
+                        c.winFaceOff();
+                    } else {
+                        JOptionPane.showMessageDialog(mainFrame, "This line does not have a center that can " +
+                                "save their face off win rate.\n Please select another line or change the position of" +
+                                        " one of these players to a center.", "Enter Stats Live",
+                                JOptionPane.ERROR_MESSAGE);
+                    }
+                } else {
+                    JOptionPane.showMessageDialog(mainFrame, "You do not currently have a line to select. " +
+                            "Please create a new line.", "Enter Stats Live", JOptionPane.ERROR_MESSAGE);
+                }
+            } else {
+                OffenseLine line = (OffenseLine) offenseLines.getSelectedItem();
+                if (line != null) {
+                    if (input == JOptionPane.YES_OPTION) {
+                        line.winFaceOff();
+                    } else {
+                        line.loseFaceOff();
+                    }
+                } else {
+                    JOptionPane.showMessageDialog(mainFrame, "You do not currently have a line to select. " +
+                            "Please create a new line.", "Enter Stats Live", JOptionPane.ERROR_MESSAGE);
+                }
+            }
+        });
 
         shotBlockLive = new JButton("Shot Block");
         hitLive = new JButton("Hit");

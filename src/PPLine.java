@@ -202,6 +202,16 @@ public class PPLine extends SpecialTeamsLine {
         success();
     }
 
+    // Used to have center win face off
+    public void winFaceOff() {
+        center.winFaceOff();
+    }
+
+    // Used to have center lose face off
+    public void loseFaceOff() {
+        center.loseFaceOff();
+    }
+
     // Updates stats for every player when they are scored on
     public void lineScoredOn() {
         center.scoredAgainst();
@@ -225,5 +235,13 @@ public class PPLine extends SpecialTeamsLine {
                         Right Defense: %s
                         PP%%: %.2f""", getName(), center.getName(), leftWing.getName(), rightWing.getName(),
                 leftDe.getName(), rightDe.getName(), getSuccessPercent());
+    }
+
+    /**
+     * @return An array of the skaters on this line
+     */
+    @Override
+    public Skater[] getSkaters() {
+        return new Skater[]{center, leftWing, rightWing, leftDe, rightDe};
     }
 }

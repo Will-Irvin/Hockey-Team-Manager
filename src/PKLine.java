@@ -227,4 +227,12 @@ public class PKLine extends SpecialTeamsLine {
                         PK%%: %.2f""", getName(), offense1.getName(), offense2.getName(), leftDe.getName(),
                 rightDe.getName(), getSuccessPercent());
     }
+
+    /**
+     * @return An array of the skaters on this line
+     */
+    @Override
+    public Skater[] getSkaters() {
+        return new Skater[]{offense1, offense2, leftDe, rightDe};
+    }
 }
