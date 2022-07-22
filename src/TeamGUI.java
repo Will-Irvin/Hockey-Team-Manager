@@ -3473,6 +3473,57 @@ public class TeamGUI implements Runnable {
 
         gameOver = new JButton("Game Over");
         createPanelForContainer(new JComponent[]{gameOver}, liveStats);
+        gameOver.addActionListener(e -> {
+            if (powerPlayLive.isSelected() || penaltyLive.isSelected()) {
+                JOptionPane.showMessageDialog(mainFrame, "Please finish all power plays/penalty kills before" +
+                        " finishing the game.", "Enter Stats Live", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+            Goalie mainGoalie = (Goalie) selectGoaliesForStats.getSelectedItem();
+            if (mainGoalie == null) {
+                JOptionPane.showMessageDialog(mainFrame, "Please select the goalie that should receive credit" +
+                        " on their record for this game.", "Enter Stats Live", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+            if (teamGoals.get() > opponentGoals.get()) {
+                team.win();
+                mainGoalie.win();
+            } else if (teamGoals.get() == opponentGoals.get()) {
+                team.tie();
+                mainGoalie.loseOT();
+            } else if (teamGoals.get() == opponentGoals.get() - 1) {
+                int input;
+                do {
+                    input = JOptionPane.showConfirmDialog(mainFrame, "Was this an overtime loss?",
+                            "Enter Stats Live", JOptionPane.YES_NO_OPTION);
+                } while (input != JOptionPane.YES_OPTION && input != JOptionPane.NO_OPTION);
+                if (input == JOptionPane.YES_OPTION) {
+                    team.tie();
+                    mainGoalie.loseOT();
+                } else {
+                    team.lose();
+                    mainGoalie.lose();
+                }
+            } else {
+                team.lose();
+                mainGoalie.lose();
+            }
+
+            teamGoals.set(0);
+            opponentGoals.set(0);
+            currentScore.setText(CURRENT_SCORE + "0-0");
+            updateEntireTeamComponents();
+            try {
+                updateFile();
+                JOptionPane.showMessageDialog(mainFrame, "Stats successfully Updated", "Enter Stats Live",
+                        JOptionPane.INFORMATION_MESSAGE);
+            } catch (IOException ex) {
+                JOptionPane.showMessageDialog(mainFrame, FILE_ERROR, "Enter Stats Live", JOptionPane.ERROR_MESSAGE);
+            } catch (Exception ex) {
+                JOptionPane.showMessageDialog(mainFrame, ex.getMessage(), "Enter Stats Live",
+                        JOptionPane.ERROR_MESSAGE);
+            }
+        });
 
         enterStatsTabs.add("Enter Live", liveStats);
 
