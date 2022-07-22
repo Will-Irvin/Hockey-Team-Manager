@@ -3284,6 +3284,90 @@ public class TeamGUI implements Runnable {
             shotBlockWindow.pack();
             shotBlockWindow.setVisible(true);
         });
+        hitLive.addActionListener(e -> {
+            Line currentLine;
+            DefenseLine defenseLine = null;
+            if (powerPlayLive.isSelected()) {
+                currentLine = (Line) ppOptions.getSelectedItem();
+            } else if (penaltyLive.isSelected()) {
+                currentLine = (Line) pkOptions.getSelectedItem();
+            } else {
+                currentLine = (Line) offenseLines.getSelectedItem();
+                defenseLine = (DefenseLine) defenseLines.getSelectedItem();
+            }
+            if (currentLine == null) {
+                JOptionPane.showMessageDialog(mainFrame, SELECT, "Enter Stats Live", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+            Skater[] skaters = currentLine.getSkaters();
+
+            mainFrame.setVisible(false);
+            JWindow hitWindow = new JWindow();
+            hitWindow.setLocationRelativeTo(mainFrame);
+            Container hitContent = hitWindow.getContentPane();
+            hitContent.setLayout(new BoxLayout(hitContent, BoxLayout.Y_AXIS));
+
+            JLabel selectHitterLabel = new JLabel("Select Player Who Made The Hit:");
+            JComboBox<Skater> hitterOptions = new JComboBox<>(skaters);
+            if (defenseLine != null) {
+                skaters = defenseLine.getSkaters();
+                hitterOptions.addItem(skaters[0]);
+                hitterOptions.addItem(skaters[1]);
+            }
+            JPanel selectHitterPanel = createPanel(new JComponent[]{selectHitterLabel, hitterOptions});
+            hitContent.add(selectHitterPanel);
+
+            JToggleButton useOtherSkater = new JToggleButton("Select A Different Skater");
+            createPanelForContainer(new JComponent[]{useOtherSkater}, hitContent);
+            useOtherSkater.addActionListener(e1 -> {
+                if (useOtherSkater.isSelected()) {
+                    hitContent.remove(selectHitterPanel);
+                    hitContent.add(playerScorePanel, 0);
+                    playerScoreLabel.setText("Select Player Who Made The Hit:");
+                } else {
+                    hitContent.remove(playerScorePanel);
+                    hitContent.add(selectHitterPanel, 0);
+                }
+                hitWindow.pack();
+                hitWindow.repaint();
+            });
+
+            JButton enterHit = new JButton("Enter Hit");
+            JButton cancel = new JButton("Cancel");
+            createPanelForContainer(new JComponent[]{enterHit, cancel}, hitContent);
+
+            ActionListener enterHitAction = e1 -> {
+                if (e1.getActionCommand().equals(enterHit.getActionCommand())) {
+                    Skater hitter;
+                    if (useOtherSkater.isSelected()) {
+                        hitter = (Skater) scorerPlayerOptions.getSelectedItem();
+                    } else {
+                        hitter = (Skater) hitterOptions.getSelectedItem();
+                    }
+                    if (hitter == null) {
+                        JOptionPane.showMessageDialog(mainFrame, SELECT, "Enter Stats Live",
+                                JOptionPane.ERROR_MESSAGE);
+                        return;
+                    }
+                    hitter.hit();
+                }
+                hitWindow.dispose();
+            };
+
+            enterHit.addActionListener(enterHitAction);
+            cancel.addActionListener(enterHitAction);
+
+            hitWindow.addWindowListener(new WindowAdapter() {
+                @Override
+                public void windowClosed(WindowEvent e) {
+                    mainFrame.setVisible(true);
+                    playerScoreLabel.setText("Select Scorer:");
+                }
+            });
+
+            hitWindow.pack();
+            hitWindow.setVisible(true);
+        });
 
         penaltyOptionsLive = new ButtonGroup();
         powerPlayLive = new JToggleButton("Power Play");
