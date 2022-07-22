@@ -49,22 +49,46 @@ public class TeamGUI implements Runnable {
     JButton newUsers;
 
     // MainGUI Constants/Components
-    // Reused String expressions
+
     // TODO
+    // Reused String expressions
+
+    // GUI Sections
+    private static final String CREATE_TEAM = "Create Team";
     private static final String EDIT_TEAM = "Edit Team";
     private static final String RESET_TEAM_STATS = "Reset Team Stats";
     private static final String CREATE_LINE = "Create Line";
+    private static final String EDIT_LINE = "Edit Line";
+    private static final String DELETE_LINE = "Delete Line";
+    private static final String CREATE_SKATER = "Create Skater";
+
+    // JOptionPane Confirmations
+    private static final String UPDATE = "Update Changes";
+    private static final String RESET_CONFIRM = "Are you sure you want to reset ";
+    private static final String TO_ZERO = "'s stats to 0?";
+    private static final String CONFIRM_DELETE = "Are you sure you would like to delete ";
+    private static final String CREATE_SUCCESS = "Successfully Created ";
+    private static final String UPDATE_SUCCESS = "Successfully Updated Changes";
+
+    // JLabel Display Strings
     private static final String CENTER = "Center:";
     private static final String LEFT_WING = "Left Wing:";
     private static final String RIGHT_WING = "Right Wing:";
     private static final String LEFT_DE = "Left Defense:";
     private static final String RIGHT_DE = "Right Defense:";
     private static final String OFFENSE = "Offense ";
+    private static final String OFFENSE_LINE = "Offense Line";
+    private static final String DEFENSE_LINE = "Defense Pair";
+    private static final String PP_LINE = "Power Play Line";
+    private static final String PK_LINE = "Penalty Kill Line";
+    private static final String SELECT_LINE = "Selected Line:";
+    private static final String SELECT_GOALIE = "Selected Goalie:";
+    private static final String USE_PLAYERS = "Select Players Manually";
+    private static final String USE_LINES = "Select Player from Lines";
+    private static final String CURRENT_SCORE = "Current Score: (Your Team - Opponent) ";
     private static final String UPDATE_NAME = "Update Name";
-    private static final String CREATE_TEAM = "Create Team";
     private static final String NAME_STRING = "Enter Name:";
     private static final String ENTER_NUM_OPPS = "Enter Number of PP/PK Opportunities:";
-    private static final String EDIT_LINE = "Edit Line";
     private static final String PLAYER_NUMBER_STRING = "Select Player Number:";
     private static final String CHANGE_NUMBER = "Change Number?";
     private static final String LEFT_HANDED = "Left-handed (Click to switch)";
@@ -88,10 +112,8 @@ public class TeamGUI implements Runnable {
     private static final String POST_SHOTS_BLOCKED = "Select Number of Shots Blocked by your Skaters: ";
     private static final String POST_SHOTS_AGAINST = "Select Number of Shots Against your Goalie: ";
     private static final String POST_HITS = "Select Number of Hits made by your Team: ";
-    private static final String UPDATE = "Update Changes";
-    private static final String RESET_CONFIRM = "Are you sure you want to reset ";
-    private static final String TO_ZERO = "'s stats to 0?";
-    private static final String CONFIRM_DELETE = "Are you sure you would like to delete ";
+
+    // HTML Strings
     private static final String EDIT_INSTRUCTIONS = "<html><center>Enter changes for the information that you would " +
             "like to change.<br>If a field is left blank, no changes will be made for the corresponding information." +
             "</html>";
@@ -104,26 +126,23 @@ public class TeamGUI implements Runnable {
     private static final String RESET_STATS_WARNING = "<html><center>The button below will reset all stats for your " +
             "team, its players, and its special teams to 0.<br>This action cannot be undone after the fact and their " +
             "previous stats will be lost.</html>";
+
+    // Error Strings
     private static final String NUMBER_ERROR = "Please enter a number where prompted.";
     private static final String FILE_ERROR = "There was an issue interacting with the file. Please ensure that your " +
             "file has not been moved or altered, close the application, and try again.";
     private static final String EMPTY_INPUTS = "Please enter a value in at least one of the boxes";
     private static final String BLANK_UPDATED = " (Any blank fields have already been updated)";
     private static final String PLAYER_DUPLICATE = "New player cannot share the same number as another player";
-    private static final String SELECT_LINE = "Selected Line:";
-    private static final String SELECT_GOALIE = "Selected Goalie:";
-    private static final String OFFENSE_LINE = "Offense Line";
-    private static final String DEFENSE_LINE = "Defense Pair";
-    private static final String PP_LINE = "Power Play Line";
-    private static final String PK_LINE = "Penalty Kill Line";
-    private static final String USE_PLAYERS = "Select Players Manually";
-    private static final String USE_LINES = "Select Player from Lines";
-    private static final String CURRENT_SCORE = "Current Score: (Your Team - Opponent) ";
+    private static final String UNIQUE_NAME = " cannot share the same name";
+    private static final String SELECT = "Please select a player or line";
+    private static final String UNEXPECTED_ERROR = "An unexpected error occurred - ";
+
+    // JTable Columns
     private static final String[] SKATER_STATS_COLUMNS = {"Skater Name", "Player #", "Position", "Goals", "Assists",
             "Points", "+/-"};
     private static final String[] GOALIE_STATS_COLUMNS = {"Goalie Name", "Player #", "Wins", "Losses", "OT L / Ties",
             "GAA", "SV%"};
-    private static final String SELECT = "Please select a player or line";
 
     // Numeric Constants
     private static final int ENTER_NAME_SIZE = 30;
@@ -1193,8 +1212,7 @@ public class TeamGUI implements Runnable {
 
             if (name.isBlank() && recordStrings[0].isBlank() && recordStrings[1].isBlank() &&
                     recordStrings[2].isBlank()) {
-                JOptionPane.showMessageDialog(mainFrame, EMPTY_INPUTS,
-                        EDIT_TEAM, JOptionPane.INFORMATION_MESSAGE);
+                JOptionPane.showMessageDialog(mainFrame, EMPTY_INPUTS, EDIT_TEAM, JOptionPane.INFORMATION_MESSAGE);
                 return;
             }
             // Adjust record if necessary
@@ -1230,8 +1248,8 @@ public class TeamGUI implements Runnable {
                 int index = TeamGUI.changeTeam(team, newTeam);
                 updateTeamComponents(team, newTeam, index);
                 if (index == -1) {
-                    JOptionPane.showMessageDialog(mainFrame, "New name cannot be the same name as another team",
-                            EDIT_TEAM, JOptionPane.ERROR_MESSAGE);
+                    JOptionPane.showMessageDialog(mainFrame, "Two teams" + UNIQUE_NAME, EDIT_TEAM,
+                            JOptionPane.ERROR_MESSAGE);
                     return;
                 }
                 team = newTeam;
@@ -1241,8 +1259,7 @@ public class TeamGUI implements Runnable {
                 } catch (IOException ex) {
                     JOptionPane.showMessageDialog(mainFrame, FILE_ERROR, EDIT_TEAM, JOptionPane.ERROR_MESSAGE);
                 } catch (Exception ex) {
-                    JOptionPane.showMessageDialog(mainFrame, ex.getMessage(), EDIT_TEAM,
-                            JOptionPane.ERROR_MESSAGE);
+                    JOptionPane.showMessageDialog(mainFrame, ex.getMessage(), EDIT_TEAM, JOptionPane.ERROR_MESSAGE);
                 }
             } else {
                 updateTeamComponents(null, null, -1);
@@ -1251,15 +1268,14 @@ public class TeamGUI implements Runnable {
 
         // Resets stats for team and updates relevant components
         resetTeamStats.addActionListener(e -> {
-            int response = JOptionPane.showConfirmDialog(mainFrame, "Are you sure that you want to reset " +
-                    "stats for the entire team?", RESET_TEAM_STATS, JOptionPane.YES_NO_OPTION);
+            int response = JOptionPane.showConfirmDialog(mainFrame, RESET_CONFIRM + "the entire team" + TO_ZERO,
+                    RESET_TEAM_STATS, JOptionPane.YES_NO_OPTION);
             if (response == JOptionPane.YES_OPTION) {
                 team.resetTeamStats();
                 try {
                     updateFile();
                 } catch (IOException ex) {
-                    JOptionPane.showMessageDialog(mainFrame, FILE_ERROR, RESET_TEAM_STATS,
-                            JOptionPane.ERROR_MESSAGE);
+                    JOptionPane.showMessageDialog(mainFrame, FILE_ERROR, RESET_TEAM_STATS, JOptionPane.ERROR_MESSAGE);
                 } catch (Exception ex) {
                     JOptionPane.showMessageDialog(mainFrame, ex.getMessage(), RESET_TEAM_STATS,
                             JOptionPane.ERROR_MESSAGE);
@@ -1282,10 +1298,8 @@ public class TeamGUI implements Runnable {
         viewRosterWithStatsContent.setLayout(new BoxLayout(viewRosterWithStatsContent, BoxLayout.Y_AXIS));
         JScrollPane viewRosterWithStatsScroll = new JScrollPane(viewRosterWithStatsContent);
 
-        skaterStats = new StatsTableModel(team.generateSkaterRosterWithStats(),
-                SKATER_STATS_COLUMNS);
-        goalieStats = new StatsTableModel(team.generateGoalieRosterWithStats(),
-                GOALIE_STATS_COLUMNS);
+        skaterStats = new StatsTableModel(team.generateSkaterRosterWithStats(), SKATER_STATS_COLUMNS);
+        goalieStats = new StatsTableModel(team.generateGoalieRosterWithStats(), GOALIE_STATS_COLUMNS);
         viewRosterStatsSkaters = new JTable(skaterStats);
         viewRosterStatsSkaters.getColumnModel().getColumn(0).setPreferredWidth(NAME_COLUMN_WIDTH);
         viewRosterStatsGoalies = new JTable(goalieStats);
@@ -1495,8 +1509,7 @@ public class TeamGUI implements Runnable {
                     newLine = new DefenseLine(lineName.getText(), (Defenseman) pickLeftDe.getSelectedItem(),
                             (Defenseman) pickRightDe.getSelectedItem());
                 } catch (IllegalArgumentException | NullPointerException ex) {
-                    JOptionPane.showMessageDialog(mainFrame, ex.getMessage(), CREATE_LINE,
-                            JOptionPane.ERROR_MESSAGE);
+                    JOptionPane.showMessageDialog(mainFrame, ex.getMessage(), CREATE_LINE, JOptionPane.ERROR_MESSAGE);
                     return;
                 }
             } else if (lineType[2].isSelected()) {  // PP Line
@@ -1551,8 +1564,8 @@ public class TeamGUI implements Runnable {
             }
             int index = team.addLine(newLine);
             if (index == -1) {
-                JOptionPane.showMessageDialog(mainFrame, "New Line cannot share the same name as another line",
-                        CREATE_LINE, JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(mainFrame, "Two lines" + UNIQUE_NAME, CREATE_LINE,
+                        JOptionPane.ERROR_MESSAGE);
                 return;
             }
 
@@ -1565,7 +1578,7 @@ public class TeamGUI implements Runnable {
 
             try {
                 updateFile();
-                JOptionPane.showMessageDialog(mainFrame, "New line has successfully been created",
+                JOptionPane.showMessageDialog(mainFrame, CREATE_SUCCESS + "New Line",
                         CREATE_LINE, JOptionPane.INFORMATION_MESSAGE);
             } catch (IOException ex) {
                 JOptionPane.showMessageDialog(mainFrame, FILE_ERROR, CREATE_LINE, JOptionPane.ERROR_MESSAGE);
@@ -1643,8 +1656,7 @@ public class TeamGUI implements Runnable {
                     newLine = new OffenseLine(oLine);
                     newLine.setName(name);
                 } catch (IllegalArgumentException | NullPointerException ex) {
-                    JOptionPane.showMessageDialog(mainFrame, ex.getMessage(), EDIT_LINE,
-                            JOptionPane.ERROR_MESSAGE);
+                    JOptionPane.showMessageDialog(mainFrame, ex.getMessage(), EDIT_LINE, JOptionPane.ERROR_MESSAGE);
                     return;
                 }
             } else if (editingLine instanceof DefenseLine defenseLine) {
@@ -1652,8 +1664,7 @@ public class TeamGUI implements Runnable {
                     newLine = new DefenseLine(defenseLine);
                     newLine.setName(name);
                 } catch (IllegalArgumentException | NullPointerException ex) {
-                    JOptionPane.showMessageDialog(mainFrame, ex.getMessage(), EDIT_LINE,
-                            JOptionPane.ERROR_MESSAGE);
+                    JOptionPane.showMessageDialog(mainFrame, ex.getMessage(), EDIT_LINE, JOptionPane.ERROR_MESSAGE);
                     return;
                 }
             } else if (editingLine instanceof SpecialTeamsLine specialLine) {
@@ -1676,8 +1687,8 @@ public class TeamGUI implements Runnable {
                             try {
                                 updateFile();
                                 viewLine.setText(editingLine.lineRoster());
-                                JOptionPane.showMessageDialog(mainFrame, "Line Updated Successfully",
-                                        EDIT_LINE, JOptionPane.INFORMATION_MESSAGE);
+                                JOptionPane.showMessageDialog(mainFrame, UPDATE_SUCCESS, EDIT_LINE,
+                                        JOptionPane.INFORMATION_MESSAGE);
                             } catch (IOException ex) {
                                 JOptionPane.showMessageDialog(mainFrame, FILE_ERROR, EDIT_LINE,
                                         JOptionPane.ERROR_MESSAGE);
@@ -1697,8 +1708,7 @@ public class TeamGUI implements Runnable {
                         }
                     }
                 } catch (NumberFormatException ex) {
-                    JOptionPane.showMessageDialog(mainFrame, NUMBER_ERROR, EDIT_LINE,
-                            JOptionPane.ERROR_MESSAGE);
+                    JOptionPane.showMessageDialog(mainFrame, NUMBER_ERROR, EDIT_LINE, JOptionPane.ERROR_MESSAGE);
                     return;
                 } catch (IllegalArgumentException | NullPointerException ex) {
                     JOptionPane.showMessageDialog(mainFrame, ex.getMessage(), EDIT_LINE, JOptionPane.ERROR_MESSAGE);
@@ -1707,8 +1717,8 @@ public class TeamGUI implements Runnable {
             }
             int index = team.changeLine(editingLine, newLine);
             if (index == -1) {
-                JOptionPane.showMessageDialog(mainFrame, "New name cannot be the same as another line's name",
-                        EDIT_LINE, JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(mainFrame, "Two lines" + UNIQUE_NAME, EDIT_LINE,
+                        JOptionPane.ERROR_MESSAGE);
                 return;
             }
             updateLineComboBoxes(editingLine, newLine, index);
@@ -1718,8 +1728,7 @@ public class TeamGUI implements Runnable {
                 viewLine.setText(editingLine.lineRoster());
                 changeLineName.setText("");
                 lineOptions.setSelectedIndex(0);
-                JOptionPane.showMessageDialog(mainFrame, "Line Updated Successfully", EDIT_LINE,
-                        JOptionPane.INFORMATION_MESSAGE);
+                JOptionPane.showMessageDialog(mainFrame, UPDATE_SUCCESS, EDIT_LINE, JOptionPane.INFORMATION_MESSAGE);
             } catch (IOException ex) {
                 JOptionPane.showMessageDialog(mainFrame, FILE_ERROR, EDIT_LINE, JOptionPane.ERROR_MESSAGE);
             } catch (Exception ex) {
@@ -1735,7 +1744,7 @@ public class TeamGUI implements Runnable {
             mainFrame.setVisible(false);
 
             Line editingLine = (Line) lineOptions.getSelectedItem();
-            JFrame playersWindow = new JFrame("Change Players:");
+            JFrame playersWindow = new JFrame("Change Players");
             playersWindow.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
             Container playersWindowContent = playersWindow.getContentPane();
             playersWindowContent.setLayout(new BoxLayout(playersWindowContent, BoxLayout.Y_AXIS));
@@ -1879,14 +1888,12 @@ public class TeamGUI implements Runnable {
                     try {
                         updateFile();
                         viewLine.setText(editingLine.lineRoster());
-                        JOptionPane.showMessageDialog(playersWindow, "Players successfully updated",
-                                EDIT_LINE, JOptionPane.INFORMATION_MESSAGE);
+                        JOptionPane.showMessageDialog(playersWindow, UPDATE_SUCCESS, EDIT_LINE,
+                                JOptionPane.INFORMATION_MESSAGE);
                     } catch (IOException ex) {
-                        JOptionPane.showMessageDialog(mainFrame, FILE_ERROR, EDIT_LINE,
-                                JOptionPane.ERROR_MESSAGE);
+                        JOptionPane.showMessageDialog(mainFrame, FILE_ERROR, EDIT_LINE, JOptionPane.ERROR_MESSAGE);
                     } catch (Exception ex) {
-                        JOptionPane.showMessageDialog(mainFrame, ex.getMessage(), EDIT_LINE,
-                                JOptionPane.ERROR_MESSAGE);
+                        JOptionPane.showMessageDialog(mainFrame, ex.getMessage(), EDIT_LINE, JOptionPane.ERROR_MESSAGE);
                     }
                     playersWindow.dispose();
                 } else {
@@ -1908,31 +1915,28 @@ public class TeamGUI implements Runnable {
         deleteLine.addActionListener(e -> {
             Line removingLine = (Line) lineOptions.getSelectedItem();
             if (removingLine == null) {
-                JOptionPane.showMessageDialog(mainFrame, "Please select a line to delete", "Delete Line",
-                        JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(mainFrame, SELECT, DELETE_LINE, JOptionPane.ERROR_MESSAGE);
                 return;
             }
 
             int response = JOptionPane.showConfirmDialog(mainFrame, CONFIRM_DELETE +
-                    removingLine.getName() + "?", "Delete Line", JOptionPane.YES_NO_OPTION);
+                    removingLine.getName() + "?", DELETE_LINE, JOptionPane.YES_NO_OPTION);
             if (response == JOptionPane.YES_OPTION) {
                 if (team.removeLine(removingLine)) {
                     updateLineComboBoxes(removingLine, null, -1);
                     try {
                         updateFile();
-                        JOptionPane.showMessageDialog(mainFrame, "Line successfully deleted", "Delete Line",
+                        JOptionPane.showMessageDialog(mainFrame, UPDATE_SUCCESS, DELETE_LINE,
                                 JOptionPane.INFORMATION_MESSAGE);
                     } catch (IOException ex) {
-                        JOptionPane.showMessageDialog(mainFrame, FILE_ERROR, "Delete Line",
-                                JOptionPane.ERROR_MESSAGE);
+                        JOptionPane.showMessageDialog(mainFrame, FILE_ERROR, DELETE_LINE, JOptionPane.ERROR_MESSAGE);
                     } catch (Exception ex) {
-                        JOptionPane.showMessageDialog(mainFrame, ex.getMessage(), "Delete Line",
+                        JOptionPane.showMessageDialog(mainFrame, ex.getMessage(), DELETE_LINE,
                                 JOptionPane.ERROR_MESSAGE);
                     }
                 } else {
-                    JOptionPane.showMessageDialog(mainFrame, "An unexpected error occurred - " +
-                                    "deleteLine.addActionListener",
-                            "Delete Line", JOptionPane.ERROR_MESSAGE);
+                    JOptionPane.showMessageDialog(mainFrame, UNEXPECTED_ERROR + "deleteLine.addActionListener",
+                            DELETE_LINE, JOptionPane.ERROR_MESSAGE);
                 }
             }
         });
@@ -1971,10 +1975,10 @@ public class TeamGUI implements Runnable {
 
         enterSkaterNameLabel = new JLabel(NAME_STRING);
         enterSkaterName = new JTextField(ENTER_NAME_SIZE);
-        enterSkaterNumber = new JSlider(1, 99);
+        enterSkaterNumber = new JSlider(1, Player.PLAYER_NUM_MAX);
         enterSkaterNumberLabel = new JLabel(PLAYER_NUMBER_STRING + "  " + enterSkaterNumber.getValue());
-        createPanelForContainer(new JComponent[]{enterSkaterNameLabel, enterSkaterName, enterSkaterNumberLabel, enterSkaterNumber},
-                createSkater);
+        createPanelForContainer(new JComponent[]{enterSkaterNameLabel, enterSkaterName, enterSkaterNumberLabel,
+                        enterSkaterNumber}, createSkater);
 
         // Displays currently selected value in the JLabel
         enterSkaterNumber.addChangeListener(e ->
@@ -1996,7 +2000,7 @@ public class TeamGUI implements Runnable {
         assignSkaterStats = new JToggleButton("Initialize Skater Stats");
         createPanelForContainer(new JComponent[]{assignSkaterStats}, createSkater);
 
-        createPlayer = new JButton("Create Player");
+        createPlayer = new JButton(CREATE_SKATER);
         createPanelForContainer(new JComponent[]{createPlayer}, createSkater);
 
         enterGoalsLabel = new JLabel(GOALS_STRING);
@@ -2064,9 +2068,9 @@ public class TeamGUI implements Runnable {
             String stickHand;
             Skater newSkater;
             if (chooseStickHand.isSelected()) {
-                stickHand = "Left";
+                stickHand = Skater.STICK_LEFT;
             } else {
-                stickHand = "Right";
+                stickHand = Skater.STICK_RIGHT;
             }
 
             Position position = (Position) positionOptions.getSelectedItem();
@@ -2100,24 +2104,22 @@ public class TeamGUI implements Runnable {
                     }
                 }
             } catch (NumberFormatException ex) {
-                JOptionPane.showMessageDialog(mainFrame, NUMBER_ERROR, "Create Skater", JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(mainFrame, NUMBER_ERROR, CREATE_SKATER, JOptionPane.ERROR_MESSAGE);
                 return;
             } catch (IllegalArgumentException | NullPointerException ex) {
-                JOptionPane.showMessageDialog(mainFrame, ex.getMessage(), "Create Skater",
-                        JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(mainFrame, ex.getMessage(), CREATE_SKATER, JOptionPane.ERROR_MESSAGE);
                 return;
             }
             int index = team.addPlayer(newSkater);
             if (index == -1) {
-                JOptionPane.showMessageDialog(mainFrame, PLAYER_DUPLICATE, "Create Skater",
-                        JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(mainFrame, PLAYER_DUPLICATE, CREATE_SKATER, JOptionPane.ERROR_MESSAGE);
                 return;
             }
             updatePlayerComponents(null, newSkater, -1, index);
 
             try {
                 updateFile();
-                JOptionPane.showMessageDialog(mainFrame, "Skater successfully created", "Create Skater",
+                JOptionPane.showMessageDialog(mainFrame, CREATE_SUCCESS + "Skater", CREATE_SKATER,
                         JOptionPane.INFORMATION_MESSAGE);
 
                 // Reset Text Fields
@@ -2133,14 +2135,13 @@ public class TeamGUI implements Runnable {
                     enterShotsBlocked.setText("");
                 }
             } catch (IOException ex) {
-                JOptionPane.showMessageDialog(selectFrame, FILE_ERROR, "Create Team", JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(selectFrame, FILE_ERROR, CREATE_SKATER, JOptionPane.ERROR_MESSAGE);
             } catch (Exception ex) {
-                JOptionPane.showMessageDialog(selectFrame, ex.getMessage(), "Create Team",
-                        JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(selectFrame, ex.getMessage(), CREATE_SKATER, JOptionPane.ERROR_MESSAGE);
             }
         });
 
-        skaterTabs.add("Create Skater", createSkaterScroll);
+        skaterTabs.add(CREATE_SKATER, createSkaterScroll);
 
         // Edit/Delete Skater
 
