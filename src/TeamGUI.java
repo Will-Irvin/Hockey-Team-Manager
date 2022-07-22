@@ -3198,6 +3198,92 @@ public class TeamGUI implements Runnable {
         shotBlockLive = new JButton("Shot Block");
         hitLive = new JButton("Hit");
         createPanelForContainer(new JComponent[]{shotBlockLive, hitLive}, liveStats);
+        shotBlockLive.addActionListener(e -> {
+            Line currentLine;
+            if (powerPlayLive.isSelected()) {
+                currentLine = (Line) ppOptions.getSelectedItem();
+            } else if (penaltyLive.isSelected()) {
+                currentLine = (Line) pkOptions.getSelectedItem();
+            } else {
+                currentLine = (Line) defenseLines.getSelectedItem();
+            }
+            if (currentLine == null) {
+                JOptionPane.showMessageDialog(mainFrame, "You do not currently have a line to select. Please" +
+                        " create a new line.", "Enter Stats Live", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+            mainFrame.setVisible(false);
+            JWindow shotBlockWindow = new JWindow();
+            shotBlockWindow.setLocationRelativeTo(mainFrame);
+            Container shotBlockContent = shotBlockWindow.getContentPane();
+            shotBlockContent.setLayout(new BoxLayout(shotBlockContent, BoxLayout.Y_AXIS));
+
+            JLabel selectBlockerLabel = new JLabel("Select Defenseman That Blocked The Shot:");
+            JComboBox<Defenseman> blockerOptions = new JComboBox<>();
+            Skater[] skaters = currentLine.getSkaters();
+            if (currentLine instanceof DefenseLine) {
+                blockerOptions.addItem((Defenseman) skaters[0]);
+                blockerOptions.addItem((Defenseman) skaters[1]);
+            } else if (currentLine instanceof PPLine) {
+                blockerOptions.addItem((Defenseman) skaters[3]);
+                blockerOptions.addItem((Defenseman) skaters[4]);
+            } else if (currentLine instanceof PKLine) {
+                blockerOptions.addItem((Defenseman) skaters[2]);
+                blockerOptions.addItem((Defenseman) skaters[3]);
+            }
+            JPanel selectBlockerPanel = createPanel(new JComponent[]{selectBlockerLabel, blockerOptions});
+            shotBlockContent.add(selectBlockerPanel);
+
+            JToggleButton selectOtherDefense = new JToggleButton("Select a Different Defenseman");
+            createPanelForContainer(new JComponent[]{selectOtherDefense}, shotBlockContent);
+            selectOtherDefense.addActionListener(e1 -> {
+                if (selectOtherDefense.isSelected()) {
+                    shotBlockContent.remove(selectBlockerPanel);
+                    shotBlockContent.add(selectLDPanel, 0);
+                    selectLDLabel.setText("Select Defenseman that blocked the shot");
+                } else {
+                    shotBlockContent.remove(selectLDPanel);
+                    shotBlockContent.add(selectBlockerPanel, 0);
+                }
+                shotBlockWindow.pack();
+                shotBlockWindow.repaint();
+            });
+
+            JButton enterShotBlock = new JButton("Enter Shot Block");
+            JButton cancel = new JButton("Cancel");
+            createPanelForContainer(new JComponent[]{enterShotBlock, cancel}, shotBlockContent);
+
+            ActionListener enterShotBlockAction = e1 -> {
+                if (e1.getActionCommand().equals(enterShotBlock.getActionCommand())) {
+                    Defenseman blocker;
+                    if (selectOtherDefense.isSelected()) {
+                        blocker = (Defenseman) pickLeftDe.getSelectedItem();
+                    } else {
+                        blocker = (Defenseman) blockerOptions.getSelectedItem();
+                    }
+                    if (blocker == null) {
+                        JOptionPane.showMessageDialog(mainFrame, SELECT, "Enter Stats Live",
+                                JOptionPane.ERROR_MESSAGE);
+                        return;
+                    }
+                    blocker.blockedShot();
+                }
+                shotBlockWindow.dispose();
+            };
+            enterShotBlock.addActionListener(enterShotBlockAction);
+            cancel.addActionListener(enterShotBlockAction);
+
+            shotBlockWindow.addWindowListener(new WindowAdapter() {
+                @Override
+                public void windowClosed(WindowEvent e) {
+                    mainFrame.setVisible(true);
+                    selectLDLabel.setText(LEFT_DE);
+                }
+            });
+
+            shotBlockWindow.pack();
+            shotBlockWindow.setVisible(true);
+        });
 
         penaltyOptionsLive = new ButtonGroup();
         powerPlayLive = new JToggleButton("Power Play");
