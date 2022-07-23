@@ -36,6 +36,10 @@ public class TeamGUI implements Runnable {
             "saved every time a change is made, and changes cannot be undone.\n" +
             "If the file is deleted or lost, when the application launches, a new file will be created, and it " +
             "will only contain the sample team. There is no way to recover any data without the file.";
+    private static final String CREATE_TEAM = "Create Team";
+    private static final String DELETE_TEAM = "Delete Team";
+    private static final String RESTORE_SAMPLE = "Restore Sample Team";
+
 
     // JComponents
     JFrame selectFrame;
@@ -56,7 +60,6 @@ public class TeamGUI implements Runnable {
     // Reused String expressions
 
     // GUI Sections
-    private static final String CREATE_TEAM = "Create Team";
     private static final String EDIT_TEAM = "Edit Team";
     private static final String RESET_TEAM_STATS = "Reset Team Stats";
     private static final String CREATE_LINE = "Create Line";
@@ -4453,8 +4456,8 @@ public class TeamGUI implements Runnable {
         // Middle of frame that contains other options with teams
         otherOptionsLabel = new JLabel("Additional Options: ");
         createTeam = new JButton(CREATE_TEAM);
-        deleteTeam = new JButton("Delete Team");
-        restoreSample = new JButton("Restore Sample Team");
+        deleteTeam = new JButton(DELETE_TEAM);
+        restoreSample = new JButton(RESTORE_SAMPLE);
 
         createPanelForContainer(new JComponent[]{otherOptionsLabel, createTeam, deleteTeam, restoreSample},
                 selectContent);
@@ -4489,23 +4492,21 @@ public class TeamGUI implements Runnable {
           the GUI for that team will open, and the data file will be updated with the new team.
          */
         createTeam.addActionListener(e -> {
-            int input = JOptionPane.showConfirmDialog(selectFrame, "Would you like to provide a win/loss record for" +
-                    " this team?", CREATE_TEAM, JOptionPane.YES_NO_CANCEL_OPTION);
+            int input = JOptionPane.showConfirmDialog(selectFrame, "Would you like to provide a win/loss " +
+                    "record for this team?", CREATE_TEAM, JOptionPane.YES_NO_CANCEL_OPTION);
             switch (input) {
                 case JOptionPane.YES_OPTION -> { // Prompt for wins, losses, ot losses
                     while (true) {
                         try {
                             // Entering information for new team
-                            String name = JOptionPane.showInputDialog(selectFrame, "Enter Team Name:",
-                                    CREATE_TEAM, JOptionPane.QUESTION_MESSAGE);
-                            int wins = Integer.parseInt(JOptionPane.showInputDialog(selectFrame,
-                                    "Enter number of wins:", CREATE_TEAM, JOptionPane.QUESTION_MESSAGE));
-                            int losses = Integer.parseInt(JOptionPane.showInputDialog(selectFrame,
-                                    "Enter number of losses:", CREATE_TEAM,
-                                    JOptionPane.QUESTION_MESSAGE));
-                            int otLosses = Integer.parseInt(JOptionPane.showInputDialog(selectFrame,
-                                    "Enter number of overtime losses or ties:", CREATE_TEAM,
-                                    JOptionPane.QUESTION_MESSAGE));
+                            String name = JOptionPane.showInputDialog(selectFrame, NAME_STRING, CREATE_TEAM,
+                                    JOptionPane.QUESTION_MESSAGE);
+                            int wins = Integer.parseInt(JOptionPane.showInputDialog(selectFrame, WINS_STRING,
+                                    CREATE_TEAM, JOptionPane.QUESTION_MESSAGE));
+                            int losses = Integer.parseInt(JOptionPane.showInputDialog(selectFrame, LOSSES_STRING,
+                                    CREATE_TEAM, JOptionPane.QUESTION_MESSAGE));
+                            int otLosses = Integer.parseInt(JOptionPane.showInputDialog(selectFrame, OT_STRING,
+                                    CREATE_TEAM, JOptionPane.QUESTION_MESSAGE));
                             Team newTeam = new Team(name, wins, losses, otLosses);
 
                             int index = addTeam(newTeam);
@@ -4537,8 +4538,8 @@ public class TeamGUI implements Runnable {
                 case JOptionPane.NO_OPTION -> {  // Similar to yes, but only prompt for name
                     while (true) {
                         try {
-                            String name = JOptionPane.showInputDialog(selectFrame, "Enter team name:",
-                                    CREATE_TEAM, JOptionPane.QUESTION_MESSAGE);
+                            String name = JOptionPane.showInputDialog(selectFrame, NAME_STRING, CREATE_TEAM,
+                                    JOptionPane.QUESTION_MESSAGE);
 
                             Team newTeam = new Team(name);
 
@@ -4555,6 +4556,9 @@ public class TeamGUI implements Runnable {
                             selectFrame.setVisible(false);
                             displayTeamGUI();
                             break;
+                        } catch (IOException ex) {
+                            JOptionPane.showMessageDialog(selectFrame, FILE_ERROR, CREATE_TEAM,
+                                    JOptionPane.ERROR_MESSAGE);
                         } catch (Exception ex) {
                             JOptionPane.showMessageDialog(selectFrame, ex.getMessage(), CREATE_TEAM,
                                     JOptionPane.ERROR_MESSAGE);
@@ -4570,14 +4574,14 @@ public class TeamGUI implements Runnable {
          */
         deleteTeam.addActionListener(e -> {
             if (teams.isEmpty()) {
-                JOptionPane.showMessageDialog(selectFrame, "There are no teams to delete.",
-                        "Delete Team", JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(selectFrame, "There are no teams to delete.", DELETE_TEAM,
+                        JOptionPane.ERROR_MESSAGE);
                 return;
             }
             selectFrame.setVisible(false);
 
             // New Frame
-            JFrame deleteFrame = new JFrame("Delete Team");
+            JFrame deleteFrame = new JFrame(DELETE_TEAM);
             deleteFrame.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
             Container deleteContent = deleteFrame.getContentPane();
             deleteContent.setLayout(new BorderLayout());
@@ -4598,16 +4602,18 @@ public class TeamGUI implements Runnable {
             deleteButton.addActionListener(e1 -> {
                 Object o = teamSelection.getSelectedItem();
                 if (o instanceof Team t) {
-                    int finalCheck = JOptionPane.showConfirmDialog(selectFrame, "WARNING: Are you sure you want to " +
-                                    "delete this team (" + t.getName() + ")? This cannot be undone.",
-                            "Delete Team", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
+                    int finalCheck = JOptionPane.showConfirmDialog(selectFrame, CONFIRM_DELETE + t.getName() +
+                                    "? This cannot be undone.", DELETE_TEAM, JOptionPane.YES_NO_OPTION);
                     if (finalCheck == JOptionPane.YES_OPTION) {
                         teams.remove(t);
                         teamSelection.removeItemAt(teamSelection.getSelectedIndex());
                         try {
                             updateFile();
+                        } catch (IOException ex) {
+                            JOptionPane.showMessageDialog(selectFrame, FILE_ERROR, DELETE_TEAM,
+                                    JOptionPane.ERROR_MESSAGE);
                         } catch (Exception ex) {
-                            JOptionPane.showMessageDialog(selectFrame, ex.getMessage(), "File Error",
+                            JOptionPane.showMessageDialog(selectFrame, ex.getMessage(), DELETE_TEAM,
                                     JOptionPane.ERROR_MESSAGE);
                         }
                         deleteFrame.dispose();
@@ -4632,17 +4638,16 @@ public class TeamGUI implements Runnable {
             int index = addTeam(sample);
             if (index == -1) {
                 JOptionPane.showMessageDialog(selectFrame, "The sample team is still in your list",
-                        "Restore Sample", JOptionPane.ERROR_MESSAGE);
+                        RESTORE_SAMPLE, JOptionPane.ERROR_MESSAGE);
                 return;
             }
             teamSelection.insertItemAt(sample, index);
             try {
                 updateFile();
             } catch (IOException ex) {
-                JOptionPane.showMessageDialog(selectFrame, FILE_ERROR, "Restore Sample", JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(selectFrame, FILE_ERROR, RESTORE_SAMPLE, JOptionPane.ERROR_MESSAGE);
             } catch (Exception ex) {
-                JOptionPane.showMessageDialog(selectFrame, ex.getMessage(), "Restore Sample",
-                        JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(selectFrame, ex.getMessage(), RESTORE_SAMPLE, JOptionPane.ERROR_MESSAGE);
             }
         });
 
