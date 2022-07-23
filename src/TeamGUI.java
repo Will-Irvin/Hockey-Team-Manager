@@ -4651,8 +4651,8 @@ public class TeamGUI implements Runnable {
             }
         });
 
-        newUsers.addActionListener(e -> JOptionPane.showMessageDialog(selectFrame, NEW_INFO, "New User Information",
-                JOptionPane.INFORMATION_MESSAGE));
+        newUsers.addActionListener(e -> JOptionPane.showMessageDialog(selectFrame, NEW_INFO,
+                "New User Information", JOptionPane.INFORMATION_MESSAGE));
     }
 
     public static void main(String[] args) {
