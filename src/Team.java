@@ -29,6 +29,8 @@ public class Team implements Serializable {
         }
         if (name.isBlank()) {
             throw new IllegalArgumentException(Player.NAME_BLANK);
+        } else if (name.indexOf('|') >= 0) {
+            throw new IllegalArgumentException(Player.SPECIAL_CHAR);
         }
         this.name = name;
         this.skaters = new ArrayList<>();
@@ -50,6 +52,8 @@ public class Team implements Serializable {
         }
         if (name.isBlank()) {
             throw new IllegalArgumentException(Player.NAME_BLANK);
+        } else if (name.indexOf('|') >= 0) {
+            throw new IllegalArgumentException(Player.SPECIAL_CHAR);
         }
         this.name = name;
         this.skaters = new ArrayList<>();
@@ -117,6 +121,8 @@ public class Team implements Serializable {
         }
         if (name.isBlank()) {
             throw new IllegalArgumentException(Player.NAME_BLANK);
+        } else if (name.indexOf('|') >= 0) {
+            throw new IllegalArgumentException(Player.SPECIAL_CHAR);
         }
         this.name = name;
     }

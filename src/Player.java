@@ -13,12 +13,15 @@ public abstract class Player implements Serializable {
     public static final String NULL_ERROR = "Given arguments cannot be null";
     public static final String NAME_BLANK = "Name cannot be blank";
     public static final String PLAYER_NUMBER_RANGE = "Player number must be between 1-99";
+    public static final String SPECIAL_CHAR = "Names cannot contain '|' character";
 
     public Player(String name, int playerNumber) throws IllegalArgumentException, NullPointerException {
         if (name == null) {
             throw new NullPointerException(NULL_ERROR);
         } else if (name.isBlank()) {
             throw new IllegalArgumentException(NAME_BLANK);
+        } else if (name.indexOf('|') >= 0) {
+            throw new IllegalArgumentException(SPECIAL_CHAR);
         }
         this.name = name;
         if (playerNumber < 1 || playerNumber > PLAYER_NUM_MAX) {
@@ -46,6 +49,8 @@ public abstract class Player implements Serializable {
             throw new NullPointerException(NULL_ERROR);
         } else if (name.isBlank()) {
             throw new IllegalArgumentException(NAME_BLANK);
+        } else if (name.indexOf('|') >= 0) {
+            throw new IllegalArgumentException(SPECIAL_CHAR);
         } else {
             this.name = name;
         }
