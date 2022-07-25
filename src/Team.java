@@ -441,7 +441,8 @@ public class Team implements Serializable {
      * in a formatted file to save data
      */
     public String writeToFile() {
-        StringBuilder result = new StringBuilder(String.format("%s\n%d\n", name, skaters.size()));
+        StringBuilder result = new StringBuilder(String.format("%s|%d|%d|%d\n%d\n", name, wins, losses, otLosses,
+                skaters.size()));
 
         for (Skater player: skaters) {
             result.append(String.format("%s|%d|%s|", player.getName(), player.getPlayerNumber(),

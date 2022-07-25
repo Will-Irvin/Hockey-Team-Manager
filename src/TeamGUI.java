@@ -1,6 +1,5 @@
 import javax.swing.*;
 import javax.swing.event.ChangeListener;
-import javax.swing.plaf.synth.ColorType;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.awt.event.*;
@@ -36,9 +35,15 @@ public class TeamGUI implements Runnable {
             "saved every time a change is made, and changes cannot be undone.\n" +
             "If the file is deleted or lost, when the application launches, a new file will be created, and it " +
             "will only contain the sample team. There is no way to recover any data without the file.";
+    private static final String CREATE_FILE_INSTRUCTIONS = "<html><center>Click on the Team(s) You Wish to Save Above" +
+            " and Enter New File Name Below<br>Hold down the Ctrl key to select multiple teams<center></html>";
+    private static final String NEW_FILE_ERR = "There was an issue creating the given file name. It may be invalid " +
+            "or already exist on your computer. Please try again or try a different name.";
     private static final String CREATE_TEAM = "Create Team";
     private static final String DELETE_TEAM = "Delete Team";
     private static final String RESTORE_SAMPLE = "Restore Sample Team";
+    private static final String CREATE_FILE = "Save Teams To Text File";
+    private static final String IMPORT_FILE = "Import Teams From Text File";
 
 
     // JComponents
@@ -51,6 +56,9 @@ public class TeamGUI implements Runnable {
     JButton createTeam;
     JButton deleteTeam;
     JButton restoreSample;
+
+    JButton createTextFile;
+    JButton importTextFile;
 
     JButton newUsers;
 
@@ -2317,7 +2325,7 @@ public class TeamGUI implements Runnable {
                     if (editingSkater.getStickHand().equals(Skater.STICK_LEFT)) {
                         editingSkater.setStickHand(Skater.STICK_RIGHT);
                     } else {
-                        editingSkater.setStickHand(Skater.STICK_RIGHT);
+                        editingSkater.setStickHand(Skater.STICK_LEFT);
                     }
                     changeStickHand.setSelected(false);
                     change = true;
@@ -4455,12 +4463,87 @@ public class TeamGUI implements Runnable {
 
         // Middle of frame that contains other options with teams
         otherOptionsLabel = new JLabel("Additional Options: ");
+        createPanelForContainer(new JComponent[]{otherOptionsLabel}, selectContent);
         createTeam = new JButton(CREATE_TEAM);
         deleteTeam = new JButton(DELETE_TEAM);
         restoreSample = new JButton(RESTORE_SAMPLE);
+        createPanelForContainer(new JComponent[]{createTeam, deleteTeam, restoreSample}, selectContent);
 
-        createPanelForContainer(new JComponent[]{otherOptionsLabel, createTeam, deleteTeam, restoreSample},
-                selectContent);
+        createTextFile = new JButton(CREATE_FILE);
+        importTextFile = new JButton(IMPORT_FILE);
+        createPanelForContainer(new JComponent[]{createTextFile, importTextFile}, selectContent);
+        createTextFile.addActionListener(e -> {
+            if (teams.size() == 0) {
+                JOptionPane.showMessageDialog(selectFrame, NO_OPTIONS + "team to save to a file.", IMPORT_FILE,
+                        JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+
+            selectFrame.setVisible(false);
+
+            JFrame createFileFrame = new JFrame(CREATE_FILE);
+            createFileFrame.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
+            createFileFrame.setLocationRelativeTo(selectFrame);
+            Container createFileContent = createFileFrame.getContentPane();
+            createFileContent.setLayout(new BoxLayout(createFileContent, BoxLayout.Y_AXIS));
+
+            JList<Team> teamList = new JList<>(teams.toArray(new Team[]{}));
+            teamList.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
+            createPanelForContainer(new JComponent[]{teamList}, createFileContent);
+            JLabel createFileLabel = new JLabel(CREATE_FILE_INSTRUCTIONS);
+            createPanelForContainer(new JComponent[]{createFileLabel}, createFileContent);
+            JTextField fileName = new JTextField(ENTER_NAME_SIZE);
+            createPanelForContainer(new JComponent[]{fileName}, createFileContent);
+
+            JButton createFile = new JButton("Create File");
+            ActionListener createFileAction = e1 -> {
+                Team[] savedTeams = teamList.getSelectedValuesList().toArray(new Team[]{});
+                if (savedTeams.length == 0) {
+                    JOptionPane.showMessageDialog(createFileFrame, "Please select a team to save to the" +
+                            " file", CREATE_FILE, JOptionPane.ERROR_MESSAGE);
+                    return;
+                }
+                try {
+                    File file = new File(fileName.getText());
+                    if (!file.createNewFile()) {
+                        JOptionPane.showMessageDialog(createFileFrame, NEW_FILE_ERR, CREATE_FILE,
+                                JOptionPane.ERROR_MESSAGE);
+                        return;
+                    }
+                    PrintWriter pw = new PrintWriter(new FileOutputStream(file));
+                    pw.println(savedTeams.length);
+                    pw.flush();
+                    for (Team team: savedTeams) {
+                        pw.println(team.writeToFile());
+                        pw.flush();
+                    }
+                    JOptionPane.showMessageDialog(createFileFrame, CREATE_SUCCESS + "file and saved team" +
+                            " data.", CREATE_FILE, JOptionPane.INFORMATION_MESSAGE);
+                } catch (IOException ex) {
+                    JOptionPane.showMessageDialog(createFileFrame, FILE_ERROR.substring(0, FILE_ERROR.indexOf('.')),
+                            CREATE_FILE, JOptionPane.ERROR_MESSAGE);
+                    return;
+                }
+                createFileFrame.dispose();
+            };
+            createFile.addActionListener(createFileAction);
+            createPanelForContainer(new JComponent[]{createFile}, createFileContent);
+
+            createFileFrame.addWindowListener(new WindowAdapter() {
+                @Override
+                public void windowClosing(WindowEvent e) {
+                    selectFrame.setVisible(true);
+                }
+
+                @Override
+                public void windowClosed(WindowEvent e) {
+                    selectFrame.setVisible(true);
+                }
+            });
+
+            createFileFrame.pack();
+            createFileFrame.setVisible(true);
+        });
 
         // Bottom of Frame, button where new users can find additional guidance
         newUsers = new JButton("Help and Guidance for New Users");
