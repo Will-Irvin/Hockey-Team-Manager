@@ -437,36 +437,42 @@ public class Team implements Serializable {
     }
 
     /**
-     * @return A string containing every player listed on the team and some of their basic stats (points, number,
-     * record, etc.)
+     * @return A string containing every player and line listed on the team as well as their stats that will be included
+     * in a formatted file to save data
      */
-    public String generateRosterWithStats() {
-        StringBuilder result = new StringBuilder(String.format("%s\nSkaters:\t|  #|Pos|  G|  A|Pts|+/-|\n", name));
+    public String writeToFile() {
+        StringBuilder result = new StringBuilder(String.format("%s\n%d\n", name, skaters.size()));
 
-        for (Skater player : skaters) {
-            int index = player.getName().lastIndexOf(' ');
-            if (index >= 0) {
-                result.append(String.format("%.15s\t|%3d|", player.getName().substring(index),
-                        player.getPlayerNumber()));
-            } else {
-                result.append(String.format("%.15s\t|%3d|", player.getName(), player.getPlayerNumber()));
-            }
+        for (Skater player: skaters) {
+            result.append(String.format("%s|%d|%s|", player.getName(), player.getPlayerNumber(),
+                    player.getStickHand()));
+
             switch (player.getPosition()) {
-                case Center -> result.append("  C");
-                case Left_Wing -> result.append(" LW");
-                case Right_Wing -> result.append(" RW");
-                case Left_Defense -> result.append(" LD");
-                case Right_Defense -> result.append(" RD");
+                case Center -> result.append("C");
+                case Left_Wing -> result.append("LW");
+                case Right_Wing -> result.append("RW");
+                case Left_Defense -> result.append("LD");
+                case Right_Defense -> result.append("RD");
             }
-            result.append(String.format("|%3d|%3d|%3d|%3d|\n", player.getGoals(), player.getAssists(),
-                    player.getPoints(), player.getPlusMinus()));
+            result.append(String.format("|%d|%d|%d|%d|%d|%.1f\n", player.getGoals(), player.getAssists(),
+                    player.getPoints(), player.getPlusMinus(), player.getHits(), player.getPenaltyMinutes()));
         }
-        result.append("\nGoalies:\t|  #|  W|  L|OT| GAA| Sv%|\n");
+        result.append(String.format("%d\n", goalies.size()));
         for (Goalie goalie: goalies) {
-            String lastName = goalie.getName().substring(goalie.getName().lastIndexOf(' '));
-            result.append(String.format("%.15s\t|%3d|%3d|%3d|%3d|%4.2f|%.3f|\n", lastName,
-                    goalie.getPlayerNumber(), goalie.getWins(), goalie.getLosses(), goalie.getOtLosses(),
-                    goalie.getGAA(), goalie.getSavePercent()));
+            result.append(String.format("%s|%d|%d|%d|%d|%d|%.3f|%d\n", goalie.getName(), goalie.getPlayerNumber(),
+                    goalie.getWins(), goalie.getLosses(), goalie.getOtLosses(), goalie.getShutouts(),
+                    goalie.getSavePercent(), goalie.getShotsAgainst()));
+        }
+        result.append(String.format("%d\n", lines.size()));
+        for (Line line: lines) {
+            result.append(String.format("%s", line.getName()));
+            for (Skater skater: line.getSkaters()) {
+                result.append(String.format("|%d", skater.getPlayerNumber()));
+            }
+            if (line instanceof SpecialTeamsLine specialTeams) {
+                result.append(String.format("|%.2f|%d", specialTeams.getSuccessPercent(), specialTeams.getAttempts()));
+            }
+            result.append('\n');
         }
         return result.substring(0, result.length() - 1);
     }
