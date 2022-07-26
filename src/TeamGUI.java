@@ -32,18 +32,39 @@ public class TeamGUI implements Runnable {
             "All data related to the teams that you create in this application is stored in a file called \"" + FILE_NAME
             + "\" which was automatically created when you first launched this application.\n" +
             "This file is not readable nor transferable between most devices. The file is automatically updated and " +
-            "saved every time a change is made, and changes cannot be undone.\n" +
+            "saved every time a change is made.\n" +
             "If the file is deleted or lost, when the application launches, a new file will be created, and it " +
-            "will only contain the sample team. There is no way to recover any data without the file.";
+            "will only contain the sample team.\nIf you would like to transfer data between devices, save older " +
+            "versions of your teams, or have a more reliable back up file;\nyou can save any of your teams by " +
+            "creating a formatted text file using the button in the welcome menu.\nThis file will have the " +
+            "information for the team at the time it was created, and it will not be updated with any new changes.\n" +
+            "You can then import your teams from this text file using the adjacent button in the welcome menu.";
+    private static final String NEW_INFO_2 = """
+            This application also allows you to organize your skaters into lines.
+            When creating skaters you must assign them to one of the five positions.
+            It should be noted that only skaters who are assigned the center position can be assigned as the center of
+            a line, and only skaters who are assigned a defensive position (Left Defense or Right Defense)
+            can be assigned as a defenseman on a line. Any skater can be assigned as a winger. You can also change the
+            position of your skaters later if needed. Additionally, only centers have the ability to save a face off
+            record and only defenseman have the ability to save a shot block stat.""";
     private static final String CREATE_FILE_INSTRUCTIONS = "<html><center>Click on the Team(s) You Wish to Save Above" +
             " and Enter New File Name Below<br>Hold down the Ctrl key to select multiple teams<center></html>";
     private static final String NEW_FILE_ERR = "There was an issue creating the given file name. It may be invalid " +
-            "or already exist on your computer. Please try again or try a different name.";
+            "or already exist on your computer. Please delete the old file or try a different name.";
+    private static final String DUPLICATES_INSTRUCTIONS = "<html><center>Select the Teams from your program above " +
+            "that you would like to replace with the information from the text file.<br> Hold down Ctrl to select" +
+            " multiple teams.</center></html>";
+    private static final String FILE_DUPLICATE_PLAYER = "Two or more players share the same number";
+    private static final String FILE_DUPLICATE_LINE = "Two or more lines share the same name";
+    private static final String WRONG_POSITION = "Players are not assigned to the correct position";
+    private static final String POSITION_STRING = "Position String is not valid";
+    private static final String ELEMENT_NUM = "Unexpected number of elements";
     private static final String CREATE_TEAM = "Create Team";
     private static final String DELETE_TEAM = "Delete Team";
     private static final String RESTORE_SAMPLE = "Restore Sample Team";
     private static final String CREATE_FILE = "Save Teams To Text File";
     private static final String IMPORT_FILE = "Import Teams From Text File";
+    private static final String NEW_USER_INFO = "New User Information";
 
 
     // JComponents
@@ -642,10 +663,17 @@ public class TeamGUI implements Runnable {
         oos.close();
     }
 
-
-    public void importFile(File f) throws IOException {
+    /**
+     * This method reads in information about a team from a text file and adds the read in teams to the static list,
+     * and GUI components.
+     * @param f The file being read by the method
+     * @return An ArrayList of any teams whose name already exists in the program.
+     * @throws IOException If there is an issue reading from the file or an issue with the format of the file.
+     */
+    public ArrayList<Team> importFile(File f) throws IOException {
         BufferedReader br = new BufferedReader(new FileReader(f));
         int lineNum = 1;
+        ArrayList<Team> duplicates = new ArrayList<>();
         String regEx = "\\|";
         try {
             int numTeams = Integer.parseInt(br.readLine());
@@ -683,11 +711,11 @@ public class TeamGUI implements Runnable {
                                 Position.Right_Defense, Integer.parseInt(skaterInfo[4]), Integer.parseInt(skaterInfo[5]),
                                 Integer.parseInt(skaterInfo[6]), Integer.parseInt(skaterInfo[7]),
                                 Double.parseDouble(skaterInfo[8]), Integer.parseInt(skaterInfo[9]));
-                        default -> throw new FormatException("Position String is not valid", lineNum);
+                        default -> throw new FormatException(POSITION_STRING, lineNum);
                     }
                     index = team.addPlayer(skater);
                     if (index < 0) {
-                        throw new FormatException("Two or more players share the same number", lineNum);
+                        throw new FormatException(FILE_DUPLICATE_PLAYER, lineNum);
                     }
                     lineNum++;
                 }
@@ -699,7 +727,7 @@ public class TeamGUI implements Runnable {
                             Integer.parseInt(goalieInfo[2]), Integer.parseInt(goalieInfo[3]),
                             Integer.parseInt(goalieInfo[4]), Integer.parseInt(goalieInfo[5])));
                     if (index < 0) {
-                        throw new FormatException("Two or more players share the same number", lineNum);
+                        throw new FormatException(FILE_DUPLICATE_PLAYER, lineNum);
                     }
                     lineNum++;
                 }
@@ -716,7 +744,7 @@ public class TeamGUI implements Runnable {
                                         c, team.getSkater(Integer.parseInt(lineInfo[2])),
                                         team.getSkater(Integer.parseInt(lineInfo[3])));
                             } else {
-                                throw new FormatException("Players are not assigned to the right position", lineNum);
+                                throw new FormatException(WRONG_POSITION, lineNum);
                             }
                         }
                         // Defense Line
@@ -726,7 +754,7 @@ public class TeamGUI implements Runnable {
                             if (left instanceof Defenseman leftDe && right instanceof Defenseman rightDe) {
                                 line = new DefenseLine(lineInfo[0], leftDe, rightDe);
                             } else {
-                                throw new FormatException("Players are not the right position", lineNum);
+                                throw new FormatException(WRONG_POSITION, lineNum);
                             }
                         }
                         // PP Line
@@ -740,7 +768,7 @@ public class TeamGUI implements Runnable {
                                         team.getSkater(Integer.parseInt(lineInfo[3])), leftDe, rightDe,
                                         Double.parseDouble(lineInfo[6]), Integer.parseInt(lineInfo[7]));
                             } else {
-                                throw new FormatException("Players are not the right position", lineNum);
+                                throw new FormatException(WRONG_POSITION, lineNum);
                             }
                         }
                         // PK Line
@@ -752,14 +780,14 @@ public class TeamGUI implements Runnable {
                                         team.getSkater(Integer.parseInt(lineInfo[2])), leftDe, rightDe,
                                         Double.parseDouble(lineInfo[5]), Integer.parseInt(lineInfo[6]));
                             } else {
-                                throw new FormatException("Players are not the right position", lineNum);
+                                throw new FormatException(WRONG_POSITION, lineNum);
                             }
                         }
-                        default -> throw new FormatException("Unexpected number of elements", lineNum);
+                        default -> throw new FormatException(ELEMENT_NUM, lineNum);
                     }
                     index = team.addLine(line);
                     if (index < 0) {
-                        throw new FormatException("Two lines share the same name", lineNum);
+                        throw new FormatException(FILE_DUPLICATE_LINE, lineNum);
                     }
                     lineNum++;
                 }
@@ -767,10 +795,13 @@ public class TeamGUI implements Runnable {
                 index = addTeam(team);
                 if (index >= 0) {
                     teamSelection.insertItemAt(team, index);
+                } else {
+                    duplicates.add(team);
                 }
             }
+            return duplicates;
         } catch (IndexOutOfBoundsException ex) {
-            throw new FormatException("Unexpected number of elements", lineNum);
+            throw new FormatException(ELEMENT_NUM, lineNum);
         } catch (NumberFormatException ex) {
             throw new FormatException(FILE_NUM_ERROR, lineNum);
         } catch (IllegalArgumentException | NullPointerException ex) {
@@ -4686,8 +4717,9 @@ public class TeamGUI implements Runnable {
             int input = fc.showOpenDialog(selectFrame);
             if (input == JFileChooser.APPROVE_OPTION) {
                 File f = fc.getSelectedFile();
+                ArrayList<Team> duplicateTeams;
                 try {
-                    importFile(f);
+                    duplicateTeams = importFile(f);
                 } catch (FormatException ex) {
                     JOptionPane.showMessageDialog(selectFrame, ex.getMessage(), IMPORT_FILE, JOptionPane.ERROR_MESSAGE);
                     return;
@@ -4695,14 +4727,60 @@ public class TeamGUI implements Runnable {
                     JOptionPane.showMessageDialog(selectFrame, TEXT_FILE_ERROR, IMPORT_FILE, JOptionPane.ERROR_MESSAGE);
                     return;
                 }
-            }
+                if (!duplicateTeams.isEmpty()) {
+                    selectFrame.setVisible(false);
+                    JWindow duplicatesWindow = new JWindow();
+                    duplicatesWindow.setLocationRelativeTo(selectFrame);
+                    Container duplicateContent = duplicatesWindow.getContentPane();
+                    duplicateContent.setLayout(new BoxLayout(duplicateContent, BoxLayout.Y_AXIS));
+                    JList<Team> duplicateList = new JList<>(duplicateTeams.toArray(new Team[]{}));
+                    duplicateList.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
+                    createPanelForContainer(new JComponent[]{duplicateList}, duplicateContent);
+                    JLabel duplicatesInstructions = new JLabel(DUPLICATES_INSTRUCTIONS);
+                    createPanelForContainer(new JComponent[]{duplicatesInstructions}, duplicateContent);
+                    JButton confirm = new JButton("Select These Teams");
+                    createPanelForContainer(new JComponent[]{confirm}, duplicateContent);
+                    confirm.addActionListener(e1 -> {
+                        Team[] selections = duplicateList.getSelectedValuesList().toArray(new Team[]{});
+                        if (selections.length > 0) {
+                            for (Team newTeam: selections) {
+                                int index = changeTeam(newTeam, newTeam);
+                                teamSelection.removeItemAt(index);
+                                teamSelection.insertItemAt(newTeam, index);
+                            }
+                        }
+                        duplicatesWindow.dispose();
+                    });
 
-            try {
-                updateFile();
-            } catch (IOException ex) {
-                JOptionPane.showMessageDialog(selectFrame, BIN_FILE_ERROR, IMPORT_FILE, JOptionPane.ERROR_MESSAGE);
-            } catch (Exception ex) {
-                JOptionPane.showMessageDialog(selectFrame, ex.getMessage(), IMPORT_FILE, JOptionPane.ERROR_MESSAGE);
+                    duplicatesWindow.addWindowListener(new WindowAdapter() {
+                        @Override
+                        public void windowClosed(WindowEvent e) {
+                            selectFrame.setVisible(true);
+                            try {
+                                updateFile();
+                            } catch (IOException ex) {
+                                JOptionPane.showMessageDialog(selectFrame, BIN_FILE_ERROR, IMPORT_FILE,
+                                        JOptionPane.ERROR_MESSAGE);
+                            } catch (Exception ex) {
+                                JOptionPane.showMessageDialog(selectFrame, ex.getMessage(), IMPORT_FILE,
+                                        JOptionPane.ERROR_MESSAGE);
+                            }
+                        }
+                    });
+
+                    duplicatesWindow.pack();
+                    duplicatesWindow.setVisible(true);
+                } else {
+                    try {
+                        updateFile();
+                    } catch (IOException ex) {
+                        JOptionPane.showMessageDialog(selectFrame, BIN_FILE_ERROR, IMPORT_FILE,
+                                JOptionPane.ERROR_MESSAGE);
+                    } catch (Exception ex) {
+                        JOptionPane.showMessageDialog(selectFrame, ex.getMessage(), IMPORT_FILE,
+                                JOptionPane.ERROR_MESSAGE);
+                    }
+                }
             }
         });
 
@@ -4895,8 +4973,10 @@ public class TeamGUI implements Runnable {
             }
         });
 
-        newUsers.addActionListener(e -> JOptionPane.showMessageDialog(selectFrame, NEW_INFO,
-                "New User Information", JOptionPane.INFORMATION_MESSAGE));
+        newUsers.addActionListener(e -> {
+            JOptionPane.showMessageDialog(selectFrame, NEW_INFO, NEW_USER_INFO, JOptionPane.INFORMATION_MESSAGE);
+            JOptionPane.showMessageDialog(selectFrame, NEW_INFO_2, NEW_USER_INFO, JOptionPane.INFORMATION_MESSAGE);
+        });
     }
 
     public static void main(String[] args) {
