@@ -330,6 +330,32 @@ public class Team implements Serializable {
     }
 
     /**
+     * Finds a skater from the team's list based on the given player number
+     * @param playerNumber Player number of the skater the code is seeking
+     * @return The skater if there is a match or null if there is no skater with that number
+     */
+    public Skater getSkater(int playerNumber) {
+        if (skaters.isEmpty()) {
+            return null;
+        }
+        int high = skaters.size();
+        int low = 0;
+        while (true) {
+            if (high < low) {
+                return null;
+            }
+            int i = (high + low) / 2;
+            if (skaters.get(i).getPlayerNumber() == playerNumber) {
+                return skaters.get(i);
+            } else if (skaters.get(i).getPlayerNumber() < playerNumber) {
+                low = i;
+            } else {
+                high = i;
+            }
+        }
+    }
+
+    /**
      * Calculates team's overall face off percentage win rate by looking through the list of players for each center
      * and adding their stats to a running total.
      * @return The calculated percentage
@@ -461,8 +487,14 @@ public class Team implements Serializable {
                 case Left_Defense -> result.append("LD");
                 case Right_Defense -> result.append("RD");
             }
-            result.append(String.format("|%d|%d|%d|%d|%d|%.1f\n", player.getGoals(), player.getAssists(),
-                    player.getPoints(), player.getPlusMinus(), player.getHits(), player.getPenaltyMinutes()));
+            result.append(String.format("|%d|%d|%d|%d|%.1f", player.getGoals(), player.getAssists(),
+                    player.getPlusMinus(), player.getHits(), player.getPenaltyMinutes()));
+            if (player instanceof Center c) {
+                result.append(String.format("|%.2f|%d", c.getFaceOffPercent(), c.getFaceOffTotal()));
+            } else if (player instanceof Defenseman d) {
+                result.append(String.format("|%d", d.getShotsBlocked()));
+            }
+            result.append('\n');
         }
         result.append(String.format("%d\n", goalies.size()));
         for (Goalie goalie: goalies) {

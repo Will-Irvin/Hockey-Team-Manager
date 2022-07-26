@@ -64,9 +64,7 @@ public class TeamGUI implements Runnable {
 
     // MainGUI Constants/Components
 
-    // TODO
     // Reused String expressions
-
     // GUI Sections
     private static final String EDIT_TEAM = "Edit Team";
     private static final String RESET_TEAM_STATS = "Reset Team Stats";
@@ -170,8 +168,10 @@ public class TeamGUI implements Runnable {
 
     // Error Strings
     private static final String NUMBER_ERROR = "Please enter a number where prompted.";
-    private static final String FILE_ERROR = "There was an issue interacting with the file. Please ensure that your " +
-            "file has not been moved or altered, close the application, and try again.";
+    private static final String FILE_NUM_ERROR = "A number was not located where is was expected.";
+    private static final String BIN_FILE_ERROR = "There was an issue interacting with the file. Please ensure that " +
+            "your file has not been moved or altered, close the application, and try again.";
+    private static final String TEXT_FILE_ERROR = "There was an issue interacting with the file. Please try again.";
     private static final String EMPTY_INPUTS = "Please enter a value in at least one of the boxes";
     private static final String BLANK_UPDATED = " (Any blank fields have already been updated)";
     private static final String PLAYER_NUMBER_DUPLICATE = "New player cannot share the same number as another player";
@@ -640,6 +640,142 @@ public class TeamGUI implements Runnable {
         }
         oos.flush();
         oos.close();
+    }
+
+
+    public void importFile(File f) throws IOException {
+        BufferedReader br = new BufferedReader(new FileReader(f));
+        int lineNum = 1;
+        String regEx = "\\|";
+        try {
+            int numTeams = Integer.parseInt(br.readLine());
+            lineNum++;
+            int index;
+            for (int i = 0; i < numTeams; i++) {
+                Team team;
+                String[] teamInfo = br.readLine().split(regEx);
+                team = new Team(teamInfo[0], Integer.parseInt(teamInfo[1]), Integer.parseInt(teamInfo[2]),
+                        Integer.parseInt(teamInfo[3]));
+                lineNum++;
+                int loopTotal = Integer.parseInt(br.readLine());
+                for (int k = 0; k < loopTotal; k++) {
+                    String[] skaterInfo = br.readLine().split(regEx);
+                    Skater skater;
+                    switch (skaterInfo[3]) {
+                        case "C" -> skater = new Center(skaterInfo[0], Integer.parseInt(skaterInfo[1]), skaterInfo[2],
+                                    Integer.parseInt(skaterInfo[4]), Integer.parseInt(skaterInfo[5]),
+                                    Integer.parseInt(skaterInfo[6]), Integer.parseInt(skaterInfo[7]),
+                                    Double.parseDouble(skaterInfo[8]), Double.parseDouble(skaterInfo[9]),
+                                    Integer.parseInt(skaterInfo[10]));
+                        case "LW" -> skater = new Skater(skaterInfo[0], Integer.parseInt(skaterInfo[1]), skaterInfo[2],
+                                Position.Left_Wing, Integer.parseInt(skaterInfo[4]), Integer.parseInt(skaterInfo[5]),
+                                Integer.parseInt(skaterInfo[6]), Integer.parseInt(skaterInfo[7]),
+                                Double.parseDouble(skaterInfo[8]));
+                        case "RW" -> skater = new Skater(skaterInfo[0], Integer.parseInt(skaterInfo[1]), skaterInfo[2],
+                                Position.Right_Wing, Integer.parseInt(skaterInfo[4]), Integer.parseInt(skaterInfo[5]),
+                                Integer.parseInt(skaterInfo[6]), Integer.parseInt(skaterInfo[7]),
+                                Double.parseDouble(skaterInfo[8]));
+                        case "LD" -> skater = new Defenseman(skaterInfo[0], Integer.parseInt(skaterInfo[1]), skaterInfo[2],
+                                Position.Left_Defense, Integer.parseInt(skaterInfo[4]), Integer.parseInt(skaterInfo[5]),
+                                Integer.parseInt(skaterInfo[6]), Integer.parseInt(skaterInfo[7]),
+                                Double.parseDouble(skaterInfo[8]), Integer.parseInt(skaterInfo[9]));
+                        case "RD" -> skater = new Defenseman(skaterInfo[0], Integer.parseInt(skaterInfo[1]), skaterInfo[2],
+                                Position.Right_Defense, Integer.parseInt(skaterInfo[4]), Integer.parseInt(skaterInfo[5]),
+                                Integer.parseInt(skaterInfo[6]), Integer.parseInt(skaterInfo[7]),
+                                Double.parseDouble(skaterInfo[8]), Integer.parseInt(skaterInfo[9]));
+                        default -> throw new FormatException("Position String is not valid", lineNum);
+                    }
+                    index = team.addPlayer(skater);
+                    if (index < 0) {
+                        throw new FormatException("Two or more players share the same number", lineNum);
+                    }
+                    lineNum++;
+                }
+                loopTotal = Integer.parseInt(br.readLine());
+                for (int k = 0; k < loopTotal; k++) {
+                    String[] goalieInfo = br.readLine().split(regEx);
+                    index = team.addPlayer(new Goalie(goalieInfo[0], Integer.parseInt(goalieInfo[1]),
+                            Double.parseDouble(goalieInfo[6]), Integer.parseInt(goalieInfo[7]),
+                            Integer.parseInt(goalieInfo[2]), Integer.parseInt(goalieInfo[3]),
+                            Integer.parseInt(goalieInfo[4]), Integer.parseInt(goalieInfo[5])));
+                    if (index < 0) {
+                        throw new FormatException("Two or more players share the same number", lineNum);
+                    }
+                    lineNum++;
+                }
+                loopTotal = Integer.parseInt(br.readLine());
+                for (int k = 0; k < loopTotal; k++) {
+                    String[] lineInfo = br.readLine().split(regEx);
+                    Line line;
+                    switch (lineInfo.length) {
+                        // Offense Line
+                        case 4 -> {
+                            Skater center = team.getSkater(Integer.parseInt(lineInfo[1]));
+                            if (center instanceof Center c) {
+                                line = new OffenseLine(lineInfo[0],
+                                        c, team.getSkater(Integer.parseInt(lineInfo[2])),
+                                        team.getSkater(Integer.parseInt(lineInfo[3])));
+                            } else {
+                                throw new FormatException("Players are not assigned to the right position", lineNum);
+                            }
+                        }
+                        // Defense Line
+                        case 3 -> {
+                            Skater left = team.getSkater(Integer.parseInt(lineInfo[1]));
+                            Skater right = team.getSkater(Integer.parseInt(lineInfo[2]));
+                            if (left instanceof Defenseman leftDe && right instanceof Defenseman rightDe) {
+                                line = new DefenseLine(lineInfo[0], leftDe, rightDe);
+                            } else {
+                                throw new FormatException("Players are not the right position", lineNum);
+                            }
+                        }
+                        // PP Line
+                        case 8 -> {
+                            Skater center = team.getSkater(Integer.parseInt(lineInfo[1]));
+                            Skater left = team.getSkater(Integer.parseInt(lineInfo[4]));
+                            Skater right = team.getSkater(Integer.parseInt(lineInfo[5]));
+                            if (center instanceof Center c && left instanceof Defenseman leftDe &&
+                                    right instanceof Defenseman rightDe) {
+                                line = new PPLine(lineInfo[0], c, team.getSkater(Integer.parseInt(lineInfo[2])),
+                                        team.getSkater(Integer.parseInt(lineInfo[3])), leftDe, rightDe,
+                                        Double.parseDouble(lineInfo[6]), Integer.parseInt(lineInfo[7]));
+                            } else {
+                                throw new FormatException("Players are not the right position", lineNum);
+                            }
+                        }
+                        // PK Line
+                        case 7 -> {
+                            Skater left = team.getSkater(Integer.parseInt(lineInfo[3]));
+                            Skater right = team.getSkater(Integer.parseInt(lineInfo[4]));
+                            if (left instanceof Defenseman leftDe && right instanceof Defenseman rightDe) {
+                                line = new PKLine(lineInfo[0], team.getSkater(Integer.parseInt(lineInfo[1])),
+                                        team.getSkater(Integer.parseInt(lineInfo[2])), leftDe, rightDe,
+                                        Double.parseDouble(lineInfo[5]), Integer.parseInt(lineInfo[6]));
+                            } else {
+                                throw new FormatException("Players are not the right position", lineNum);
+                            }
+                        }
+                        default -> throw new FormatException("Unexpected number of elements", lineNum);
+                    }
+                    index = team.addLine(line);
+                    if (index < 0) {
+                        throw new FormatException("Two lines share the same name", lineNum);
+                    }
+                    lineNum++;
+                }
+
+                index = addTeam(team);
+                if (index >= 0) {
+                    teamSelection.insertItemAt(team, index);
+                }
+            }
+        } catch (IndexOutOfBoundsException ex) {
+            throw new FormatException("Unexpected number of elements", lineNum);
+        } catch (NumberFormatException ex) {
+            throw new FormatException(FILE_NUM_ERROR, lineNum);
+        } catch (IllegalArgumentException | NullPointerException ex) {
+            throw new FormatException(ex.getMessage(), lineNum);
+        }
     }
 
     /**
@@ -1288,7 +1424,7 @@ public class TeamGUI implements Runnable {
                 JOptionPane.showMessageDialog(mainFrame, NUMBER_ERROR, EDIT_TEAM, JOptionPane.ERROR_MESSAGE);
                 return;
             } catch (IOException ex) {
-                JOptionPane.showMessageDialog(mainFrame, FILE_ERROR, EDIT_TEAM, JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(mainFrame, BIN_FILE_ERROR, EDIT_TEAM, JOptionPane.ERROR_MESSAGE);
             } catch (Exception ex) {
                 JOptionPane.showMessageDialog(mainFrame, ex.getMessage(), EDIT_TEAM, JOptionPane.ERROR_MESSAGE);
             }
@@ -1308,7 +1444,7 @@ public class TeamGUI implements Runnable {
                 try {
                     updateFile();
                 } catch (IOException ex) {
-                    JOptionPane.showMessageDialog(mainFrame, FILE_ERROR, EDIT_TEAM, JOptionPane.ERROR_MESSAGE);
+                    JOptionPane.showMessageDialog(mainFrame, BIN_FILE_ERROR, EDIT_TEAM, JOptionPane.ERROR_MESSAGE);
                 } catch (Exception ex) {
                     JOptionPane.showMessageDialog(mainFrame, ex.getMessage(), EDIT_TEAM, JOptionPane.ERROR_MESSAGE);
                 }
@@ -1326,7 +1462,7 @@ public class TeamGUI implements Runnable {
                 try {
                     updateFile();
                 } catch (IOException ex) {
-                    JOptionPane.showMessageDialog(mainFrame, FILE_ERROR, RESET_TEAM_STATS, JOptionPane.ERROR_MESSAGE);
+                    JOptionPane.showMessageDialog(mainFrame, BIN_FILE_ERROR, RESET_TEAM_STATS, JOptionPane.ERROR_MESSAGE);
                 } catch (Exception ex) {
                     JOptionPane.showMessageDialog(mainFrame, ex.getMessage(), RESET_TEAM_STATS,
                             JOptionPane.ERROR_MESSAGE);
@@ -1632,7 +1768,7 @@ public class TeamGUI implements Runnable {
                 JOptionPane.showMessageDialog(mainFrame, CREATE_SUCCESS + "New Line",
                         CREATE_LINE, JOptionPane.INFORMATION_MESSAGE);
             } catch (IOException ex) {
-                JOptionPane.showMessageDialog(mainFrame, FILE_ERROR, CREATE_LINE, JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(mainFrame, BIN_FILE_ERROR, CREATE_LINE, JOptionPane.ERROR_MESSAGE);
             } catch (Exception ex) {
                 JOptionPane.showMessageDialog(mainFrame, ex.getMessage(), CREATE_LINE, JOptionPane.ERROR_MESSAGE);
             }
@@ -1741,7 +1877,7 @@ public class TeamGUI implements Runnable {
                                 JOptionPane.showMessageDialog(mainFrame, UPDATE_SUCCESS, EDIT_LINE,
                                         JOptionPane.INFORMATION_MESSAGE);
                             } catch (IOException ex) {
-                                JOptionPane.showMessageDialog(mainFrame, FILE_ERROR, EDIT_LINE,
+                                JOptionPane.showMessageDialog(mainFrame, BIN_FILE_ERROR, EDIT_LINE,
                                         JOptionPane.ERROR_MESSAGE);
                             } catch (Exception ex) {
                                 JOptionPane.showMessageDialog(mainFrame, ex.getMessage(), EDIT_LINE,
@@ -1781,7 +1917,7 @@ public class TeamGUI implements Runnable {
                 lineOptions.setSelectedIndex(0);
                 JOptionPane.showMessageDialog(mainFrame, UPDATE_SUCCESS, EDIT_LINE, JOptionPane.INFORMATION_MESSAGE);
             } catch (IOException ex) {
-                JOptionPane.showMessageDialog(mainFrame, FILE_ERROR, EDIT_LINE, JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(mainFrame, BIN_FILE_ERROR, EDIT_LINE, JOptionPane.ERROR_MESSAGE);
             } catch (Exception ex) {
                 JOptionPane.showMessageDialog(mainFrame, ex.getMessage(), EDIT_LINE, JOptionPane.ERROR_MESSAGE);
             }
@@ -1942,7 +2078,7 @@ public class TeamGUI implements Runnable {
                         JOptionPane.showMessageDialog(playersWindow, UPDATE_SUCCESS, EDIT_LINE,
                                 JOptionPane.INFORMATION_MESSAGE);
                     } catch (IOException ex) {
-                        JOptionPane.showMessageDialog(mainFrame, FILE_ERROR, EDIT_LINE, JOptionPane.ERROR_MESSAGE);
+                        JOptionPane.showMessageDialog(mainFrame, BIN_FILE_ERROR, EDIT_LINE, JOptionPane.ERROR_MESSAGE);
                     } catch (Exception ex) {
                         JOptionPane.showMessageDialog(mainFrame, ex.getMessage(), EDIT_LINE, JOptionPane.ERROR_MESSAGE);
                     }
@@ -1980,7 +2116,7 @@ public class TeamGUI implements Runnable {
                         JOptionPane.showMessageDialog(mainFrame, UPDATE_SUCCESS, DELETE_LINE,
                                 JOptionPane.INFORMATION_MESSAGE);
                     } catch (IOException ex) {
-                        JOptionPane.showMessageDialog(mainFrame, FILE_ERROR, DELETE_LINE, JOptionPane.ERROR_MESSAGE);
+                        JOptionPane.showMessageDialog(mainFrame, BIN_FILE_ERROR, DELETE_LINE, JOptionPane.ERROR_MESSAGE);
                     } catch (Exception ex) {
                         JOptionPane.showMessageDialog(mainFrame, ex.getMessage(), DELETE_LINE,
                                 JOptionPane.ERROR_MESSAGE);
@@ -2186,7 +2322,7 @@ public class TeamGUI implements Runnable {
                     enterShotsBlocked.setText("");
                 }
             } catch (IOException ex) {
-                JOptionPane.showMessageDialog(selectFrame, FILE_ERROR, CREATE_SKATER, JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(selectFrame, BIN_FILE_ERROR, CREATE_SKATER, JOptionPane.ERROR_MESSAGE);
             } catch (Exception ex) {
                 JOptionPane.showMessageDialog(selectFrame, ex.getMessage(), CREATE_SKATER, JOptionPane.ERROR_MESSAGE);
             }
@@ -2481,7 +2617,7 @@ public class TeamGUI implements Runnable {
                     JOptionPane.showMessageDialog(mainFrame, UPDATE_SUCCESS, EDIT_SKATER,
                             JOptionPane.INFORMATION_MESSAGE);
                 } catch (IOException ex) {
-                    JOptionPane.showMessageDialog(mainFrame, FILE_ERROR, EDIT_SKATER, JOptionPane.ERROR_MESSAGE);
+                    JOptionPane.showMessageDialog(mainFrame, BIN_FILE_ERROR, EDIT_SKATER, JOptionPane.ERROR_MESSAGE);
                 } catch (Exception ex) {
                     JOptionPane.showMessageDialog(mainFrame, ex.getMessage(), EDIT_SKATER, JOptionPane.ERROR_MESSAGE);
                 }
@@ -2505,7 +2641,7 @@ public class TeamGUI implements Runnable {
                         JOptionPane.showMessageDialog(mainFrame, UPDATE_SUCCESS, EDIT_SKATER,
                                 JOptionPane.INFORMATION_MESSAGE);
                     } catch (IOException ex) {
-                        JOptionPane.showMessageDialog(mainFrame, FILE_ERROR, EDIT_SKATER, JOptionPane.ERROR_MESSAGE);
+                        JOptionPane.showMessageDialog(mainFrame, BIN_FILE_ERROR, EDIT_SKATER, JOptionPane.ERROR_MESSAGE);
                     } catch (Exception ex) {
                         JOptionPane.showMessageDialog(mainFrame, ex.getMessage(), EDIT_SKATER,
                                 JOptionPane.ERROR_MESSAGE);
@@ -2535,7 +2671,7 @@ public class TeamGUI implements Runnable {
                     JOptionPane.showMessageDialog(mainFrame, UPDATE_SUCCESS, DELETE_SKATER,
                             JOptionPane.INFORMATION_MESSAGE);
                 } catch (IOException ex) {
-                    JOptionPane.showMessageDialog(mainFrame, FILE_ERROR, DELETE_SKATER, JOptionPane.ERROR_MESSAGE);
+                    JOptionPane.showMessageDialog(mainFrame, BIN_FILE_ERROR, DELETE_SKATER, JOptionPane.ERROR_MESSAGE);
                 } catch (Exception ex) {
                     JOptionPane.showMessageDialog(mainFrame, ex.getMessage(), DELETE_SKATER, JOptionPane.ERROR_MESSAGE);
                 }
@@ -2661,7 +2797,7 @@ public class TeamGUI implements Runnable {
                 JOptionPane.showMessageDialog(mainFrame, CREATE_SUCCESS + "Goalie", CREATE_GOALIE,
                         JOptionPane.INFORMATION_MESSAGE);
             } catch (IOException ex) {
-                JOptionPane.showMessageDialog(mainFrame, FILE_ERROR, CREATE_GOALIE, JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(mainFrame, BIN_FILE_ERROR, CREATE_GOALIE, JOptionPane.ERROR_MESSAGE);
             } catch (Exception ex) {
                 JOptionPane.showMessageDialog(mainFrame, ex.getMessage(), CREATE_GOALIE, JOptionPane.ERROR_MESSAGE);
             }
@@ -2793,7 +2929,7 @@ public class TeamGUI implements Runnable {
                 updateFile();
                 JOptionPane.showMessageDialog(mainFrame, UPDATE_SUCCESS, EDIT_GOALIE, JOptionPane.INFORMATION_MESSAGE);
             } catch (IOException ex) {
-                JOptionPane.showMessageDialog(mainFrame, FILE_ERROR, EDIT_GOALIE, JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(mainFrame, BIN_FILE_ERROR, EDIT_GOALIE, JOptionPane.ERROR_MESSAGE);
             } catch (Exception ex) {
                 JOptionPane.showMessageDialog(mainFrame, ex.getMessage(), EDIT_GOALIE, JOptionPane.ERROR_MESSAGE);
             }
@@ -2817,7 +2953,7 @@ public class TeamGUI implements Runnable {
                     JOptionPane.showMessageDialog(mainFrame, UPDATE_SUCCESS, EDIT_GOALIE,
                             JOptionPane.INFORMATION_MESSAGE);
                 } catch (IOException ex) {
-                    JOptionPane.showMessageDialog(mainFrame, FILE_ERROR, EDIT_GOALIE, JOptionPane.ERROR_MESSAGE);
+                    JOptionPane.showMessageDialog(mainFrame, BIN_FILE_ERROR, EDIT_GOALIE, JOptionPane.ERROR_MESSAGE);
                 } catch (Exception ex) {
                     JOptionPane.showMessageDialog(mainFrame, ex.getMessage(), EDIT_GOALIE, JOptionPane.ERROR_MESSAGE);
                 }
@@ -2842,7 +2978,7 @@ public class TeamGUI implements Runnable {
                     JOptionPane.showMessageDialog(mainFrame, UPDATE_SUCCESS, DELETE_GOALIE,
                             JOptionPane.INFORMATION_MESSAGE);
                 } catch (IOException ex) {
-                    JOptionPane.showMessageDialog(mainFrame, FILE_ERROR, DELETE_GOALIE, JOptionPane.ERROR_MESSAGE);
+                    JOptionPane.showMessageDialog(mainFrame, BIN_FILE_ERROR, DELETE_GOALIE, JOptionPane.ERROR_MESSAGE);
                 } catch (Exception ex) {
                     JOptionPane.showMessageDialog(mainFrame, ex.getMessage(), DELETE_GOALIE, JOptionPane.ERROR_MESSAGE);
                 }
@@ -3562,7 +3698,7 @@ public class TeamGUI implements Runnable {
                 JOptionPane.showMessageDialog(mainFrame, UPDATE_SUCCESS, ENTER_STATS_LIVE,
                         JOptionPane.INFORMATION_MESSAGE);
             } catch (IOException ex) {
-                JOptionPane.showMessageDialog(mainFrame, FILE_ERROR, ENTER_STATS_LIVE, JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(mainFrame, BIN_FILE_ERROR, ENTER_STATS_LIVE, JOptionPane.ERROR_MESSAGE);
             } catch (Exception ex) {
                 JOptionPane.showMessageDialog(mainFrame, ex.getMessage(), ENTER_STATS_LIVE, JOptionPane.ERROR_MESSAGE);
             }
@@ -3643,7 +3779,7 @@ public class TeamGUI implements Runnable {
                 try {
                     updateFile();
                 } catch (IOException ex) {
-                    JOptionPane.showMessageDialog(mainFrame, FILE_ERROR, ENTER_STATS_AFTER, JOptionPane.ERROR_MESSAGE);
+                    JOptionPane.showMessageDialog(mainFrame, BIN_FILE_ERROR, ENTER_STATS_AFTER, JOptionPane.ERROR_MESSAGE);
                 } catch (Exception ex) {
                     JOptionPane.showMessageDialog(mainFrame, ex.getMessage(), ENTER_STATS_AFTER,
                             JOptionPane.ERROR_MESSAGE);
@@ -4436,7 +4572,7 @@ public class TeamGUI implements Runnable {
         try {
             openFile();
         } catch (IOException | ClassNotFoundException e) {
-            JOptionPane.showMessageDialog(null, FILE_ERROR, INIT, JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(null, BIN_FILE_ERROR, INIT, JOptionPane.ERROR_MESSAGE);
             return;
         } catch (Exception e) {
             JOptionPane.showMessageDialog(null, e.getMessage(), INIT, JOptionPane.ERROR_MESSAGE);
@@ -4520,8 +4656,8 @@ public class TeamGUI implements Runnable {
                     JOptionPane.showMessageDialog(createFileFrame, CREATE_SUCCESS + "file and saved team" +
                             " data.", CREATE_FILE, JOptionPane.INFORMATION_MESSAGE);
                 } catch (IOException ex) {
-                    JOptionPane.showMessageDialog(createFileFrame, FILE_ERROR.substring(0, FILE_ERROR.indexOf('.')),
-                            CREATE_FILE, JOptionPane.ERROR_MESSAGE);
+                    JOptionPane.showMessageDialog(createFileFrame, TEXT_FILE_ERROR, CREATE_FILE,
+                            JOptionPane.ERROR_MESSAGE);
                     return;
                 }
                 createFileFrame.dispose();
@@ -4543,6 +4679,31 @@ public class TeamGUI implements Runnable {
 
             createFileFrame.pack();
             createFileFrame.setVisible(true);
+        });
+        importTextFile.addActionListener(e -> {
+            JFileChooser fc = new JFileChooser();
+            fc.setDialogTitle("Select Formatted File Storing TeamManager Data");
+            int input = fc.showOpenDialog(selectFrame);
+            if (input == JFileChooser.APPROVE_OPTION) {
+                File f = fc.getSelectedFile();
+                try {
+                    importFile(f);
+                } catch (FormatException ex) {
+                    JOptionPane.showMessageDialog(selectFrame, ex.getMessage(), IMPORT_FILE, JOptionPane.ERROR_MESSAGE);
+                    return;
+                } catch (IOException ex) {
+                    JOptionPane.showMessageDialog(selectFrame, TEXT_FILE_ERROR, IMPORT_FILE, JOptionPane.ERROR_MESSAGE);
+                    return;
+                }
+            }
+
+            try {
+                updateFile();
+            } catch (IOException ex) {
+                JOptionPane.showMessageDialog(selectFrame, BIN_FILE_ERROR, IMPORT_FILE, JOptionPane.ERROR_MESSAGE);
+            } catch (Exception ex) {
+                JOptionPane.showMessageDialog(selectFrame, ex.getMessage(), IMPORT_FILE, JOptionPane.ERROR_MESSAGE);
+            }
         });
 
         // Bottom of Frame, button where new users can find additional guidance
@@ -4610,7 +4771,7 @@ public class TeamGUI implements Runnable {
                             JOptionPane.showMessageDialog(selectFrame, NUMBER_ERROR, CREATE_TEAM,
                                     JOptionPane.ERROR_MESSAGE);
                         } catch (IOException ex) {
-                            JOptionPane.showMessageDialog(selectFrame, FILE_ERROR, CREATE_TEAM,
+                            JOptionPane.showMessageDialog(selectFrame, BIN_FILE_ERROR, CREATE_TEAM,
                                     JOptionPane.ERROR_MESSAGE);
                         } catch (Exception ex) {
                             JOptionPane.showMessageDialog(selectFrame, ex.getMessage(), CREATE_TEAM,
@@ -4640,7 +4801,7 @@ public class TeamGUI implements Runnable {
                             displayTeamGUI();
                             break;
                         } catch (IOException ex) {
-                            JOptionPane.showMessageDialog(selectFrame, FILE_ERROR, CREATE_TEAM,
+                            JOptionPane.showMessageDialog(selectFrame, BIN_FILE_ERROR, CREATE_TEAM,
                                     JOptionPane.ERROR_MESSAGE);
                         } catch (Exception ex) {
                             JOptionPane.showMessageDialog(selectFrame, ex.getMessage(), CREATE_TEAM,
@@ -4693,7 +4854,7 @@ public class TeamGUI implements Runnable {
                         try {
                             updateFile();
                         } catch (IOException ex) {
-                            JOptionPane.showMessageDialog(selectFrame, FILE_ERROR, DELETE_TEAM,
+                            JOptionPane.showMessageDialog(selectFrame, BIN_FILE_ERROR, DELETE_TEAM,
                                     JOptionPane.ERROR_MESSAGE);
                         } catch (Exception ex) {
                             JOptionPane.showMessageDialog(selectFrame, ex.getMessage(), DELETE_TEAM,
@@ -4728,7 +4889,7 @@ public class TeamGUI implements Runnable {
             try {
                 updateFile();
             } catch (IOException ex) {
-                JOptionPane.showMessageDialog(selectFrame, FILE_ERROR, RESTORE_SAMPLE, JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(selectFrame, BIN_FILE_ERROR, RESTORE_SAMPLE, JOptionPane.ERROR_MESSAGE);
             } catch (Exception ex) {
                 JOptionPane.showMessageDialog(selectFrame, ex.getMessage(), RESTORE_SAMPLE, JOptionPane.ERROR_MESSAGE);
             }
