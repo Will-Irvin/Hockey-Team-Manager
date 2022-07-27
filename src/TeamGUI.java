@@ -2648,7 +2648,6 @@ public class TeamGUI implements Runnable {
                     newSkater = new Skater(editingSkater);
                 }
                 newSkater.setPlayerNumber(changeSkaterNumber.getValue());
-
                 change = true;
             }
 
