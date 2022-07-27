@@ -2648,8 +2648,7 @@ public class TeamGUI implements Runnable {
                     newSkater = new Skater(editingSkater);
                 }
                 newSkater.setPlayerNumber(changeSkaterNumber.getValue());
-                changeSkaterNumberCheck.setSelected(false);
-                changeSkaterNumberCheck.setText(CHANGE_NUMBER);
+
                 change = true;
             }
 
@@ -2658,6 +2657,16 @@ public class TeamGUI implements Runnable {
                 int oldIndex = skaterOptions.getSelectedIndex() - 1;  // Index where the skater used to be
 
                 if (newSkater != null) {
+                    int input;
+                    do {
+                        input = JOptionPane.showConfirmDialog(mainFrame, "Warning: Changing your skater's " +
+                                "position and/or number will delete any lines that the skater is assigned to.\n" +
+                                "Are you sure you would like to proceed?", EDIT_SKATER, JOptionPane.YES_NO_OPTION,
+                                JOptionPane.WARNING_MESSAGE);
+                    } while (input != JOptionPane.YES_OPTION && input != JOptionPane.NO_OPTION);
+                    if (input == JOptionPane.NO_OPTION) {
+                        return;
+                    }
                     int index = team.changePlayer(editingSkater, newSkater);
                     if (index == -1) {
                         JOptionPane.showMessageDialog(mainFrame, PLAYER_NUMBER_DUPLICATE, EDIT_SKATER,
@@ -2665,6 +2674,9 @@ public class TeamGUI implements Runnable {
                         return;
                     }
                     updatePlayerComponents(editingSkater, newSkater, oldIndex, index);
+                    changeSkaterNumberCheck.setSelected(false);
+                    changeSkaterNumberCheck.setText(CHANGE_NUMBER);
+                    nameAndNumberPanel.remove(changeSkaterNumber);
                 } else {
                     updatePlayerComponents(null, editingSkater, oldIndex, oldIndex);
                 }
