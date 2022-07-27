@@ -65,6 +65,7 @@ public class Center extends Skater {
      * @return The calculated percentage
      */
     public double getFaceOffPercent() {
+        if (faceOffTotal == 0) return 0;
         return ((double) faceOffWins / faceOffTotal) * 100;
     }
 

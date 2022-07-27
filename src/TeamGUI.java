@@ -23,14 +23,13 @@ public class TeamGUI implements Runnable {
     // Select GUI Strings/Components
     private static final String INIT = "Initialize";
     private static final String FILE_NAME = "TeamManagerData";  // Designated name for file storing data
-    private static final String NEW_INFO = "Thank you for using Team Manager! Here are a few things to note as you get" +
-            " started:\n" +
-            "If this is your first time launching the application you will notice that the app comes preloaded with" +
-            " a sample team. This is included as a way to ease yourself into the application.\n" +
-            "Feel free to view or change it in any way you like, and use it to take some time to get used to how the " +
-            "application works.\n" +
-            "All data related to the teams that you create in this application is stored in a file called \"" + FILE_NAME
-            + "\" which was automatically created when you first launched this application.\n" +
+    private static final String NEW_INFO = "Thank you for using Team Manager! Here are a few things to note as you " +
+            "get started:\nIf this is your first time launching the application you will notice that the app comes " +
+            "preloaded with a sample team. This is included as a way to ease yourself into the application.\n" +
+            "Feel free to view or change it in any way you like, and use it to take some time to get used to how the" +
+            " application works.\n" +
+            "All data related to the teams that you create in this application is stored in a file called \"" +
+            FILE_NAME + "\" which was automatically created when you first launched this application.\n" +
             "This file is not readable nor transferable between most devices. The file is automatically updated and " +
             "saved every time a change is made.\n" +
             "If the file is deleted or lost, when the application launches, a new file will be created, and it " +
@@ -179,16 +178,23 @@ public class TeamGUI implements Runnable {
             "</html>";
     private static final String EDIT_LINE_INSTRUCTIONS = "<html><center>This tab will make changes to or delete any " +
             "already created lines.<br>Use the drop box at the top of the screen to select which line you would like " +
-            "to change or delete.<br>" + EDIT_INSTRUCTIONS;
+            "to change or delete.<hr>" + EDIT_INSTRUCTIONS;
     private static final String EDIT_PLAYER_INSTRUCTIONS = "<html><center>This tab will make changes to or delete " +
             "any already created players.<br>Use the drop box at the top of the screen to select which player you " +
-            "would like to change or delete.<br>" + EDIT_INSTRUCTIONS;
-    private static final String RESET_STATS_WARNING = "<html><center>The button below will reset all stats for your " +
-            "team, its players, and its special teams to 0.<br>This action cannot be undone after the fact and their " +
-            "previous stats will be lost.</html>";
+            "would like to change or delete.<hr>" + EDIT_INSTRUCTIONS;
+    private static final String RESET_STATS_WARNING = "<html><center><hr>The button below will reset all stats for " +
+            "your team, its players, and its special teams to 0.<br>This action cannot be undone after the fact and " +
+            "their previous stats will be lost.</html>";
+    private static final String ENTER_LIVE_INSTRUCTIONS = "<html><center>This tab is best for watching the game live " +
+            "and entering stats as the game progresses.<br>You must have created at least one of each type of line to" +
+            " be able to use this tab.<hr>Any stats you update may display in some elements of the application; " +
+            "however,<br> the application will not be completely updated and your changes will not be saved to your " +
+            "file until you click \"Game Over\".<hr>If you make a mistake and need to restart, you can close and " +
+            "restart the application without clicking \"Game Over\".<br> This will undo any stats that you have " +
+            "already entered.<hr></center></html>";
 
     // Error Strings
-    private static final String NUMBER_ERROR = "Please enter a number where prompted.";
+    private static final String NUMBER_ERROR = "Please enter a valid number where prompted.";
     private static final String FILE_NUM_ERROR = "A number was not located where is was expected.";
     private static final String BIN_FILE_ERROR = "There was an issue interacting with the file. Please ensure that " +
             "your file has not been moved or altered, close the application, and try again.";
@@ -205,7 +211,7 @@ public class TeamGUI implements Runnable {
     private static final String NO_OPTIONS = "There are currently no options to choose from. Please create a ";
     private static final String UNEXPECTED_ERROR = "An unexpected error occurred - ";
     private static final String ENTER_AFTER_REQS = "You must have at least 5 players and 1 goalie in order to enter " +
-            "stats after a game. At least one of your players must be a defenseman, and at least one of your players" +
+            "stats after a game.\nAt least one of your players must be a defenseman, and at least one of your players" +
             " must be a center.";
     private static final String POS_PENALTY_LENGTH = "Penalty Duration Must Be Positive";
 
@@ -703,14 +709,16 @@ public class TeamGUI implements Runnable {
                                 Position.Right_Wing, Integer.parseInt(skaterInfo[4]), Integer.parseInt(skaterInfo[5]),
                                 Integer.parseInt(skaterInfo[6]), Integer.parseInt(skaterInfo[7]),
                                 Double.parseDouble(skaterInfo[8]));
-                        case "LD" -> skater = new Defenseman(skaterInfo[0], Integer.parseInt(skaterInfo[1]), skaterInfo[2],
-                                Position.Left_Defense, Integer.parseInt(skaterInfo[4]), Integer.parseInt(skaterInfo[5]),
-                                Integer.parseInt(skaterInfo[6]), Integer.parseInt(skaterInfo[7]),
-                                Double.parseDouble(skaterInfo[8]), Integer.parseInt(skaterInfo[9]));
-                        case "RD" -> skater = new Defenseman(skaterInfo[0], Integer.parseInt(skaterInfo[1]), skaterInfo[2],
-                                Position.Right_Defense, Integer.parseInt(skaterInfo[4]), Integer.parseInt(skaterInfo[5]),
-                                Integer.parseInt(skaterInfo[6]), Integer.parseInt(skaterInfo[7]),
-                                Double.parseDouble(skaterInfo[8]), Integer.parseInt(skaterInfo[9]));
+                        case "LD" -> skater = new Defenseman(skaterInfo[0], Integer.parseInt(skaterInfo[1]),
+                                skaterInfo[2], Position.Left_Defense, Integer.parseInt(skaterInfo[4]),
+                                Integer.parseInt(skaterInfo[5]), Integer.parseInt(skaterInfo[6]),
+                                Integer.parseInt(skaterInfo[7]), Double.parseDouble(skaterInfo[8]),
+                                Integer.parseInt(skaterInfo[9]));
+                        case "RD" -> skater = new Defenseman(skaterInfo[0], Integer.parseInt(skaterInfo[1]),
+                                skaterInfo[2], Position.Right_Defense, Integer.parseInt(skaterInfo[4]),
+                                Integer.parseInt(skaterInfo[5]), Integer.parseInt(skaterInfo[6]),
+                                Integer.parseInt(skaterInfo[7]), Double.parseDouble(skaterInfo[8]),
+                                Integer.parseInt(skaterInfo[9]));
                         default -> throw new FormatException(POSITION_STRING, lineNum);
                     }
                     index = team.addPlayer(skater);
@@ -1343,21 +1351,35 @@ public class TeamGUI implements Runnable {
                             }
                         }
                     }
-                }
-
-                // Finds proper spot in defenseman combo boxes if player is de
-                if (newSkater instanceof Defenseman de) {
-                    for (int i = 1; i < pickLeftDe.getItemCount(); i++) {
-                        if (i == pickLeftDe.getItemCount() - 1) {
-                            pickLeftDe.addItem(de);
-                            pickRightDe.addItem(de);
-                            break;
-                        }
-                        if (pickLeftDe.getItemAt(i).getPlayerNumber() < de.getPlayerNumber() &&
-                                de.getPlayerNumber() < pickLeftDe.getItemAt(i + 1).getPlayerNumber()) {
-                            pickLeftDe.insertItemAt(de, i + 1);
-                            pickRightDe.insertItemAt(de, i + 1);
-                            break;
+                } else if (newSkater instanceof Defenseman de) {
+                    if (pickLeftDe.getItemCount() == 1) {
+                        pickLeftDe.addItem(de);
+                        pickRightDe.addItem(de);
+                    } else {
+                        int low = 1;
+                        int high = pickLeftDe.getItemCount();
+                        while (true) {
+                            int i = (low + high) / 2;
+                            if (de.getPlayerNumber() < pickLeftDe.getItemAt(i).getPlayerNumber()) {
+                                if (i == 1 ||
+                                        de.getPlayerNumber() > pickLeftDe.getItemAt(i - 1).getPlayerNumber()) {
+                                    pickLeftDe.insertItemAt(de, i);
+                                    pickRightDe.insertItemAt(de, i);
+                                    break;
+                                }
+                                high = i;
+                            } else {
+                                if (i == pickLeftDe.getItemCount() - 1) {
+                                    pickLeftDe.addItem(de);
+                                    pickRightDe.addItem(de);
+                                    break;
+                                } else if (de.getPlayerNumber() < pickLeftDe.getItemAt(i + 1).getPlayerNumber()) {
+                                    pickLeftDe.insertItemAt(de, i + 1);
+                                    pickRightDe.insertItemAt(de, i + 1);
+                                    break;
+                                }
+                                low = i;
+                            }
                         }
                     }
                 }
@@ -1367,6 +1389,7 @@ public class TeamGUI implements Runnable {
                 goalieStats.insertRow(index, newGoalie.getStatsArray());
             }
         }
+        viewRoster.setText(team.generateRoster());
     }
 
     /**
@@ -1493,7 +1516,8 @@ public class TeamGUI implements Runnable {
                 try {
                     updateFile();
                 } catch (IOException ex) {
-                    JOptionPane.showMessageDialog(mainFrame, BIN_FILE_ERROR, RESET_TEAM_STATS, JOptionPane.ERROR_MESSAGE);
+                    JOptionPane.showMessageDialog(mainFrame, BIN_FILE_ERROR, RESET_TEAM_STATS,
+                            JOptionPane.ERROR_MESSAGE);
                 } catch (Exception ex) {
                     JOptionPane.showMessageDialog(mainFrame, ex.getMessage(), RESET_TEAM_STATS,
                             JOptionPane.ERROR_MESSAGE);
@@ -2147,7 +2171,8 @@ public class TeamGUI implements Runnable {
                         JOptionPane.showMessageDialog(mainFrame, UPDATE_SUCCESS, DELETE_LINE,
                                 JOptionPane.INFORMATION_MESSAGE);
                     } catch (IOException ex) {
-                        JOptionPane.showMessageDialog(mainFrame, BIN_FILE_ERROR, DELETE_LINE, JOptionPane.ERROR_MESSAGE);
+                        JOptionPane.showMessageDialog(mainFrame, BIN_FILE_ERROR, DELETE_LINE,
+                                JOptionPane.ERROR_MESSAGE);
                     } catch (Exception ex) {
                         JOptionPane.showMessageDialog(mainFrame, ex.getMessage(), DELETE_LINE,
                                 JOptionPane.ERROR_MESSAGE);
@@ -2330,7 +2355,8 @@ public class TeamGUI implements Runnable {
             }
             int index = team.addPlayer(newSkater);
             if (index == -1) {
-                JOptionPane.showMessageDialog(mainFrame, PLAYER_NUMBER_DUPLICATE, CREATE_SKATER, JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(mainFrame, PLAYER_NUMBER_DUPLICATE, CREATE_SKATER,
+                        JOptionPane.ERROR_MESSAGE);
                 return;
             }
             updatePlayerComponents(null, newSkater, -1, index);
@@ -2420,8 +2446,8 @@ public class TeamGUI implements Runnable {
         changeAssists = new JTextField(ENTER_STAT_SIZE);
         changePMLabel = new JLabel(PM_STRING);
         changePlusMinus = new JTextField(ENTER_STAT_SIZE);
-        createPanelForContainer(new JComponent[]{changeGoalsLabel, changeGoals, changeAssistsLabel, changeAssists, changePMLabel,
-                changePlusMinus}, editSkaterContent);
+        createPanelForContainer(new JComponent[]{changeGoalsLabel, changeGoals, changeAssistsLabel, changeAssists,
+                changePMLabel, changePlusMinus}, editSkaterContent);
 
         changeHitsLabel = new JLabel(HITS_STRING);
         changeHits = new JTextField(ENTER_STAT_SIZE);
@@ -2672,7 +2698,8 @@ public class TeamGUI implements Runnable {
                         JOptionPane.showMessageDialog(mainFrame, UPDATE_SUCCESS, EDIT_SKATER,
                                 JOptionPane.INFORMATION_MESSAGE);
                     } catch (IOException ex) {
-                        JOptionPane.showMessageDialog(mainFrame, BIN_FILE_ERROR, EDIT_SKATER, JOptionPane.ERROR_MESSAGE);
+                        JOptionPane.showMessageDialog(mainFrame, BIN_FILE_ERROR, EDIT_SKATER,
+                                JOptionPane.ERROR_MESSAGE);
                     } catch (Exception ex) {
                         JOptionPane.showMessageDialog(mainFrame, ex.getMessage(), EDIT_SKATER,
                                 JOptionPane.ERROR_MESSAGE);
@@ -2812,7 +2839,8 @@ public class TeamGUI implements Runnable {
 
             int index = team.addPlayer(newGoalie);
             if (index == -1) {
-                JOptionPane.showMessageDialog(mainFrame, PLAYER_NUMBER_DUPLICATE, CREATE_GOALIE, JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(mainFrame, PLAYER_NUMBER_DUPLICATE, CREATE_GOALIE,
+                        JOptionPane.ERROR_MESSAGE);
                 return;
             }
 
@@ -2948,7 +2976,8 @@ public class TeamGUI implements Runnable {
             if (newGoalie != null) {
                 int index = team.changePlayer(editingGoalie, newGoalie);
                 if (index == -1) {
-                    JOptionPane.showMessageDialog(mainFrame, PLAYER_NUMBER_DUPLICATE, EDIT_GOALIE, JOptionPane.ERROR_MESSAGE);
+                    JOptionPane.showMessageDialog(mainFrame, PLAYER_NUMBER_DUPLICATE, EDIT_GOALIE,
+                            JOptionPane.ERROR_MESSAGE);
                     return;
                 }
                 updatePlayerComponents(editingGoalie, newGoalie, oldIndex, index);
@@ -3040,9 +3069,12 @@ public class TeamGUI implements Runnable {
 
         enterStatsTabs = new JTabbedPane();
 
-        // Live
+        // Enter Live
         Container liveStats = new Container();
         liveStats.setLayout(new BoxLayout(liveStats, BoxLayout.Y_AXIS));
+
+        JLabel enterLiveInstructions = new JLabel(ENTER_LIVE_INSTRUCTIONS);
+        createPanelForContainer(new JComponent[]{enterLiveInstructions}, liveStats);
 
         offenseLinesLabel = new JLabel(SELECT_CURRENT + OFFENSE_LINE + ':');
         JPanel offenseLinePanel = createPanel(new JComponent[]{offenseLinesLabel, offenseLines});
@@ -3253,8 +3285,8 @@ public class TeamGUI implements Runnable {
                                             penaltyOptionsLive.clearSelection();
                                             liveStats.remove(ppLinePanel);
                                             liveStats.remove(penaltyOverPanel);
-                                            liveStats.add(defenseLinePanel, 0);
-                                            liveStats.add(offenseLinePanel, 0);
+                                            liveStats.add(defenseLinePanel, 1);
+                                            liveStats.add(offenseLinePanel, 1);
                                             mainFrame.repaint();
                                         }
                                     }
@@ -3291,6 +3323,18 @@ public class TeamGUI implements Runnable {
         });
 
         scoredAgainstLive.addActionListener(e -> {
+            Goalie goalieInNet = (Goalie) selectGoaliesForStats.getSelectedItem();
+            if (goalieInNet == null) {
+                int input;
+                do {
+                    input = JOptionPane.showConfirmDialog(mainFrame, "You do not currently have a goalie" +
+                            " in net. Was this an empty net goal?", ENTER_STATS_LIVE, JOptionPane.YES_NO_OPTION,
+                            JOptionPane.WARNING_MESSAGE);
+                } while (input != JOptionPane.YES_OPTION && input != JOptionPane.NO_OPTION);
+                if (input == JOptionPane.NO_OPTION) {
+                    return;
+                }
+            }
             if (penaltyLive.isSelected()) {
                 PKLine failedLine = (PKLine) pkOptions.getSelectedItem();
                 if (failedLine != null) {
@@ -3298,15 +3342,14 @@ public class TeamGUI implements Runnable {
                     penaltyOptionsLive.clearSelection();
                     liveStats.remove(pkLinePanel);
                     liveStats.remove(penaltyOverPanel);
-                    liveStats.add(defenseLinePanel, 0);
-                    liveStats.add(offenseLinePanel, 0);
+                    liveStats.add(defenseLinePanel, 1);
+                    liveStats.add(offenseLinePanel, 1);
                 } else {
                     JOptionPane.showMessageDialog(mainFrame, NO_OPTIONS + "penalty kill line.",
                             ENTER_STATS_LIVE, JOptionPane.ERROR_MESSAGE);
                     return;
                 }
             }
-            Goalie goalieInNet = (Goalie) selectGoaliesForStats.getSelectedItem();
             if (goalieInNet != null) {
                 goalieInNet.scoredOn();
             }
@@ -3321,6 +3364,8 @@ public class TeamGUI implements Runnable {
             Goalie goalieInNet = (Goalie) selectGoaliesForStats.getSelectedItem();
             if (goalieInNet != null) {
                 goalieInNet.save();
+            } else {
+                JOptionPane.showMessageDialog(mainFrame, SELECT, ENTER_STATS_LIVE, JOptionPane.ERROR_MESSAGE);
             }
         });
 
@@ -3641,10 +3686,10 @@ public class TeamGUI implements Runnable {
             liveStats.remove(penaltyOverPanel);
             if (e.getActionCommand().equals(powerPlayLive.getActionCommand())) {
                 liveStats.remove(pkLinePanel);
-                liveStats.add(ppLinePanel, 0);
+                liveStats.add(ppLinePanel, 1);
             } else if (penalty) {
                 liveStats.remove(ppLinePanel);
-                liveStats.add(pkLinePanel, 0);
+                liveStats.add(pkLinePanel, 1);
             }
             liveStats.add(penaltyOverPanel, liveStats.getComponentCount() - 1);
             mainFrame.repaint();
@@ -3675,8 +3720,8 @@ public class TeamGUI implements Runnable {
                     return;
                 }
             }
-            liveStats.add(defenseLinePanel, 0);
-            liveStats.add(offenseLinePanel, 0);
+            liveStats.add(defenseLinePanel, 1);
+            liveStats.add(offenseLinePanel, 1);
             liveStats.remove(penaltyOverPanel);
             penaltyOptionsLive.clearSelection();
             mainFrame.repaint();
@@ -3810,7 +3855,8 @@ public class TeamGUI implements Runnable {
                 try {
                     updateFile();
                 } catch (IOException ex) {
-                    JOptionPane.showMessageDialog(mainFrame, BIN_FILE_ERROR, ENTER_STATS_AFTER, JOptionPane.ERROR_MESSAGE);
+                    JOptionPane.showMessageDialog(mainFrame, BIN_FILE_ERROR, ENTER_STATS_AFTER,
+                            JOptionPane.ERROR_MESSAGE);
                 } catch (Exception ex) {
                     JOptionPane.showMessageDialog(mainFrame, ex.getMessage(), ENTER_STATS_AFTER,
                             JOptionPane.ERROR_MESSAGE);
