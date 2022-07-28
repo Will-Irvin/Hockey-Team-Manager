@@ -108,6 +108,8 @@ public class TeamGUI implements Runnable {
     private static final String CREATE_SUCCESS = "Successfully Created ";
     private static final String UPDATE_SUCCESS = "Successfully Updated Changes";
     private static final String REG_LOSS = "Was this a regulation loss?";
+    private static final String EDIT_SKATER_CONFIRM = "Warning: Changing your skater's position and/or number will " +
+            "delete any lines that the skater is assigned to.\nAre you sure you would like to proceed?";
 
     // JLabel/JButton Display Strings
     private static final String CENTER = "Center:";
@@ -184,7 +186,7 @@ public class TeamGUI implements Runnable {
             "would like to change or delete.<hr>" + EDIT_INSTRUCTIONS;
     private static final String RESET_STATS_WARNING = "<html><center><hr>The button below will reset all stats for " +
             "your team, its players, and its special teams to 0.<br>This action cannot be undone after the fact and " +
-            "their previous stats will be lost.</html>";
+            "their previous stats will be lost unless you have a backup file.</html>";
     private static final String ENTER_LIVE_INSTRUCTIONS = "<html><center>This tab is best for watching the game live " +
             "and entering stats as the game progresses.<br>You must have created at least one of each type of line to" +
             " be able to use this tab.<hr>Any stats you update may display in some elements of the application; " +
@@ -200,7 +202,8 @@ public class TeamGUI implements Runnable {
             "your file has not been moved or altered, close the application, and try again.";
     private static final String TEXT_FILE_ERROR = "There was an issue interacting with the file. Please try again.";
     private static final String EMPTY_INPUTS = "Please enter a value in at least one of the boxes";
-    private static final String BLANK_UPDATED = " (Any blank fields have already been updated)";
+    private static final String BLANK_UPDATED = " (Any blank fields have already been updated in the application but " +
+            "not saved to the file)";
     private static final String PLAYER_NUMBER_DUPLICATE = "New player cannot share the same number as another player";
     private static final String PLAYER_DUPLICATE = "Selected players must be different";
     private static final String USE_ASSIST_1 = "Please select Assist 1 instead of Assist 2";
@@ -213,6 +216,10 @@ public class TeamGUI implements Runnable {
     private static final String ENTER_AFTER_REQS = "You must have at least 5 players and 1 goalie in order to enter " +
             "stats after a game.\nAt least one of your players must be a defenseman, and at least one of your players" +
             " must be a center.";
+    private static final String SPECIAL_TEAM_REQ = "You do not have the necessary special teams lines to record your" +
+            " penalties and power plays. Please create at least one Power Play Line and one Penalty Kill Line.";
+    private static final String ACTIVE_SP_TEAMS = "You currently have a power play or penalty kill active in the " +
+            "enter live tab. Please finish entering that before doing anything in this tab.";
     private static final String POS_PENALTY_LENGTH = "Penalty Duration Must Be Positive";
 
     // JTable Columns
@@ -1564,6 +1571,879 @@ public class TeamGUI implements Runnable {
 
         mainTabs.add("Manage Team", teamTabs);
 
+        // Manage Skaters
+
+        Container manageSkaterContent = new Container();
+        manageSkaterContent.setLayout(new BoxLayout(manageSkaterContent, BoxLayout.Y_AXIS));
+        skaterTabs = new JTabbedPane();
+        selectedSkaterLabel = new JLabel("Selected Skater:");
+        createPanelForContainer(new JComponent[]{selectedSkaterLabel, skaterOptions}, manageSkaterContent);
+        createPanelForContainer(new JComponent[]{skaterTabs}, manageSkaterContent);
+
+        // Create Skater
+
+        Container createSkater = new Container();
+        createSkater.setLayout(new BoxLayout(createSkater, BoxLayout.Y_AXIS));
+        JScrollPane createSkaterScroll = new JScrollPane(createSkater);
+
+        enterSkaterNameLabel = new JLabel(NAME_STRING);
+        enterSkaterName = new JTextField(ENTER_NAME_SIZE);
+        enterSkaterNumber = new JSlider(1, Player.PLAYER_NUM_MAX);
+        enterSkaterNumberLabel = new JLabel(PLAYER_NUMBER_STRING + "  " + enterSkaterNumber.getValue());
+        createPanelForContainer(new JComponent[]{enterSkaterNameLabel, enterSkaterName, enterSkaterNumberLabel,
+                        enterSkaterNumber}, createSkater);
+
+        // Displays currently selected value in the JLabel
+        enterSkaterNumber.addChangeListener(e ->
+                enterSkaterNumberLabel.setText(PLAYER_NUMBER_STRING + "  " + enterSkaterNumber.getValue()));
+
+        chooseStickHand = new JToggleButton(RIGHT_HANDED);
+        selectPosition = new JLabel("Select Player Position:");
+        createPanelForContainer(new JComponent[]{chooseStickHand, selectPosition, positionOptions}, createSkater);
+
+        // Changes text for JToggleButton to reflect user's choice
+        chooseStickHand.addActionListener(e -> {
+            if (chooseStickHand.isSelected()) {
+                chooseStickHand.setText(LEFT_HANDED);
+            } else {
+                chooseStickHand.setText(RIGHT_HANDED);
+            }
+        });
+
+        assignSkaterStats = new JToggleButton("Initialize Skater Stats");
+        createPanelForContainer(new JComponent[]{assignSkaterStats}, createSkater);
+
+        createPlayer = new JButton(CREATE_SKATER);
+        createPanelForContainer(new JComponent[]{createPlayer}, createSkater);
+
+        enterGoalsLabel = new JLabel(GOALS_STRING);
+        enterGoals = new JTextField(ENTER_STAT_SIZE);
+        enterAssistsLabel = new JLabel(ASSISTS_STRING);
+        enterAssists = new JTextField(ENTER_STAT_SIZE);
+        enterPMLabel = new JLabel(PM_STRING);
+        enterPlusMinus = new JTextField(ENTER_STAT_SIZE);
+        JPanel basicStatsPanel = createPanel(new JComponent[]{enterGoalsLabel, enterGoals,
+                enterAssistsLabel, enterAssists, enterPMLabel, enterPlusMinus});
+
+        enterHitsLabel = new JLabel(HITS_STRING);
+        enterHits = new JTextField(ENTER_STAT_SIZE);
+        enterPIMLabel = new JLabel(PIM_STRING);
+        enterPenaltyMinutes = new JTextField(ENTER_STAT_SIZE);
+        JPanel advancedStatsPanel = createPanel(new JComponent[]{enterHitsLabel, enterHits, enterPIMLabel,
+                enterPenaltyMinutes});
+
+        enterBlocksLabel = new JLabel(SHOT_BLOCK_STRING);
+        enterShotsBlocked = new JTextField(ENTER_STAT_SIZE);
+        JPanel defenseStatsPanel = createPanel(new JComponent[]{enterBlocksLabel, enterShotsBlocked});
+
+
+        enterFaceOffLabel = new JLabel(FACE_OFF_STRING);
+        enterFaceOffPercent = new JTextField(ENTER_STAT_SIZE);
+        enterFaceOffTotal = new JTextField(ENTER_STAT_SIZE);
+        JPanel centerStatsPanel =  createPanel(new JComponent[]{enterFaceOffLabel, enterFaceOffPercent,
+                enterFaceOffTotal});
+
+        assignSkaterStats.addActionListener(e -> {
+            if (assignSkaterStats.isSelected()) {
+                Position position = (Position) positionOptions.getSelectedItem();
+                createSkater.add(basicStatsPanel, createSkater.getComponentCount() - 1);
+                createSkater.add(advancedStatsPanel, createSkater.getComponentCount() - 1);
+                if (position == Position.Center) {
+                    createSkater.add(centerStatsPanel, createSkater.getComponentCount() - 1);
+                } else if (position == Position.Left_Defense || position == Position.Right_Defense) {
+                    createSkater.add(defenseStatsPanel, createSkater.getComponentCount() - 1);
+                }
+            } else {
+                createSkater.remove(basicStatsPanel);
+                createSkater.remove(advancedStatsPanel);
+                createSkater.remove(centerStatsPanel);
+                createSkater.remove(defenseStatsPanel);
+            }
+            mainFrame.repaint();
+        });
+
+        positionOptions.addItemListener(e -> {
+            if (assignSkaterStats.isSelected() && e.getStateChange() == ItemEvent.SELECTED) {
+                Position position = (Position) positionOptions.getSelectedItem();
+                createSkater.remove(centerStatsPanel);
+                createSkater.remove(defenseStatsPanel);
+                if (position == Position.Center) {
+                    createSkater.add(centerStatsPanel, createSkater.getComponentCount() - 1);
+                } else if (position == Position.Left_Defense || position == Position.Right_Defense) {
+                    createSkater.add(defenseStatsPanel, createSkater.getComponentCount() - 1);
+                }
+                mainFrame.repaint();
+            }
+        });
+
+        createPlayer.addActionListener(e -> {
+            String name = enterSkaterName.getText();
+            String stickHand;
+            Skater newSkater;
+            if (chooseStickHand.isSelected()) {
+                stickHand = Skater.STICK_LEFT;
+            } else {
+                stickHand = Skater.STICK_RIGHT;
+            }
+
+            Position position = (Position) positionOptions.getSelectedItem();
+            try {
+                if (assignSkaterStats.isSelected()) {
+                    int goals = Integer.parseInt(enterGoals.getText());
+                    int assists = Integer.parseInt(enterAssists.getText());
+                    int plusMinus = Integer.parseInt(enterPlusMinus.getText());
+                    int hits = Integer.parseInt(enterHits.getText());
+                    double penaltyMinutes = Double.parseDouble(enterPenaltyMinutes.getText());
+                    if (position == Position.Center) {
+                        double percent = Double.parseDouble(enterFaceOffPercent.getText());
+                        int total = Integer.parseInt(enterFaceOffTotal.getText());
+                        newSkater = new Center(name, enterSkaterNumber.getValue(), stickHand, goals, assists, plusMinus,
+                                hits, penaltyMinutes, percent, total);
+                    } else if (position == Position.Left_Defense || position == Position.Right_Defense) {
+                        int shotsBlocked = Integer.parseInt(enterShotsBlocked.getText());
+                        newSkater = new Defenseman(name, enterSkaterNumber.getValue(), stickHand, position, goals,
+                                assists, plusMinus, hits, penaltyMinutes, shotsBlocked);
+                    } else {
+                        newSkater = new Skater(name, enterSkaterNumber.getValue(), stickHand, position, goals, assists,
+                                plusMinus, hits, penaltyMinutes);
+                    }
+                } else {
+                    if (position == Position.Center) {
+                        newSkater = new Center(name, enterSkaterNumber.getValue(), stickHand);
+                    } else if (position == Position.Left_Defense || position == Position.Right_Defense) {
+                        newSkater = new Defenseman(name, enterSkaterNumber.getValue(), stickHand, position);
+                    } else {
+                        newSkater = new Skater(name, enterSkaterNumber.getValue(), stickHand, position);
+                    }
+                }
+            } catch (NumberFormatException ex) {
+                JOptionPane.showMessageDialog(mainFrame, NUMBER_ERROR, CREATE_SKATER, JOptionPane.ERROR_MESSAGE);
+                return;
+            } catch (IllegalArgumentException | NullPointerException ex) {
+                JOptionPane.showMessageDialog(mainFrame, ex.getMessage(), CREATE_SKATER, JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+            int index = team.addPlayer(newSkater);
+            if (index == -1) {
+                JOptionPane.showMessageDialog(mainFrame, PLAYER_NUMBER_DUPLICATE, CREATE_SKATER,
+                        JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+            updatePlayerComponents(null, newSkater, -1, index);
+
+            try {
+                updateFile();
+                JOptionPane.showMessageDialog(mainFrame, CREATE_SUCCESS + "Skater", CREATE_SKATER,
+                        JOptionPane.INFORMATION_MESSAGE);
+
+                // Reset Text Fields
+                enterSkaterName.setText("");
+                if (assignSkaterStats.isSelected()) {
+                    enterGoals.setText("");
+                    enterAssists.setText("");
+                    enterPlusMinus.setText("");
+                    enterHits.setText("");
+                    enterPenaltyMinutes.setText("");
+                    enterFaceOffPercent.setText("");
+                    enterFaceOffTotal.setText("");
+                    enterShotsBlocked.setText("");
+                }
+            } catch (IOException ex) {
+                JOptionPane.showMessageDialog(selectFrame, BIN_FILE_ERROR, CREATE_SKATER, JOptionPane.ERROR_MESSAGE);
+            } catch (Exception ex) {
+                JOptionPane.showMessageDialog(selectFrame, ex.getMessage(), CREATE_SKATER, JOptionPane.ERROR_MESSAGE);
+            }
+        });
+
+        skaterTabs.add(CREATE_SKATER, createSkaterScroll);
+
+        // Edit/Delete Skater
+
+        Container editSkaterContent = new Container();
+        editSkaterContent.setLayout(new BoxLayout(editSkaterContent, BoxLayout.Y_AXIS));
+
+        editSkaterInstructions = new JLabel(EDIT_PLAYER_INSTRUCTIONS);
+        createPanelForContainer(new JComponent[]{editSkaterInstructions}, editSkaterContent);
+
+        // Top Panel (name and number)
+
+        changeSkaterNameLabel = new JLabel(NAME_STRING);
+        changeSkaterName = new JTextField(ENTER_NAME_SIZE);
+        changeSkaterNumberCheck = new JCheckBox(CHANGE_NUMBER);
+        changeSkaterNumber = new JSlider(1, 99);
+
+        JPanel nameAndNumberPanel = createPanel(new JComponent[]{changeSkaterNameLabel, changeSkaterName,
+                changeSkaterNumberCheck});
+        editSkaterContent.add(nameAndNumberPanel);
+
+        // Adds/Removes proper components when user wants to change the player's number
+        changeSkaterNumberCheck.addActionListener(e -> {
+            if (changeSkaterNumberCheck.isSelected()) {
+                changeSkaterNumberCheck.setText(CHANGE_NUMBER + " " + changeSkaterNumber.getValue());
+                nameAndNumberPanel.add(changeSkaterNumber);
+            } else {
+                changeSkaterNumberCheck.setText(CHANGE_NUMBER);
+                nameAndNumberPanel.remove(changeSkaterNumber);
+            }
+            mainFrame.repaint();
+        });
+
+        // Updates label to display currently selected value
+        changeSkaterNumber.addChangeListener(e ->
+                changeSkaterNumberCheck.setText(CHANGE_NUMBER + " " + changeSkaterNumber.getValue()));
+
+        changePositionCheck = new JCheckBox(CHANGE_POSITION);
+        JPanel secondEditSkaterPanel = createPanel(new JComponent[]{changePositionCheck});
+        editSkaterContent.add(secondEditSkaterPanel);
+
+        changeStickHandLabel = new JLabel(STICK_HAND_STRING);
+        changeStickHand = new JCheckBox("Swap Stick Hand?");
+        createPanelForContainer(new JComponent[]{changeStickHandLabel, changeStickHand}, editSkaterContent);
+
+        // Adds position combo box if user wants to change player's position
+        changePositionCheck.addActionListener(e -> {
+            if (changePositionCheck.isSelected()) {
+                secondEditSkaterPanel.add(changePosition, 1);
+            } else {
+                secondEditSkaterPanel.remove(changePosition);
+            }
+            mainFrame.repaint();
+        });
+
+        changeGoalsLabel = new JLabel(GOALS_STRING);
+        changeGoals = new JTextField(ENTER_STAT_SIZE);
+        changeAssistsLabel = new JLabel(ASSISTS_STRING);
+        changeAssists = new JTextField(ENTER_STAT_SIZE);
+        changePMLabel = new JLabel(PM_STRING);
+        changePlusMinus = new JTextField(ENTER_STAT_SIZE);
+        createPanelForContainer(new JComponent[]{changeGoalsLabel, changeGoals, changeAssistsLabel, changeAssists,
+                changePMLabel, changePlusMinus}, editSkaterContent);
+
+        changeHitsLabel = new JLabel(HITS_STRING);
+        changeHits = new JTextField(ENTER_STAT_SIZE);
+        changePIMLabel = new JLabel(PIM_STRING);
+        changePenaltyMinutes = new JTextField(ENTER_STAT_SIZE);
+        createPanelForContainer(new JComponent[]{changeHitsLabel, changeHits, changePIMLabel, changePenaltyMinutes},
+                editSkaterContent);
+
+        editPlayer = new JButton(UPDATE);
+        createPanelForContainer(new JComponent[]{editPlayer}, editSkaterContent);
+
+        resetPlayerStats = new JButton("Reset Skater Stats");
+        createPanelForContainer(new JComponent[]{resetPlayerStats}, editSkaterContent);
+
+        deletePlayer = new JButton("Delete Selected Skater");
+        createPanelForContainer(new JComponent[]{deletePlayer}, editSkaterContent);
+
+        changeFaceOffLabel = new JLabel(FACE_OFF_STRING);
+        changeFaceOffPercent = new JTextField(ENTER_STAT_SIZE);
+        changeFaceOffTotal = new JTextField(ENTER_STAT_SIZE);
+        JPanel changeCenterPanel = createPanel(new JComponent[]{changeFaceOffLabel, changeFaceOffPercent,
+                changeFaceOffTotal});
+
+        changeBlocksLabel = new JLabel(SHOT_BLOCK_STRING);
+        changeShotsBlocked = new JTextField(ENTER_STAT_SIZE);
+        JPanel changeDefensePanel = createPanel(new JComponent[]{changeBlocksLabel, changeShotsBlocked});
+
+        // Updates stick hand swap button and adds proper components for a center or defenseman
+        skaterOptions.addItemListener(e -> {
+            Skater newSkater = (Skater) skaterOptions.getSelectedItem();
+            if (e.getStateChange() == ItemEvent.SELECTED && newSkater != null) {
+                editSkaterContent.remove(changeCenterPanel);
+                editSkaterContent.remove(changeDefensePanel);
+                changeStickHandLabel.setText(STICK_HAND_STRING + newSkater.getStickHand());
+                changePositionCheck.setText(CHANGE_POSITION + newSkater.getPosition());
+                viewSkaterStats.setText(newSkater.statsDisplay());
+                if (newSkater instanceof Center) {
+                    editSkaterContent.add(changeCenterPanel, editSkaterContent.getComponentCount() - 3);
+                } else if (newSkater instanceof Defenseman) {
+                    editSkaterContent.add(changeDefensePanel, editSkaterContent.getComponentCount() - 3);
+                }
+                mainFrame.repaint();
+            } else if (newSkater == null) {
+                changeStickHandLabel.setText(STICK_HAND_STRING);
+                changePositionCheck.setText(CHANGE_POSITION);
+                viewSkaterStats.setText("");
+            }
+        });
+
+        // Updates any changes being made to a skater in the edit skaters tab
+        editPlayer.addActionListener(e -> {
+            Skater editingSkater = (Skater) skaterOptions.getSelectedItem();
+            if (editingSkater == null) {  // Did not choose a skater
+                JOptionPane.showMessageDialog(mainFrame, SELECT, EDIT_SKATER, JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+            boolean change = false;  // Used to keep track of whether the user actually makes a change
+            try {
+                // Name
+                String name = changeSkaterName.getText();
+                if (!name.isBlank()) {
+                    editingSkater.setName(name);
+                    changeSkaterName.setText("");
+                    change = true;
+                }
+                // Stick Hand
+                if (changeStickHand.isSelected()) {
+                    if (editingSkater.getStickHand().equals(Skater.STICK_LEFT)) {
+                        editingSkater.setStickHand(Skater.STICK_RIGHT);
+                    } else {
+                        editingSkater.setStickHand(Skater.STICK_LEFT);
+                    }
+                    changeStickHand.setSelected(false);
+                    changeStickHandLabel.setText(STICK_HAND_STRING + editingSkater.getStickHand());
+                    change = true;
+                }
+                // Stats
+                String goalsText = changeGoals.getText();
+                String assistsText = changeAssists.getText();
+                String pmText = changePlusMinus.getText();
+                String hitsText = changeHits.getText();
+                String pimText = changePenaltyMinutes.getText();
+                if (!goalsText.isBlank()) {
+                    editingSkater.setGoals(Integer.parseInt(goalsText));
+                    changeGoals.setText("");
+                    change = true;
+                }
+                if (!assistsText.isBlank()) {
+                    editingSkater.setAssists(Integer.parseInt(assistsText));
+                    changeAssists.setText("");
+                    change = true;
+                }
+                if (!pmText.isBlank()) {
+                    editingSkater.setPlusMinus(Integer.parseInt(pmText));
+                    changePlusMinus.setText("");
+                    change = true;
+                }
+                if (!hitsText.isBlank()) {
+                    editingSkater.setHits(Integer.parseInt(hitsText));
+                    changeHits.setText("");
+                    change = true;
+                }
+                if (!pimText.isBlank()) {
+                    editingSkater.setPenaltyMinutes(Double.parseDouble(pimText));
+                    changePenaltyMinutes.setText("");
+                    change = true;
+                }
+                if (editingSkater instanceof Center c) {
+                    String faceOffPercent = changeFaceOffPercent.getText();
+                    if (!faceOffPercent.isBlank()) {
+                        c.setFaceOffPercent(Double.parseDouble(faceOffPercent),
+                                Integer.parseInt(changeFaceOffTotal.getText()));
+                        changeFaceOffPercent.setText("");
+                        changeFaceOffTotal.setText("");
+                        change = true;
+                    }
+                }
+                if (editingSkater instanceof Defenseman de) {
+                    String shotsBlockedText = changeShotsBlocked.getText();
+                    if (!shotsBlockedText.isBlank()) {
+                        de.setShotsBlocked(Integer.parseInt(shotsBlockedText));
+                        changeShotsBlocked.setText("");
+                        change = true;
+                    }
+                }
+            } catch (NumberFormatException ex) {
+                JOptionPane.showMessageDialog(mainFrame, NUMBER_ERROR + BLANK_UPDATED, EDIT_SKATER,
+                        JOptionPane.ERROR_MESSAGE);
+                return;
+            } catch (IllegalArgumentException | NullPointerException ex) {
+                JOptionPane.showMessageDialog(mainFrame, ex.getMessage() + BLANK_UPDATED, EDIT_SKATER,
+                        JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+
+            Skater newSkater = null;  // Skater where changes to position or player number will be made
+
+            /*
+               If position needs to be changed, may need to create an entirely new skater
+               This segment handles all the different possibilities for changing a player's position
+             */
+            if (changePositionCheck.isSelected()) {
+                Position newPosition = (Position) changePosition.getSelectedItem();
+                if (editingSkater instanceof Center) {
+                    if (newPosition == Position.Left_Wing || newPosition == Position.Right_Wing) {
+                        newSkater = new Skater(editingSkater);
+                        newSkater.setPosition(newPosition);
+                        if (changeSkaterNumberCheck.isSelected()) {
+                            newSkater.setPlayerNumber(changeSkaterNumber.getValue());
+                        }
+                        change = true;
+                    } else if (newPosition == Position.Right_Defense || newPosition == Position.Left_Defense) {
+                        newSkater = new Defenseman(editingSkater);
+                        newSkater.setPosition(newPosition);
+                        if (changeSkaterNumberCheck.isSelected()) {
+                            newSkater.setPlayerNumber(changeSkaterNumber.getValue());
+                        }
+                        change = true;
+                    }
+                } else if (editingSkater instanceof Defenseman) {
+                    if (newPosition == Position.Center) {
+                        newSkater = new Center(editingSkater);
+                        if (changeSkaterNumberCheck.isSelected()) {
+                            newSkater.setPlayerNumber(changeSkaterNumber.getValue());
+                        }
+                    } else if (newPosition == Position.Left_Wing || newPosition == Position.Right_Wing) {
+                        newSkater = new Skater(editingSkater);
+                        newSkater.setPosition(newPosition);
+                        if (changeSkaterNumberCheck.isSelected()) {
+                            newSkater.setPlayerNumber(changeSkaterNumber.getValue());
+                        }
+                    } else {
+                        editingSkater.setPosition(newPosition);
+                    }
+                    change = true;
+                } else {
+                    if (newPosition == Position.Center) {
+                        newSkater = new Center(editingSkater);
+                        if (changeSkaterNumberCheck.isSelected()) {
+                            newSkater.setPlayerNumber(changeSkaterNumber.getValue());
+                        }
+                    } else if (newPosition == Position.Left_Defense || newPosition == Position.Right_Defense) {
+                        newSkater = new Defenseman(editingSkater);
+                        newSkater.setPosition(newPosition);
+                        if (changeSkaterNumberCheck.isSelected()) {
+                            newSkater.setPlayerNumber(changeSkaterNumber.getValue());
+                        }
+                    } else {
+                        editingSkater.setPosition(newPosition);
+                    }
+                    change = true;
+                }
+            } else if (changeSkaterNumberCheck.isSelected()) {
+                if (editingSkater instanceof Center) {
+                    newSkater = new Center(editingSkater);
+                } else if (editingSkater instanceof  Defenseman) {
+                    newSkater = new Defenseman(editingSkater);
+                } else {
+                    newSkater = new Skater(editingSkater);
+                }
+                newSkater.setPlayerNumber(changeSkaterNumber.getValue());
+                change = true;
+            }
+
+            if (change) {  // Update GUI components, file, and the team lists if necessary
+                int oldIndex = skaterOptions.getSelectedIndex() - 1;  // Index where the skater used to be
+
+                if (newSkater != null) {
+                    int input;
+                    do {
+                        input = JOptionPane.showConfirmDialog(mainFrame, EDIT_SKATER_CONFIRM, EDIT_SKATER,
+                                JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
+                    } while (input != JOptionPane.YES_OPTION && input != JOptionPane.NO_OPTION);
+                    if (input == JOptionPane.NO_OPTION) {
+                        return;
+                    }
+                    int index = team.changePlayer(editingSkater, newSkater);
+                    if (index == -1) {
+                        JOptionPane.showMessageDialog(mainFrame, PLAYER_NUMBER_DUPLICATE, EDIT_SKATER,
+                                JOptionPane.ERROR_MESSAGE);
+                        return;
+                    }
+                    updatePlayerComponents(editingSkater, newSkater, oldIndex, index);
+                    changeSkaterNumberCheck.setSelected(false);
+                    changeSkaterNumberCheck.setText(CHANGE_NUMBER);
+                    nameAndNumberPanel.remove(changeSkaterNumber);
+                } else {
+                    updatePlayerComponents(null, editingSkater, oldIndex, oldIndex);
+                    changePositionCheck.setText(CHANGE_POSITION + editingSkater.getPosition());
+                }
+                try {
+                    updateFile();
+                    JOptionPane.showMessageDialog(mainFrame, UPDATE_SUCCESS, EDIT_SKATER,
+                            JOptionPane.INFORMATION_MESSAGE);
+                } catch (IOException ex) {
+                    JOptionPane.showMessageDialog(mainFrame, BIN_FILE_ERROR, EDIT_SKATER, JOptionPane.ERROR_MESSAGE);
+                } catch (Exception ex) {
+                    JOptionPane.showMessageDialog(mainFrame, ex.getMessage(), EDIT_SKATER, JOptionPane.ERROR_MESSAGE);
+                }
+            } else {  // Displays message telling the user to enter something
+                JOptionPane.showMessageDialog(mainFrame, EMPTY_INPUTS, EDIT_SKATER, JOptionPane.ERROR_MESSAGE);
+            }
+        });
+
+        // Confirms user's selection and resets stats of the selected player
+        resetPlayerStats.addActionListener(e -> {
+            Skater selectedSkater = (Skater) skaterOptions.getSelectedItem();
+            if (selectedSkater != null) {
+                int confirm = JOptionPane.showConfirmDialog(mainFrame, RESET_CONFIRM +
+                        selectedSkater.getName() + TO_ZERO, EDIT_SKATER, JOptionPane.YES_NO_OPTION);
+                if (confirm == JOptionPane.YES_OPTION) {
+                    selectedSkater.resetStats();
+                    updatePlayerComponents(null, selectedSkater, skaterOptions.getSelectedIndex() - 1,
+                            skaterOptions.getSelectedIndex() - 1);
+                    try {
+                        updateFile();
+                        JOptionPane.showMessageDialog(mainFrame, UPDATE_SUCCESS, EDIT_SKATER,
+                                JOptionPane.INFORMATION_MESSAGE);
+                    } catch (IOException ex) {
+                        JOptionPane.showMessageDialog(mainFrame, BIN_FILE_ERROR, EDIT_SKATER,
+                                JOptionPane.ERROR_MESSAGE);
+                    } catch (Exception ex) {
+                        JOptionPane.showMessageDialog(mainFrame, ex.getMessage(), EDIT_SKATER,
+                                JOptionPane.ERROR_MESSAGE);
+                    }
+                }
+            } else {
+                JOptionPane.showMessageDialog(mainFrame, SELECT, EDIT_SKATER, JOptionPane.ERROR_MESSAGE);
+            }
+        });
+
+        // Deletes the selected player from the team and any GUI elements
+        deletePlayer.addActionListener(e -> {
+            Skater deletingSkater = (Skater) skaterOptions.getSelectedItem();
+            if (deletingSkater == null) {
+                JOptionPane.showMessageDialog(mainFrame, SELECT, DELETE_SKATER, JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+            int selection = JOptionPane.showConfirmDialog(mainFrame, CONFIRM_DELETE + deletingSkater.getName()
+                    + "?", DELETE_SKATER, JOptionPane.YES_NO_OPTION);
+            if (selection == JOptionPane.YES_OPTION) {
+                team.removePlayer(deletingSkater);
+                updatePlayerComponents(deletingSkater, null, skaterOptions.getSelectedIndex() - 1,
+                        -1);
+
+                try {
+                    updateFile();
+                    JOptionPane.showMessageDialog(mainFrame, UPDATE_SUCCESS, DELETE_SKATER,
+                            JOptionPane.INFORMATION_MESSAGE);
+                } catch (IOException ex) {
+                    JOptionPane.showMessageDialog(mainFrame, BIN_FILE_ERROR, DELETE_SKATER, JOptionPane.ERROR_MESSAGE);
+                } catch (Exception ex) {
+                    JOptionPane.showMessageDialog(mainFrame, ex.getMessage(), DELETE_SKATER, JOptionPane.ERROR_MESSAGE);
+                }
+            }
+        });
+
+        skaterTabs.add("Edit or Delete Skaters", editSkaterContent);
+
+        // View Skater Stats
+
+        viewSkaterStats = new JTextArea();
+        viewSkaterStats.setEditable(false);
+        skaterTabs.add("View Skater Stats", viewSkaterStats);
+
+        mainTabs.add("Manage Skaters", manageSkaterContent);
+
+        // Manage Goalies
+
+        Container manageGoalieContent = new Container();
+        manageGoalieContent.setLayout(new BoxLayout(manageGoalieContent, BoxLayout.Y_AXIS));
+        selectedGoalieLabel = new JLabel(SELECT_GOALIE);
+        createPanelForContainer(new JComponent[]{selectedGoalieLabel, goalieOptions}, manageGoalieContent);
+        goalieTabs = new JTabbedPane();
+        createPanelForContainer(new JComponent[]{goalieTabs}, manageGoalieContent);
+
+        // Create Goalie
+        Container createGoalieContent = new Container();
+        createGoalieContent.setLayout(new BoxLayout(createGoalieContent, BoxLayout.Y_AXIS));
+
+        enterGoalieNameLabel = new JLabel(NAME_STRING);
+        enterGoalieName = new JTextField(ENTER_NAME_SIZE);
+        selectGoalieNumber = new JSlider(1, 99);
+        enterGoalieNumberLabel = new JLabel(PLAYER_NUMBER_STRING + " " + selectGoalieNumber.getValue());
+        createPanelForContainer(new JComponent[]{enterGoalieNameLabel, enterGoalieName, enterGoalieNumberLabel,
+                selectGoalieNumber}, createGoalieContent);
+
+        // Updates value displayed by select number value
+        selectGoalieNumber.addChangeListener(e ->
+                enterGoalieNumberLabel.setText(PLAYER_NUMBER_STRING + " " + selectGoalieNumber.getValue()));
+
+        assignGoalieStats = new JToggleButton("Initialize Goalie Stats");
+        createPanelForContainer(new JComponent[]{assignGoalieStats}, createGoalieContent);
+
+        // Enter Record
+        enterGoalieWinsLabel = new JLabel(WINS_STRING);
+        enterGoalieWins = new JTextField(ENTER_STAT_SIZE);
+        enterGoalieLossesLabel = new JLabel(LOSSES_STRING);
+        enterGoalieLosses = new JTextField(ENTER_STAT_SIZE);
+        enterGoalieOTLabel = new JLabel(OT_STRING);
+        enterGoalieOTLosses = new JTextField(ENTER_STAT_SIZE);
+        JPanel goalieRecordPanel = createPanel(new JComponent[]{enterGoalieWinsLabel, enterGoalieWins,
+                enterGoalieLossesLabel, enterGoalieLosses, enterGoalieOTLabel, enterGoalieOTLosses});
+
+        // Other Stats
+        enterShutouts = new JSlider(0, 20);
+        enterShutoutsLabel = new JLabel(SHUTOUTS_STRING + " " + enterShutouts.getValue());
+        // Updates value displayed by enter shutouts label
+        enterShutouts.addChangeListener(e ->
+                enterShutoutsLabel.setText(SHUTOUTS_STRING + " " + enterShutouts.getValue()));
+        enterSVPercentageLabel = new JLabel(SV_PERCENT_STRING);
+        enterSavePercentage = new JTextField(ENTER_STAT_SIZE);
+        enterGoalieShotsAgainst = new JTextField(ENTER_STAT_SIZE);
+        JPanel otherGoalieStatsPanel = createPanel(new JComponent[]{enterShutoutsLabel, enterShutouts,
+                enterSVPercentageLabel, enterSavePercentage, enterGoalieShotsAgainst});
+
+        createGoalie = new JButton(CREATE_GOALIE);
+        createPanelForContainer(new JComponent[]{createGoalie}, createGoalieContent);
+
+        assignGoalieStats.addActionListener(e -> {
+            if (assignGoalieStats.isSelected()) {
+                createGoalieContent.add(goalieRecordPanel, createGoalieContent.getComponentCount() - 1);
+                createGoalieContent.add(otherGoalieStatsPanel, createGoalieContent.getComponentCount() - 1);
+            } else {
+                createGoalieContent.remove(goalieRecordPanel);
+                createGoalieContent.remove(otherGoalieStatsPanel);
+            }
+            mainFrame.repaint();
+        });
+
+        /*
+           Parses stats from relevant text fields, creates new goalie, adds it to the team, and updates relevant GUI
+           elements.
+         */
+        createGoalie.addActionListener(e -> {
+            String name = enterGoalieName.getText();
+            int goalieNum = selectGoalieNumber.getValue();
+            Goalie newGoalie;
+            try {
+                if (assignGoalieStats.isSelected()) {
+                    int wins = Integer.parseInt(enterGoalieWins.getText());
+                    int losses = Integer.parseInt(enterGoalieLosses.getText());
+                    int otLosses = Integer.parseInt(enterGoalieOTLosses.getText());
+                    int shutouts = enterShutouts.getValue();
+                    double savePercent = Double.parseDouble(enterSavePercentage.getText());
+                    int shotsFaced = Integer.parseInt(enterGoalieShotsAgainst.getText());
+                    newGoalie = new Goalie(name, goalieNum, savePercent, shotsFaced, wins, losses, otLosses, shutouts);
+                } else {
+                    newGoalie = new Goalie(name, goalieNum);
+                }
+            } catch (NumberFormatException ex) {
+                JOptionPane.showMessageDialog(mainFrame, NUMBER_ERROR, CREATE_GOALIE, JOptionPane.ERROR_MESSAGE);
+                return;
+            } catch (NullPointerException | IllegalArgumentException ex) {
+                JOptionPane.showMessageDialog(mainFrame, ex.getMessage(), CREATE_GOALIE, JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+
+            int index = team.addPlayer(newGoalie);
+            if (index == -1) {
+                JOptionPane.showMessageDialog(mainFrame, PLAYER_NUMBER_DUPLICATE, CREATE_GOALIE,
+                        JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+
+            try {
+                updateFile();
+                updatePlayerComponents(null, newGoalie, -1, index);
+                enterGoalieName.setText("");
+                enterGoalieWins.setText("");
+                enterGoalieLosses.setText("");
+                enterGoalieOTLosses.setText("");
+                enterSavePercentage.setText("");
+                enterGoalieShotsAgainst.setText("");
+                JOptionPane.showMessageDialog(mainFrame, CREATE_SUCCESS + "Goalie", CREATE_GOALIE,
+                        JOptionPane.INFORMATION_MESSAGE);
+            } catch (IOException ex) {
+                JOptionPane.showMessageDialog(mainFrame, BIN_FILE_ERROR, CREATE_GOALIE, JOptionPane.ERROR_MESSAGE);
+            } catch (Exception ex) {
+                JOptionPane.showMessageDialog(mainFrame, ex.getMessage(), CREATE_GOALIE, JOptionPane.ERROR_MESSAGE);
+            }
+        });
+
+        goalieTabs.add(CREATE_GOALIE, createGoalieContent);
+
+        // Edit/Delete Goalie
+        Container editGoalieContent = new Container();
+        editGoalieContent.setLayout(new BoxLayout(editGoalieContent, BoxLayout.Y_AXIS));
+
+        editGoalieInstructions = new JLabel(EDIT_PLAYER_INSTRUCTIONS);
+        createPanelForContainer(new JComponent[]{editGoalieInstructions}, editGoalieContent);
+        changeGoalieNameLabel = new JLabel(NAME_STRING);
+        changeGoalieName = new JTextField(ENTER_NAME_SIZE);
+        changeGoalieNumberCheck = new JCheckBox(CHANGE_NUMBER);
+        changeGoalieNumber = new JSlider(1, Player.PLAYER_NUM_MAX);
+        JPanel changeBasicStatsPanel = createPanel(new JComponent[]{changeGoalieNameLabel, changeGoalieName,
+                changeGoalieNumberCheck});
+        editGoalieContent.add(changeBasicStatsPanel);
+
+        // Displays number slider when user wants to change the goalie's number
+        changeGoalieNumberCheck.addActionListener(e -> {
+            if (changeGoalieNumberCheck.isSelected()) {
+                changeGoalieNumberCheck.setText(CHANGE_NUMBER + " " + changeGoalieNumber.getValue());
+                changeBasicStatsPanel.add(changeGoalieNumber);
+            } else {
+                changeGoalieNumberCheck.setText(CHANGE_NUMBER);
+                changeBasicStatsPanel.remove(changeGoalieNumber);
+            }
+            mainFrame.repaint();
+        });
+
+        // Updates value of check box text to reflect current value of the slider
+        changeGoalieNumber.addChangeListener(e ->
+                changeGoalieNumberCheck.setText(CHANGE_NUMBER + " " + changeGoalieNumber.getValue()));
+
+        changeGoalieWinsLabel = new JLabel(WINS_STRING);
+        changeGoalieWins = new JTextField(ENTER_STAT_SIZE);
+        changeGoalieLossesLabel = new JLabel(LOSSES_STRING);
+        changeGoalieLosses = new JTextField(ENTER_STAT_SIZE);
+        changeGoalieOTLabel = new JLabel(OT_STRING);
+        changeGoalieOTLosses = new JTextField(ENTER_STAT_SIZE);
+        createPanelForContainer(new JComponent[]{changeGoalieWinsLabel, changeGoalieWins, changeGoalieLossesLabel,
+                changeGoalieLosses, changeGoalieOTLabel, changeGoalieOTLosses}, editGoalieContent);
+
+        changeShutoutsLabel = new JLabel("Enter Shutouts:");
+        changeShutouts = new JTextField(ENTER_STAT_SIZE);
+        changeSVPercentageLabel = new JLabel(SV_PERCENT_STRING);
+        changeSavePercentage = new JTextField(ENTER_STAT_SIZE);
+        changeGoalieShotsAgainst = new JTextField(ENTER_STAT_SIZE);
+        createPanelForContainer(new JComponent[]{changeShutoutsLabel, changeShutouts, changeSVPercentageLabel,
+                changeSavePercentage, changeGoalieShotsAgainst}, editGoalieContent);
+
+        editGoalie = new JButton(UPDATE);
+        createPanelForContainer(new JComponent[]{editGoalie}, editGoalieContent);
+        resetGoalieStats = new JButton("Reset Goalie Stats");
+        createPanelForContainer(new JComponent[]{resetGoalieStats}, editGoalieContent);
+        deleteGoalie = new JButton("Delete Selected Goalie");
+        createPanelForContainer(new JComponent[]{deleteGoalie}, editGoalieContent);
+
+        editGoalie.addActionListener(e -> {
+            Goalie editingGoalie = (Goalie) goalieOptions.getSelectedItem();
+            if (editingGoalie == null) {
+                JOptionPane.showMessageDialog(mainFrame, SELECT, EDIT_GOALIE, JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+
+            String name = changeGoalieName.getText();
+            String wins = changeGoalieWins.getText();
+            String losses = changeGoalieLosses.getText();
+            String otLosses = changeGoalieOTLosses.getText();
+            String shutouts = changeShutouts.getText();
+            String svPercent = changeSavePercentage.getText();
+            String shotsFaced = changeGoalieShotsAgainst.getText();
+            try {
+                if (!name.isBlank()) {
+                    editingGoalie.setName(name);
+                    changeGoalieName.setText("");
+                }
+                if (!wins.isBlank()) {
+                    editingGoalie.setWins(Integer.parseInt(wins));
+                    changeGoalieWins.setText("");
+                }
+                if (!losses.isBlank()) {
+                    editingGoalie.setLosses(Integer.parseInt(losses));
+                    changeGoalieLosses.setText("");
+                }
+                if (!otLosses.isBlank()) {
+                    editingGoalie.setOtLosses(Integer.parseInt(otLosses));
+                    changeGoalieOTLosses.setText("");
+                }
+                if (!shutouts.isBlank()) {
+                    editingGoalie.setShutouts(Integer.parseInt(shutouts));
+                    changeShutouts.setText("");
+                }
+                if (!svPercent.isBlank()) {
+                    editingGoalie.setSavePercentage(Double.parseDouble(svPercent), Integer.parseInt(shotsFaced));
+                    changeSavePercentage.setText("");
+                    changeGoalieShotsAgainst.setText("");
+                }
+            } catch (NumberFormatException ex) {
+                JOptionPane.showMessageDialog(mainFrame, NUMBER_ERROR, EDIT_GOALIE, JOptionPane.ERROR_MESSAGE);
+                return;
+            } catch (NullPointerException | IllegalArgumentException ex) {
+                JOptionPane.showMessageDialog(mainFrame, ex.getMessage(), EDIT_GOALIE, JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+            Goalie newGoalie = null;
+
+            if (changeGoalieNumberCheck.isSelected()) {
+                newGoalie = new Goalie(editingGoalie);
+                newGoalie.setPlayerNumber(changeGoalieNumber.getValue());
+            }
+
+            int oldIndex = goalieOptions.getSelectedIndex() - 1;
+            if (newGoalie != null) {
+                int index = team.changePlayer(editingGoalie, newGoalie);
+                if (index == -1) {
+                    JOptionPane.showMessageDialog(mainFrame, PLAYER_NUMBER_DUPLICATE, EDIT_GOALIE,
+                            JOptionPane.ERROR_MESSAGE);
+                    return;
+                }
+                updatePlayerComponents(editingGoalie, newGoalie, oldIndex, index);
+            } else {
+                updatePlayerComponents(null, editingGoalie, oldIndex, oldIndex);
+            }
+
+            try {
+                updateFile();
+                JOptionPane.showMessageDialog(mainFrame, UPDATE_SUCCESS, EDIT_GOALIE, JOptionPane.INFORMATION_MESSAGE);
+            } catch (IOException ex) {
+                JOptionPane.showMessageDialog(mainFrame, BIN_FILE_ERROR, EDIT_GOALIE, JOptionPane.ERROR_MESSAGE);
+            } catch (Exception ex) {
+                JOptionPane.showMessageDialog(mainFrame, ex.getMessage(), EDIT_GOALIE, JOptionPane.ERROR_MESSAGE);
+            }
+        });
+
+        resetGoalieStats.addActionListener(e -> {
+            Goalie editingGoalie = (Goalie) goalieOptions.getSelectedItem();
+            if (editingGoalie == null) {
+                JOptionPane.showMessageDialog(mainFrame, SELECT, EDIT_GOALIE, JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+
+            int confirm = JOptionPane.showConfirmDialog(mainFrame, RESET_CONFIRM + editingGoalie.getName() +
+                    TO_ZERO, EDIT_GOALIE, JOptionPane.YES_NO_OPTION);
+            if (confirm == JOptionPane.YES_OPTION) {
+                editingGoalie.resetStats();
+                updatePlayerComponents(null, editingGoalie, goalieOptions.getSelectedIndex() - 1,
+                        goalieOptions.getSelectedIndex() - 1);
+                try {
+                    updateFile();
+                    JOptionPane.showMessageDialog(mainFrame, UPDATE_SUCCESS, EDIT_GOALIE,
+                            JOptionPane.INFORMATION_MESSAGE);
+                } catch (IOException ex) {
+                    JOptionPane.showMessageDialog(mainFrame, BIN_FILE_ERROR, EDIT_GOALIE, JOptionPane.ERROR_MESSAGE);
+                } catch (Exception ex) {
+                    JOptionPane.showMessageDialog(mainFrame, ex.getMessage(), EDIT_GOALIE, JOptionPane.ERROR_MESSAGE);
+                }
+            }
+        });
+
+        deleteGoalie.addActionListener(e -> {
+            Goalie deletingGoalie = (Goalie) goalieOptions.getSelectedItem();
+            if (deletingGoalie == null) {
+                JOptionPane.showMessageDialog(mainFrame, SELECT, DELETE_GOALIE, JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+
+            int confirm = JOptionPane.showConfirmDialog(mainFrame, CONFIRM_DELETE + deletingGoalie.getName()
+                    + "?", DELETE_GOALIE, JOptionPane.YES_NO_OPTION);
+            if (confirm == JOptionPane.YES_OPTION) {
+                team.removePlayer(deletingGoalie);
+                updatePlayerComponents(deletingGoalie, null, goalieOptions.getSelectedIndex() - 1,
+                        -1);
+                try {
+                    updateFile();
+                    JOptionPane.showMessageDialog(mainFrame, UPDATE_SUCCESS, DELETE_GOALIE,
+                            JOptionPane.INFORMATION_MESSAGE);
+                } catch (IOException ex) {
+                    JOptionPane.showMessageDialog(mainFrame, BIN_FILE_ERROR, DELETE_GOALIE, JOptionPane.ERROR_MESSAGE);
+                } catch (Exception ex) {
+                    JOptionPane.showMessageDialog(mainFrame, ex.getMessage(), DELETE_GOALIE, JOptionPane.ERROR_MESSAGE);
+                }
+            }
+        });
+
+        goalieTabs.add("Edit or Delete Goalie", editGoalieContent);
+
+        // View Goalie Stats
+        viewGoalieStats = new JTextArea();
+        viewGoalieStats.setEditable(false);
+        goalieTabs.add("View Goalie Stats", viewGoalieStats);
+
+        // Updates view goalie stats text area with proper stats
+        goalieOptions.addItemListener(e -> {
+            Goalie selectedGoalie = (Goalie) goalieOptions.getSelectedItem();
+            if (e.getStateChange() == ItemEvent.SELECTED && selectedGoalie != null) {
+                viewGoalieStats.setText(selectedGoalie.statsDisplay());
+            } else if (selectedGoalie == null) {
+                viewGoalieStats.setText("");
+            }
+            mainFrame.repaint();
+        });
+
+        mainTabs.add("Manage Goalies", manageGoalieContent);
+
         // Manage Lines
 
         Container mainLineContainer = new Container();
@@ -1740,7 +2620,7 @@ public class TeamGUI implements Runnable {
                 try {
                     newLine = new OffenseLine(lineName.getText(), (Center) centerOptions.getSelectedItem(),
                             (Skater) pickLeftWing.getSelectedItem(), (Skater) pickRightWing.getSelectedItem());
-                    
+
                 } catch (IllegalArgumentException | NullPointerException ex) {
                     JOptionPane.showMessageDialog(mainFrame, ex.getMessage(), CREATE_LINE,
                             JOptionPane.ERROR_MESSAGE);
@@ -1759,7 +2639,7 @@ public class TeamGUI implements Runnable {
                     if (enterStatsToggle.isSelected()) {
                         double ppPercentage = Double.parseDouble(enterSuccessPercentage.getText());
                         int numOpps = Integer.parseInt(enterNumOpps.getText());
-                        newLine = new PPLine(lineName.getText(), (Center) centerOptions.getSelectedItem(), 
+                        newLine = new PPLine(lineName.getText(), (Center) centerOptions.getSelectedItem(),
                                 (Skater) pickLeftWing.getSelectedItem(), (Skater) pickRightWing.getSelectedItem(),
                                 (Defenseman) pickLeftDe.getSelectedItem(), (Defenseman) pickRightDe.getSelectedItem(),
                                 ppPercentage, numOpps);
@@ -1782,7 +2662,7 @@ public class TeamGUI implements Runnable {
                     if (enterStatsToggle.isSelected()) {
                         double pkPercentage = Double.parseDouble(enterSuccessPercentage.getText());
                         int numOpps = Integer.parseInt(enterNumOpps.getText());
-                        newLine = new PKLine(lineName.getText(), (Skater) pickLeftWing.getSelectedItem(), 
+                        newLine = new PKLine(lineName.getText(), (Skater) pickLeftWing.getSelectedItem(),
                                 (Skater) pickRightWing.getSelectedItem(), (Defenseman) pickLeftDe.getSelectedItem(),
                                 (Defenseman) pickRightDe.getSelectedItem(), pkPercentage, numOpps);
                     } else {
@@ -2200,881 +3080,6 @@ public class TeamGUI implements Runnable {
         lineTabs.add("View Lines", viewLinesContent);
 
         mainTabs.add("Manage Lines", lineContainerScroll);
-
-        // Manage Skaters
-
-        Container manageSkaterContent = new Container();
-        manageSkaterContent.setLayout(new BoxLayout(manageSkaterContent, BoxLayout.Y_AXIS));
-        skaterTabs = new JTabbedPane();
-        selectedSkaterLabel = new JLabel("Selected Skater:");
-        createPanelForContainer(new JComponent[]{selectedSkaterLabel, skaterOptions}, manageSkaterContent);
-        createPanelForContainer(new JComponent[]{skaterTabs}, manageSkaterContent);
-
-        // Create Skater
-
-        Container createSkater = new Container();
-        createSkater.setLayout(new BoxLayout(createSkater, BoxLayout.Y_AXIS));
-        JScrollPane createSkaterScroll = new JScrollPane(createSkater);
-
-        enterSkaterNameLabel = new JLabel(NAME_STRING);
-        enterSkaterName = new JTextField(ENTER_NAME_SIZE);
-        enterSkaterNumber = new JSlider(1, Player.PLAYER_NUM_MAX);
-        enterSkaterNumberLabel = new JLabel(PLAYER_NUMBER_STRING + "  " + enterSkaterNumber.getValue());
-        createPanelForContainer(new JComponent[]{enterSkaterNameLabel, enterSkaterName, enterSkaterNumberLabel,
-                        enterSkaterNumber}, createSkater);
-
-        // Displays currently selected value in the JLabel
-        enterSkaterNumber.addChangeListener(e ->
-                enterSkaterNumberLabel.setText(PLAYER_NUMBER_STRING + "  " + enterSkaterNumber.getValue()));
-
-        chooseStickHand = new JToggleButton(RIGHT_HANDED);
-        selectPosition = new JLabel("Select Player Position:");
-        createPanelForContainer(new JComponent[]{chooseStickHand, selectPosition, positionOptions}, createSkater);
-
-        // Changes text for JToggleButton to reflect user's choice
-        chooseStickHand.addActionListener(e -> {
-            if (chooseStickHand.isSelected()) {
-                chooseStickHand.setText(LEFT_HANDED);
-            } else {
-                chooseStickHand.setText(RIGHT_HANDED);
-            }
-        });
-
-        assignSkaterStats = new JToggleButton("Initialize Skater Stats");
-        createPanelForContainer(new JComponent[]{assignSkaterStats}, createSkater);
-
-        createPlayer = new JButton(CREATE_SKATER);
-        createPanelForContainer(new JComponent[]{createPlayer}, createSkater);
-
-        enterGoalsLabel = new JLabel(GOALS_STRING);
-        enterGoals = new JTextField(ENTER_STAT_SIZE);
-        enterAssistsLabel = new JLabel(ASSISTS_STRING);
-        enterAssists = new JTextField(ENTER_STAT_SIZE);
-        enterPMLabel = new JLabel(PM_STRING);
-        enterPlusMinus = new JTextField(ENTER_STAT_SIZE);
-        JPanel basicStatsPanel = createPanel(new JComponent[]{enterGoalsLabel, enterGoals,
-                enterAssistsLabel, enterAssists, enterPMLabel, enterPlusMinus});
-
-        enterHitsLabel = new JLabel(HITS_STRING);
-        enterHits = new JTextField(ENTER_STAT_SIZE);
-        enterPIMLabel = new JLabel(PIM_STRING);
-        enterPenaltyMinutes = new JTextField(ENTER_STAT_SIZE);
-        JPanel advancedStatsPanel = createPanel(new JComponent[]{enterHitsLabel, enterHits, enterPIMLabel,
-                enterPenaltyMinutes});
-
-        enterBlocksLabel = new JLabel(SHOT_BLOCK_STRING);
-        enterShotsBlocked = new JTextField(ENTER_STAT_SIZE);
-        JPanel defenseStatsPanel = createPanel(new JComponent[]{enterBlocksLabel, enterShotsBlocked});
-
-
-        enterFaceOffLabel = new JLabel(FACE_OFF_STRING);
-        enterFaceOffPercent = new JTextField(ENTER_STAT_SIZE);
-        enterFaceOffTotal = new JTextField(ENTER_STAT_SIZE);
-        JPanel centerStatsPanel =  createPanel(new JComponent[]{enterFaceOffLabel, enterFaceOffPercent,
-                enterFaceOffTotal});
-
-        assignSkaterStats.addActionListener(e -> {
-            if (assignSkaterStats.isSelected()) {
-                Position position = (Position) positionOptions.getSelectedItem();
-                createSkater.add(basicStatsPanel, createSkater.getComponentCount() - 1);
-                createSkater.add(advancedStatsPanel, createSkater.getComponentCount() - 1);
-                if (position == Position.Center) {
-                    createSkater.add(centerStatsPanel, createSkater.getComponentCount() - 1);
-                } else if (position == Position.Left_Defense || position == Position.Right_Defense) {
-                    createSkater.add(defenseStatsPanel, createSkater.getComponentCount() - 1);
-                }
-            } else {
-                createSkater.remove(basicStatsPanel);
-                createSkater.remove(advancedStatsPanel);
-                createSkater.remove(centerStatsPanel);
-                createSkater.remove(defenseStatsPanel);
-            }
-            mainFrame.repaint();
-        });
-
-        positionOptions.addItemListener(e -> {
-            if (assignSkaterStats.isSelected() && e.getStateChange() == ItemEvent.SELECTED) {
-                Position position = (Position) positionOptions.getSelectedItem();
-                createSkater.remove(centerStatsPanel);
-                createSkater.remove(defenseStatsPanel);
-                if (position == Position.Center) {
-                    createSkater.add(centerStatsPanel, createSkater.getComponentCount() - 1);
-                } else if (position == Position.Left_Defense || position == Position.Right_Defense) {
-                    createSkater.add(defenseStatsPanel, createSkater.getComponentCount() - 1);
-                }
-                mainFrame.repaint();
-            }
-        });
-
-        createPlayer.addActionListener(e -> {
-            String name = enterSkaterName.getText();
-            String stickHand;
-            Skater newSkater;
-            if (chooseStickHand.isSelected()) {
-                stickHand = Skater.STICK_LEFT;
-            } else {
-                stickHand = Skater.STICK_RIGHT;
-            }
-
-            Position position = (Position) positionOptions.getSelectedItem();
-            try {
-                if (assignSkaterStats.isSelected()) {
-                    int goals = Integer.parseInt(enterGoals.getText());
-                    int assists = Integer.parseInt(enterAssists.getText());
-                    int plusMinus = Integer.parseInt(enterPlusMinus.getText());
-                    int hits = Integer.parseInt(enterHits.getText());
-                    double penaltyMinutes = Double.parseDouble(enterPenaltyMinutes.getText());
-                    if (position == Position.Center) {
-                        double percent = Double.parseDouble(enterFaceOffPercent.getText());
-                        int total = Integer.parseInt(enterFaceOffTotal.getText());
-                        newSkater = new Center(name, enterSkaterNumber.getValue(), stickHand, goals, assists, plusMinus,
-                                hits, penaltyMinutes, percent, total);
-                    } else if (position == Position.Left_Defense || position == Position.Right_Defense) {
-                        int shotsBlocked = Integer.parseInt(enterShotsBlocked.getText());
-                        newSkater = new Defenseman(name, enterSkaterNumber.getValue(), stickHand, position, goals,
-                                assists, plusMinus, hits, penaltyMinutes, shotsBlocked);
-                    } else {
-                        newSkater = new Skater(name, enterSkaterNumber.getValue(), stickHand, position, goals, assists,
-                                plusMinus, hits, penaltyMinutes);
-                    }
-                } else {
-                    if (position == Position.Center) {
-                        newSkater = new Center(name, enterSkaterNumber.getValue(), stickHand);
-                    } else if (position == Position.Left_Defense || position == Position.Right_Defense) {
-                        newSkater = new Defenseman(name, enterSkaterNumber.getValue(), stickHand, position);
-                    } else {
-                        newSkater = new Skater(name, enterSkaterNumber.getValue(), stickHand, position);
-                    }
-                }
-            } catch (NumberFormatException ex) {
-                JOptionPane.showMessageDialog(mainFrame, NUMBER_ERROR, CREATE_SKATER, JOptionPane.ERROR_MESSAGE);
-                return;
-            } catch (IllegalArgumentException | NullPointerException ex) {
-                JOptionPane.showMessageDialog(mainFrame, ex.getMessage(), CREATE_SKATER, JOptionPane.ERROR_MESSAGE);
-                return;
-            }
-            int index = team.addPlayer(newSkater);
-            if (index == -1) {
-                JOptionPane.showMessageDialog(mainFrame, PLAYER_NUMBER_DUPLICATE, CREATE_SKATER,
-                        JOptionPane.ERROR_MESSAGE);
-                return;
-            }
-            updatePlayerComponents(null, newSkater, -1, index);
-
-            try {
-                updateFile();
-                JOptionPane.showMessageDialog(mainFrame, CREATE_SUCCESS + "Skater", CREATE_SKATER,
-                        JOptionPane.INFORMATION_MESSAGE);
-
-                // Reset Text Fields
-                enterSkaterName.setText("");
-                if (assignSkaterStats.isSelected()) {
-                    enterGoals.setText("");
-                    enterAssists.setText("");
-                    enterPlusMinus.setText("");
-                    enterHits.setText("");
-                    enterPenaltyMinutes.setText("");
-                    enterFaceOffPercent.setText("");
-                    enterFaceOffTotal.setText("");
-                    enterShotsBlocked.setText("");
-                }
-            } catch (IOException ex) {
-                JOptionPane.showMessageDialog(selectFrame, BIN_FILE_ERROR, CREATE_SKATER, JOptionPane.ERROR_MESSAGE);
-            } catch (Exception ex) {
-                JOptionPane.showMessageDialog(selectFrame, ex.getMessage(), CREATE_SKATER, JOptionPane.ERROR_MESSAGE);
-            }
-        });
-
-        skaterTabs.add(CREATE_SKATER, createSkaterScroll);
-
-        // Edit/Delete Skater
-
-        Container editSkaterContent = new Container();
-        editSkaterContent.setLayout(new BoxLayout(editSkaterContent, BoxLayout.Y_AXIS));
-
-        editSkaterInstructions = new JLabel(EDIT_PLAYER_INSTRUCTIONS);
-        createPanelForContainer(new JComponent[]{editSkaterInstructions}, editSkaterContent);
-
-        // Top Panel (name and number)
-
-        changeSkaterNameLabel = new JLabel(NAME_STRING);
-        changeSkaterName = new JTextField(ENTER_NAME_SIZE);
-        changeSkaterNumberCheck = new JCheckBox(CHANGE_NUMBER);
-        changeSkaterNumber = new JSlider(1, 99);
-
-        JPanel nameAndNumberPanel = createPanel(new JComponent[]{changeSkaterNameLabel, changeSkaterName,
-                changeSkaterNumberCheck});
-        editSkaterContent.add(nameAndNumberPanel);
-
-        // Adds/Removes proper components when user wants to change the player's number
-        changeSkaterNumberCheck.addActionListener(e -> {
-            if (changeSkaterNumberCheck.isSelected()) {
-                changeSkaterNumberCheck.setText(CHANGE_NUMBER + " " + changeSkaterNumber.getValue());
-                nameAndNumberPanel.add(changeSkaterNumber);
-            } else {
-                changeSkaterNumberCheck.setText(CHANGE_NUMBER);
-                nameAndNumberPanel.remove(changeSkaterNumber);
-            }
-            mainFrame.repaint();
-        });
-
-        // Updates label to display currently selected value
-        changeSkaterNumber.addChangeListener(e ->
-                changeSkaterNumberCheck.setText(CHANGE_NUMBER + " " + changeSkaterNumber.getValue()));
-
-        changePositionCheck = new JCheckBox(CHANGE_POSITION);
-        JPanel secondEditSkaterPanel = createPanel(new JComponent[]{changePositionCheck});
-        editSkaterContent.add(secondEditSkaterPanel);
-
-        changeStickHandLabel = new JLabel(STICK_HAND_STRING);
-        changeStickHand = new JCheckBox("Swap Stick Hand?");
-        createPanelForContainer(new JComponent[]{changeStickHandLabel, changeStickHand}, editSkaterContent);
-
-        // Adds position combo box if user wants to change player's position
-        changePositionCheck.addActionListener(e -> {
-            if (changePositionCheck.isSelected()) {
-                secondEditSkaterPanel.add(changePosition, 1);
-            } else {
-                secondEditSkaterPanel.remove(changePosition);
-            }
-            mainFrame.repaint();
-        });
-
-        changeGoalsLabel = new JLabel(GOALS_STRING);
-        changeGoals = new JTextField(ENTER_STAT_SIZE);
-        changeAssistsLabel = new JLabel(ASSISTS_STRING);
-        changeAssists = new JTextField(ENTER_STAT_SIZE);
-        changePMLabel = new JLabel(PM_STRING);
-        changePlusMinus = new JTextField(ENTER_STAT_SIZE);
-        createPanelForContainer(new JComponent[]{changeGoalsLabel, changeGoals, changeAssistsLabel, changeAssists,
-                changePMLabel, changePlusMinus}, editSkaterContent);
-
-        changeHitsLabel = new JLabel(HITS_STRING);
-        changeHits = new JTextField(ENTER_STAT_SIZE);
-        changePIMLabel = new JLabel(PIM_STRING);
-        changePenaltyMinutes = new JTextField(ENTER_STAT_SIZE);
-        createPanelForContainer(new JComponent[]{changeHitsLabel, changeHits, changePIMLabel, changePenaltyMinutes},
-                editSkaterContent);
-
-        editPlayer = new JButton(UPDATE);
-        createPanelForContainer(new JComponent[]{editPlayer}, editSkaterContent);
-
-        resetPlayerStats = new JButton("Reset Skater Stats");
-        createPanelForContainer(new JComponent[]{resetPlayerStats}, editSkaterContent);
-
-        deletePlayer = new JButton("Delete Selected Skater");
-        createPanelForContainer(new JComponent[]{deletePlayer}, editSkaterContent);
-
-        changeFaceOffLabel = new JLabel(FACE_OFF_STRING);
-        changeFaceOffPercent = new JTextField(ENTER_STAT_SIZE);
-        changeFaceOffTotal = new JTextField(ENTER_STAT_SIZE);
-        JPanel changeCenterPanel = createPanel(new JComponent[]{changeFaceOffLabel, changeFaceOffPercent,
-                changeFaceOffTotal});
-
-        changeBlocksLabel = new JLabel(SHOT_BLOCK_STRING);
-        changeShotsBlocked = new JTextField(ENTER_STAT_SIZE);
-        JPanel changeDefensePanel = createPanel(new JComponent[]{changeBlocksLabel, changeShotsBlocked});
-
-        // Updates stick hand swap button and adds proper components for a center or defenseman
-        skaterOptions.addItemListener(e -> {
-            Skater newSkater = (Skater) skaterOptions.getSelectedItem();
-            if (e.getStateChange() == ItemEvent.SELECTED && newSkater != null) {
-                editSkaterContent.remove(changeCenterPanel);
-                editSkaterContent.remove(changeDefensePanel);
-                changeStickHandLabel.setText(STICK_HAND_STRING + newSkater.getStickHand());
-                changePositionCheck.setText(CHANGE_POSITION + newSkater.getPosition());
-                viewSkaterStats.setText(newSkater.statsDisplay());
-                if (newSkater instanceof Center) {
-                    editSkaterContent.add(changeCenterPanel, editSkaterContent.getComponentCount() - 3);
-                } else if (newSkater instanceof Defenseman) {
-                    editSkaterContent.add(changeDefensePanel, editSkaterContent.getComponentCount() - 3);
-                }
-                mainFrame.repaint();
-            } else if (newSkater == null) {
-                changeStickHandLabel.setText(STICK_HAND_STRING);
-                changePositionCheck.setText(CHANGE_POSITION);
-                viewSkaterStats.setText("");
-            }
-        });
-
-        // Updates any changes being made to a skater in the edit skaters tab
-        editPlayer.addActionListener(e -> {
-            Skater editingSkater = (Skater) skaterOptions.getSelectedItem();
-            if (editingSkater == null) {  // Did not choose a skater
-                JOptionPane.showMessageDialog(mainFrame, SELECT, EDIT_SKATER, JOptionPane.ERROR_MESSAGE);
-                return;
-            }
-            boolean change = false;  // Used to keep track of whether the user actually makes a change
-            try {
-                // Name
-                String name = changeSkaterName.getText();
-                if (!name.isBlank()) {
-                    editingSkater.setName(name);
-                    changeSkaterName.setText("");
-                    change = true;
-                }
-                // Stick Hand
-                if (changeStickHand.isSelected()) {
-                    if (editingSkater.getStickHand().equals(Skater.STICK_LEFT)) {
-                        editingSkater.setStickHand(Skater.STICK_RIGHT);
-                    } else {
-                        editingSkater.setStickHand(Skater.STICK_LEFT);
-                    }
-                    changeStickHand.setSelected(false);
-                    change = true;
-                }
-                // Stats
-                String goalsText = changeGoals.getText();
-                String assistsText = changeAssists.getText();
-                String pmText = changePlusMinus.getText();
-                String hitsText = changeHits.getText();
-                String pimText = changePenaltyMinutes.getText();
-                if (!goalsText.isBlank()) {
-                    editingSkater.setGoals(Integer.parseInt(goalsText));
-                    changeGoals.setText("");
-                    change = true;
-                }
-                if (!assistsText.isBlank()) {
-                    editingSkater.setAssists(Integer.parseInt(assistsText));
-                    changeAssists.setText("");
-                    change = true;
-                }
-                if (!pmText.isBlank()) {
-                    editingSkater.setPlusMinus(Integer.parseInt(pmText));
-                    changePlusMinus.setText("");
-                    change = true;
-                }
-                if (!hitsText.isBlank()) {
-                    editingSkater.setHits(Integer.parseInt(hitsText));
-                    changeHits.setText("");
-                    change = true;
-                }
-                if (!pimText.isBlank()) {
-                    editingSkater.setPenaltyMinutes(Double.parseDouble(pimText));
-                    changePenaltyMinutes.setText("");
-                    change = true;
-                }
-                if (editingSkater instanceof Center c) {
-                    String faceOffPercent = changeFaceOffPercent.getText();
-                    if (!faceOffPercent.isBlank()) {
-                        c.setFaceOffPercent(Double.parseDouble(faceOffPercent),
-                                Integer.parseInt(changeFaceOffTotal.getText()));
-                        changeFaceOffPercent.setText("");
-                        changeFaceOffTotal.setText("");
-                        change = true;
-                    }
-                }
-                if (editingSkater instanceof Defenseman de) {
-                    String shotsBlockedText = changeShotsBlocked.getText();
-                    if (!shotsBlockedText.isBlank()) {
-                        de.setShotsBlocked(Integer.parseInt(shotsBlockedText));
-                        changeShotsBlocked.setText("");
-                        change = true;
-                    }
-                }
-            } catch (NumberFormatException ex) {
-                JOptionPane.showMessageDialog(mainFrame, NUMBER_ERROR + BLANK_UPDATED, EDIT_SKATER,
-                        JOptionPane.ERROR_MESSAGE);
-                return;
-            } catch (IllegalArgumentException | NullPointerException ex) {
-                JOptionPane.showMessageDialog(mainFrame, ex.getMessage() + BLANK_UPDATED, EDIT_SKATER,
-                        JOptionPane.ERROR_MESSAGE);
-                return;
-            }
-
-            Skater newSkater = null;  // Skater where changes to position or player number will be made
-
-            /*
-               If position needs to be changed, may need to create an entirely new skater
-               This segment handles all the different possibilities for changing a player's position
-             */
-            if (changePositionCheck.isSelected()) {
-                Position newPosition = (Position) changePosition.getSelectedItem();
-                if (editingSkater instanceof Center) {
-                    if (newPosition == Position.Left_Wing || newPosition == Position.Right_Wing) {
-                        newSkater = new Skater(editingSkater);
-                        newSkater.setPosition(newPosition);
-                        if (changeSkaterNumberCheck.isSelected()) {
-                            newSkater.setPlayerNumber(changeSkaterNumber.getValue());
-                        }
-                        change = true;
-                    } else if (newPosition == Position.Right_Defense || newPosition == Position.Left_Defense) {
-                        newSkater = new Defenseman(editingSkater);
-                        newSkater.setPosition(newPosition);
-                        if (changeSkaterNumberCheck.isSelected()) {
-                            newSkater.setPlayerNumber(changeSkaterNumber.getValue());
-                        }
-                        change = true;
-                    }
-                } else if (editingSkater instanceof Defenseman) {
-                    if (newPosition == Position.Center) {
-                        newSkater = new Center(editingSkater);
-                        if (changeSkaterNumberCheck.isSelected()) {
-                            newSkater.setPlayerNumber(changeSkaterNumber.getValue());
-                        }
-                    } else if (newPosition == Position.Left_Wing || newPosition == Position.Right_Wing) {
-                        newSkater = new Skater(editingSkater);
-                        newSkater.setPosition(newPosition);
-                        if (changeSkaterNumberCheck.isSelected()) {
-                            newSkater.setPlayerNumber(changeSkaterNumber.getValue());
-                        }
-                    } else {
-                        editingSkater.setPosition(newPosition);
-                    }
-                    change = true;
-                } else {
-                    if (newPosition == Position.Center) {
-                        newSkater = new Center(editingSkater);
-                        if (changeSkaterNumberCheck.isSelected()) {
-                            newSkater.setPlayerNumber(changeSkaterNumber.getValue());
-                        }
-                    } else if (newPosition == Position.Left_Defense || newPosition == Position.Right_Defense) {
-                        newSkater = new Defenseman(editingSkater);
-                        newSkater.setPosition(newPosition);
-                        if (changeSkaterNumberCheck.isSelected()) {
-                            newSkater.setPlayerNumber(changeSkaterNumber.getValue());
-                        }
-                    } else {
-                        editingSkater.setPosition(newPosition);
-                    }
-                    change = true;
-                }
-            } else if (changeSkaterNumberCheck.isSelected()) {
-                if (editingSkater instanceof Center) {
-                    newSkater = new Center(editingSkater);
-                } else if (editingSkater instanceof  Defenseman) {
-                    newSkater = new Defenseman(editingSkater);
-                } else {
-                    newSkater = new Skater(editingSkater);
-                }
-                newSkater.setPlayerNumber(changeSkaterNumber.getValue());
-                change = true;
-            }
-
-
-            if (change) {  // Update GUI components, file, and the team lists if necessary
-                int oldIndex = skaterOptions.getSelectedIndex() - 1;  // Index where the skater used to be
-
-                if (newSkater != null) {
-                    int input;
-                    do {
-                        input = JOptionPane.showConfirmDialog(mainFrame, "Warning: Changing your skater's " +
-                                "position and/or number will delete any lines that the skater is assigned to.\n" +
-                                "Are you sure you would like to proceed?", EDIT_SKATER, JOptionPane.YES_NO_OPTION,
-                                JOptionPane.WARNING_MESSAGE);
-                    } while (input != JOptionPane.YES_OPTION && input != JOptionPane.NO_OPTION);
-                    if (input == JOptionPane.NO_OPTION) {
-                        return;
-                    }
-                    int index = team.changePlayer(editingSkater, newSkater);
-                    if (index == -1) {
-                        JOptionPane.showMessageDialog(mainFrame, PLAYER_NUMBER_DUPLICATE, EDIT_SKATER,
-                                JOptionPane.ERROR_MESSAGE);
-                        return;
-                    }
-                    updatePlayerComponents(editingSkater, newSkater, oldIndex, index);
-                    changeSkaterNumberCheck.setSelected(false);
-                    changeSkaterNumberCheck.setText(CHANGE_NUMBER);
-                    nameAndNumberPanel.remove(changeSkaterNumber);
-                } else {
-                    updatePlayerComponents(null, editingSkater, oldIndex, oldIndex);
-                }
-
-                try {
-                    updateFile();
-                    JOptionPane.showMessageDialog(mainFrame, UPDATE_SUCCESS, EDIT_SKATER,
-                            JOptionPane.INFORMATION_MESSAGE);
-                } catch (IOException ex) {
-                    JOptionPane.showMessageDialog(mainFrame, BIN_FILE_ERROR, EDIT_SKATER, JOptionPane.ERROR_MESSAGE);
-                } catch (Exception ex) {
-                    JOptionPane.showMessageDialog(mainFrame, ex.getMessage(), EDIT_SKATER, JOptionPane.ERROR_MESSAGE);
-                }
-            } else {  // Displays message telling the user to enter something
-                JOptionPane.showMessageDialog(mainFrame, EMPTY_INPUTS, EDIT_SKATER, JOptionPane.ERROR_MESSAGE);
-            }
-        });
-
-        // Confirms user's selection and resets stats of the selected player
-        resetPlayerStats.addActionListener(e -> {
-            Skater selectedSkater = (Skater) skaterOptions.getSelectedItem();
-            if (selectedSkater != null) {
-                int confirm = JOptionPane.showConfirmDialog(mainFrame, RESET_CONFIRM +
-                        selectedSkater.getName() + TO_ZERO, EDIT_SKATER, JOptionPane.YES_NO_OPTION);
-                if (confirm == JOptionPane.YES_OPTION) {
-                    selectedSkater.resetStats();
-                    updatePlayerComponents(null, selectedSkater, skaterOptions.getSelectedIndex() - 1,
-                            skaterOptions.getSelectedIndex() - 1);
-                    try {
-                        updateFile();
-                        JOptionPane.showMessageDialog(mainFrame, UPDATE_SUCCESS, EDIT_SKATER,
-                                JOptionPane.INFORMATION_MESSAGE);
-                    } catch (IOException ex) {
-                        JOptionPane.showMessageDialog(mainFrame, BIN_FILE_ERROR, EDIT_SKATER,
-                                JOptionPane.ERROR_MESSAGE);
-                    } catch (Exception ex) {
-                        JOptionPane.showMessageDialog(mainFrame, ex.getMessage(), EDIT_SKATER,
-                                JOptionPane.ERROR_MESSAGE);
-                    }
-                }
-            } else {
-                JOptionPane.showMessageDialog(mainFrame, SELECT, EDIT_SKATER, JOptionPane.ERROR_MESSAGE);
-            }
-        });
-
-        // Deletes the selected player from the team and any GUI elements
-        deletePlayer.addActionListener(e -> {
-            Skater deletingSkater = (Skater) skaterOptions.getSelectedItem();
-            if (deletingSkater == null) {
-                JOptionPane.showMessageDialog(mainFrame, SELECT, DELETE_SKATER, JOptionPane.ERROR_MESSAGE);
-                return;
-            }
-            int selection = JOptionPane.showConfirmDialog(mainFrame, CONFIRM_DELETE + deletingSkater.getName()
-                    + "?", DELETE_SKATER, JOptionPane.YES_NO_OPTION);
-            if (selection == JOptionPane.YES_OPTION) {
-                team.removePlayer(deletingSkater);
-                updatePlayerComponents(deletingSkater, null, skaterOptions.getSelectedIndex() - 1,
-                        -1);
-
-                try {
-                    updateFile();
-                    JOptionPane.showMessageDialog(mainFrame, UPDATE_SUCCESS, DELETE_SKATER,
-                            JOptionPane.INFORMATION_MESSAGE);
-                } catch (IOException ex) {
-                    JOptionPane.showMessageDialog(mainFrame, BIN_FILE_ERROR, DELETE_SKATER, JOptionPane.ERROR_MESSAGE);
-                } catch (Exception ex) {
-                    JOptionPane.showMessageDialog(mainFrame, ex.getMessage(), DELETE_SKATER, JOptionPane.ERROR_MESSAGE);
-                }
-            }
-        });
-
-        skaterTabs.add("Edit or Delete Skaters", editSkaterContent);
-
-        // View Skater Stats
-
-        viewSkaterStats = new JTextArea();
-        viewSkaterStats.setEditable(false);
-        skaterTabs.add("View Skater Stats", viewSkaterStats);
-
-        mainTabs.add("Manage Skaters", manageSkaterContent);
-
-        // Manage Goalies
-
-        Container manageGoalieContent = new Container();
-        manageGoalieContent.setLayout(new BoxLayout(manageGoalieContent, BoxLayout.Y_AXIS));
-        selectedGoalieLabel = new JLabel(SELECT_GOALIE);
-        createPanelForContainer(new JComponent[]{selectedGoalieLabel, goalieOptions}, manageGoalieContent);
-        goalieTabs = new JTabbedPane();
-        createPanelForContainer(new JComponent[]{goalieTabs}, manageGoalieContent);
-
-        // Create Goalie
-        Container createGoalieContent = new Container();
-        createGoalieContent.setLayout(new BoxLayout(createGoalieContent, BoxLayout.Y_AXIS));
-
-        enterGoalieNameLabel = new JLabel(NAME_STRING);
-        enterGoalieName = new JTextField(ENTER_NAME_SIZE);
-        selectGoalieNumber = new JSlider(1, 99);
-        enterGoalieNumberLabel = new JLabel(PLAYER_NUMBER_STRING + " " + selectGoalieNumber.getValue());
-        createPanelForContainer(new JComponent[]{enterGoalieNameLabel, enterGoalieName, enterGoalieNumberLabel,
-                selectGoalieNumber}, createGoalieContent);
-
-        // Updates value displayed by select number value
-        selectGoalieNumber.addChangeListener(e ->
-                enterGoalieNumberLabel.setText(PLAYER_NUMBER_STRING + " " + selectGoalieNumber.getValue()));
-
-        assignGoalieStats = new JToggleButton("Initialize Goalie Stats");
-        createPanelForContainer(new JComponent[]{assignGoalieStats}, createGoalieContent);
-
-        // Enter Record
-        enterGoalieWinsLabel = new JLabel(WINS_STRING);
-        enterGoalieWins = new JTextField(ENTER_STAT_SIZE);
-        enterGoalieLossesLabel = new JLabel(LOSSES_STRING);
-        enterGoalieLosses = new JTextField(ENTER_STAT_SIZE);
-        enterGoalieOTLabel = new JLabel(OT_STRING);
-        enterGoalieOTLosses = new JTextField(ENTER_STAT_SIZE);
-        JPanel goalieRecordPanel = createPanel(new JComponent[]{enterGoalieWinsLabel, enterGoalieWins,
-                enterGoalieLossesLabel, enterGoalieLosses, enterGoalieOTLabel, enterGoalieOTLosses});
-
-        // Other Stats
-        enterShutouts = new JSlider(0, 20);
-        enterShutoutsLabel = new JLabel(SHUTOUTS_STRING + " " + enterShutouts.getValue());
-        // Updates value displayed by enter shutouts label
-        enterShutouts.addChangeListener(e ->
-                enterShutoutsLabel.setText(SHUTOUTS_STRING + " " + enterShutouts.getValue()));
-        enterSVPercentageLabel = new JLabel(SV_PERCENT_STRING);
-        enterSavePercentage = new JTextField(ENTER_STAT_SIZE);
-        enterGoalieShotsAgainst = new JTextField(ENTER_STAT_SIZE);
-        JPanel otherGoalieStatsPanel = createPanel(new JComponent[]{enterShutoutsLabel, enterShutouts,
-                enterSVPercentageLabel, enterSavePercentage, enterGoalieShotsAgainst});
-
-        createGoalie = new JButton(CREATE_GOALIE);
-        createPanelForContainer(new JComponent[]{createGoalie}, createGoalieContent);
-
-        assignGoalieStats.addActionListener(e -> {
-            if (assignGoalieStats.isSelected()) {
-                createGoalieContent.add(goalieRecordPanel, createGoalieContent.getComponentCount() - 1);
-                createGoalieContent.add(otherGoalieStatsPanel, createGoalieContent.getComponentCount() - 1);
-            } else {
-                createGoalieContent.remove(goalieRecordPanel);
-                createGoalieContent.remove(otherGoalieStatsPanel);
-            }
-            mainFrame.repaint();
-        });
-
-        /*
-           Parses stats from relevant text fields, creates new goalie, adds it to the team, and updates relevant GUI
-           elements.
-         */
-        createGoalie.addActionListener(e -> {
-            String name = enterGoalieName.getText();
-            int goalieNum = selectGoalieNumber.getValue();
-            Goalie newGoalie;
-            try {
-                if (assignGoalieStats.isSelected()) {
-                    int wins = Integer.parseInt(enterGoalieWins.getText());
-                    int losses = Integer.parseInt(enterGoalieLosses.getText());
-                    int otLosses = Integer.parseInt(enterGoalieOTLosses.getText());
-                    int shutouts = enterShutouts.getValue();
-                    double savePercent = Double.parseDouble(enterSavePercentage.getText());
-                    int shotsFaced = Integer.parseInt(enterGoalieShotsAgainst.getText());
-                    newGoalie = new Goalie(name, goalieNum, savePercent, shotsFaced, wins, losses, otLosses, shutouts);
-                } else {
-                    newGoalie = new Goalie(name, goalieNum);
-                }
-            } catch (NumberFormatException ex) {
-                JOptionPane.showMessageDialog(mainFrame, NUMBER_ERROR, CREATE_GOALIE, JOptionPane.ERROR_MESSAGE);
-                return;
-            } catch (NullPointerException | IllegalArgumentException ex) {
-                JOptionPane.showMessageDialog(mainFrame, ex.getMessage(), CREATE_GOALIE, JOptionPane.ERROR_MESSAGE);
-                return;
-            }
-
-            int index = team.addPlayer(newGoalie);
-            if (index == -1) {
-                JOptionPane.showMessageDialog(mainFrame, PLAYER_NUMBER_DUPLICATE, CREATE_GOALIE,
-                        JOptionPane.ERROR_MESSAGE);
-                return;
-            }
-
-            try {
-                updateFile();
-                updatePlayerComponents(null, newGoalie, -1, index);
-                enterGoalieName.setText("");
-                enterGoalieWins.setText("");
-                enterGoalieLosses.setText("");
-                enterGoalieOTLosses.setText("");
-                enterSavePercentage.setText("");
-                enterGoalieShotsAgainst.setText("");
-                JOptionPane.showMessageDialog(mainFrame, CREATE_SUCCESS + "Goalie", CREATE_GOALIE,
-                        JOptionPane.INFORMATION_MESSAGE);
-            } catch (IOException ex) {
-                JOptionPane.showMessageDialog(mainFrame, BIN_FILE_ERROR, CREATE_GOALIE, JOptionPane.ERROR_MESSAGE);
-            } catch (Exception ex) {
-                JOptionPane.showMessageDialog(mainFrame, ex.getMessage(), CREATE_GOALIE, JOptionPane.ERROR_MESSAGE);
-            }
-        });
-
-        goalieTabs.add(CREATE_GOALIE, createGoalieContent);
-
-        // Edit/Delete Goalie
-        Container editGoalieContent = new Container();
-        editGoalieContent.setLayout(new BoxLayout(editGoalieContent, BoxLayout.Y_AXIS));
-
-        editGoalieInstructions = new JLabel(EDIT_PLAYER_INSTRUCTIONS);
-        createPanelForContainer(new JComponent[]{editGoalieInstructions}, editGoalieContent);
-        changeGoalieNameLabel = new JLabel(NAME_STRING);
-        changeGoalieName = new JTextField(ENTER_NAME_SIZE);
-        changeGoalieNumberCheck = new JCheckBox(CHANGE_NUMBER);
-        changeGoalieNumber = new JSlider(1, Player.PLAYER_NUM_MAX);
-        JPanel changeBasicStatsPanel = createPanel(new JComponent[]{changeGoalieNameLabel, changeGoalieName,
-                changeGoalieNumberCheck});
-        editGoalieContent.add(changeBasicStatsPanel);
-
-        // Displays number slider when user wants to change the goalie's number
-        changeGoalieNumberCheck.addActionListener(e -> {
-            if (changeGoalieNumberCheck.isSelected()) {
-                changeGoalieNumberCheck.setText(CHANGE_NUMBER + " " + changeGoalieNumber.getValue());
-                changeBasicStatsPanel.add(changeGoalieNumber);
-            } else {
-                changeGoalieNumberCheck.setText(CHANGE_NUMBER);
-                changeBasicStatsPanel.remove(changeGoalieNumber);
-            }
-            mainFrame.repaint();
-        });
-
-        // Updates value of check box text to reflect current value of the slider
-        changeGoalieNumber.addChangeListener(e ->
-                changeGoalieNumberCheck.setText(CHANGE_NUMBER + " " + changeGoalieNumber.getValue()));
-
-        changeGoalieWinsLabel = new JLabel(WINS_STRING);
-        changeGoalieWins = new JTextField(ENTER_STAT_SIZE);
-        changeGoalieLossesLabel = new JLabel(LOSSES_STRING);
-        changeGoalieLosses = new JTextField(ENTER_STAT_SIZE);
-        changeGoalieOTLabel = new JLabel(OT_STRING);
-        changeGoalieOTLosses = new JTextField(ENTER_STAT_SIZE);
-        createPanelForContainer(new JComponent[]{changeGoalieWinsLabel, changeGoalieWins, changeGoalieLossesLabel,
-                changeGoalieLosses, changeGoalieOTLabel, changeGoalieOTLosses}, editGoalieContent);
-
-        changeShutoutsLabel = new JLabel("Enter Shutouts:");
-        changeShutouts = new JTextField(ENTER_STAT_SIZE);
-        changeSVPercentageLabel = new JLabel(SV_PERCENT_STRING);
-        changeSavePercentage = new JTextField(ENTER_STAT_SIZE);
-        changeGoalieShotsAgainst = new JTextField(ENTER_STAT_SIZE);
-        createPanelForContainer(new JComponent[]{changeShutoutsLabel, changeShutouts, changeSVPercentageLabel,
-                changeSavePercentage, changeGoalieShotsAgainst}, editGoalieContent);
-
-        editGoalie = new JButton(UPDATE);
-        createPanelForContainer(new JComponent[]{editGoalie}, editGoalieContent);
-        resetGoalieStats = new JButton("Reset Goalie Stats");
-        createPanelForContainer(new JComponent[]{resetGoalieStats}, editGoalieContent);
-        deleteGoalie = new JButton("Delete Selected Goalie");
-        createPanelForContainer(new JComponent[]{deleteGoalie}, editGoalieContent);
-
-        editGoalie.addActionListener(e -> {
-            Goalie editingGoalie = (Goalie) goalieOptions.getSelectedItem();
-            if (editingGoalie == null) {
-                JOptionPane.showMessageDialog(mainFrame, SELECT, EDIT_GOALIE, JOptionPane.ERROR_MESSAGE);
-                return;
-            }
-
-            String name = changeGoalieName.getText();
-            String wins = changeGoalieWins.getText();
-            String losses = changeGoalieLosses.getText();
-            String otLosses = changeGoalieOTLosses.getText();
-            String shutouts = changeShutouts.getText();
-            String svPercent = changeSavePercentage.getText();
-            String shotsFaced = changeGoalieShotsAgainst.getText();
-            try {
-                if (!name.isBlank()) {
-                    editingGoalie.setName(name);
-                    changeGoalieName.setText("");
-                }
-                if (!wins.isBlank()) {
-                    editingGoalie.setWins(Integer.parseInt(wins));
-                    changeGoalieWins.setText("");
-                }
-                if (!losses.isBlank()) {
-                    editingGoalie.setLosses(Integer.parseInt(losses));
-                    changeGoalieLosses.setText("");
-                }
-                if (!otLosses.isBlank()) {
-                    editingGoalie.setOtLosses(Integer.parseInt(otLosses));
-                    changeGoalieOTLosses.setText("");
-                }
-                if (!shutouts.isBlank()) {
-                    editingGoalie.setShutouts(Integer.parseInt(shutouts));
-                    changeShutouts.setText("");
-                }
-                if (!svPercent.isBlank()) {
-                    editingGoalie.setSavePercentage(Double.parseDouble(svPercent), Integer.parseInt(shotsFaced));
-                    changeSavePercentage.setText("");
-                    changeGoalieShotsAgainst.setText("");
-                }
-            } catch (NumberFormatException ex) {
-                JOptionPane.showMessageDialog(mainFrame, NUMBER_ERROR, EDIT_GOALIE, JOptionPane.ERROR_MESSAGE);
-                return;
-            } catch (NullPointerException | IllegalArgumentException ex) {
-                JOptionPane.showMessageDialog(mainFrame, ex.getMessage(), EDIT_GOALIE, JOptionPane.ERROR_MESSAGE);
-                return;
-            }
-            Goalie newGoalie = null;
-
-            if (changeGoalieNumberCheck.isSelected()) {
-                newGoalie = new Goalie(editingGoalie);
-                newGoalie.setPlayerNumber(changeGoalieNumber.getValue());
-            }
-
-            int oldIndex = goalieOptions.getSelectedIndex() - 1;
-            if (newGoalie != null) {
-                int index = team.changePlayer(editingGoalie, newGoalie);
-                if (index == -1) {
-                    JOptionPane.showMessageDialog(mainFrame, PLAYER_NUMBER_DUPLICATE, EDIT_GOALIE,
-                            JOptionPane.ERROR_MESSAGE);
-                    return;
-                }
-                updatePlayerComponents(editingGoalie, newGoalie, oldIndex, index);
-            } else {
-                updatePlayerComponents(null, editingGoalie, oldIndex, oldIndex);
-            }
-
-            try {
-                updateFile();
-                JOptionPane.showMessageDialog(mainFrame, UPDATE_SUCCESS, EDIT_GOALIE, JOptionPane.INFORMATION_MESSAGE);
-            } catch (IOException ex) {
-                JOptionPane.showMessageDialog(mainFrame, BIN_FILE_ERROR, EDIT_GOALIE, JOptionPane.ERROR_MESSAGE);
-            } catch (Exception ex) {
-                JOptionPane.showMessageDialog(mainFrame, ex.getMessage(), EDIT_GOALIE, JOptionPane.ERROR_MESSAGE);
-            }
-        });
-
-        resetGoalieStats.addActionListener(e -> {
-            Goalie editingGoalie = (Goalie) goalieOptions.getSelectedItem();
-            if (editingGoalie == null) {
-                JOptionPane.showMessageDialog(mainFrame, SELECT, EDIT_GOALIE, JOptionPane.ERROR_MESSAGE);
-                return;
-            }
-
-            int confirm = JOptionPane.showConfirmDialog(mainFrame, RESET_CONFIRM + editingGoalie.getName() +
-                    TO_ZERO, EDIT_GOALIE, JOptionPane.YES_NO_OPTION);
-            if (confirm == JOptionPane.YES_OPTION) {
-                editingGoalie.resetStats();
-                updatePlayerComponents(null, editingGoalie, goalieOptions.getSelectedIndex() - 1,
-                        goalieOptions.getSelectedIndex() - 1);
-                try {
-                    updateFile();
-                    JOptionPane.showMessageDialog(mainFrame, UPDATE_SUCCESS, EDIT_GOALIE,
-                            JOptionPane.INFORMATION_MESSAGE);
-                } catch (IOException ex) {
-                    JOptionPane.showMessageDialog(mainFrame, BIN_FILE_ERROR, EDIT_GOALIE, JOptionPane.ERROR_MESSAGE);
-                } catch (Exception ex) {
-                    JOptionPane.showMessageDialog(mainFrame, ex.getMessage(), EDIT_GOALIE, JOptionPane.ERROR_MESSAGE);
-                }
-            }
-        });
-
-        deleteGoalie.addActionListener(e -> {
-            Goalie deletingGoalie = (Goalie) goalieOptions.getSelectedItem();
-            if (deletingGoalie == null) {
-                JOptionPane.showMessageDialog(mainFrame, SELECT, DELETE_GOALIE, JOptionPane.ERROR_MESSAGE);
-                return;
-            }
-
-            int confirm = JOptionPane.showConfirmDialog(mainFrame, CONFIRM_DELETE + deletingGoalie.getName()
-                    + "?", DELETE_GOALIE, JOptionPane.YES_NO_OPTION);
-            if (confirm == JOptionPane.YES_OPTION) {
-                team.removePlayer(deletingGoalie);
-                updatePlayerComponents(deletingGoalie, null, goalieOptions.getSelectedIndex() - 1,
-                        -1);
-                try {
-                    updateFile();
-                    JOptionPane.showMessageDialog(mainFrame, UPDATE_SUCCESS, DELETE_GOALIE,
-                            JOptionPane.INFORMATION_MESSAGE);
-                } catch (IOException ex) {
-                    JOptionPane.showMessageDialog(mainFrame, BIN_FILE_ERROR, DELETE_GOALIE, JOptionPane.ERROR_MESSAGE);
-                } catch (Exception ex) {
-                    JOptionPane.showMessageDialog(mainFrame, ex.getMessage(), DELETE_GOALIE, JOptionPane.ERROR_MESSAGE);
-                }
-            }
-        });
-
-        goalieTabs.add("Edit or Delete Goalie", editGoalieContent);
-
-        // View Goalie Stats
-        viewGoalieStats = new JTextArea();
-        viewGoalieStats.setEditable(false);
-        goalieTabs.add("View Goalie Stats", viewGoalieStats);
-
-        // Updates view goalie stats text area with proper stats
-        goalieOptions.addItemListener(e -> {
-            Goalie selectedGoalie = (Goalie) goalieOptions.getSelectedItem();
-            if (e.getStateChange() == ItemEvent.SELECTED && selectedGoalie != null) {
-                viewGoalieStats.setText(selectedGoalie.statsDisplay());
-            } else if (selectedGoalie == null) {
-                viewGoalieStats.setText("");
-            }
-            mainFrame.repaint();
-        });
-
-        mainTabs.add("Manage Goalies", manageGoalieContent);
 
         // Enter Game Stats
 
@@ -3791,7 +3796,8 @@ public class TeamGUI implements Runnable {
             }
         });
 
-        enterStatsTabs.add("Enter Live", liveStats);
+        JScrollPane enterLiveScroll = new JScrollPane(liveStats);
+        enterStatsTabs.add("Enter Live", enterLiveScroll);
 
         // Post Game
         Container postGameStats = new Container();
@@ -3857,12 +3863,12 @@ public class TeamGUI implements Runnable {
                 mainTabs.removeChangeListener(haltTabs);
                 enterStatsTabs.removeChangeListener(haltTabs);
                 goalieWindow = null;
-                liveStats.add(selectGoaliePanel, 1);
+                liveStats.add(selectGoaliePanel, 2);
                 defenseLinePanel.remove(defenseLinePanel.getComponentCount() - 1);
                 defenseLinePanel.add(defenseLines);
                 pkLinePanel.remove(pkLinePanel.getComponentCount() - 1);
                 pkLinePanel.add(pkOptions);
-                liveStats.add(defenseLinePanel, 1);
+                liveStats.add(defenseLinePanel, 2);
                 try {
                     updateFile();
                 } catch (IOException ex) {
@@ -3883,22 +3889,38 @@ public class TeamGUI implements Runnable {
                                 JOptionPane.ERROR_MESSAGE);
                         return;
                     }
-                    int goalsScored;
-                    int goalsAgainst;
+
+                    if (powerPlayLive.isSelected() || penaltyLive.isSelected()) {
+                        JOptionPane.showMessageDialog(mainFrame, ACTIVE_SP_TEAMS, ENTER_STATS_AFTER,
+                                JOptionPane.ERROR_MESSAGE);
+                        return;
+                    }
+                    /*
+                      Stores the inputs from the JTextFields (score and face off totals)
+                      Index 0 - team goals scored
+                      Index 1 - opponent goals scored
+                      Index 2 - team face off wins
+                      Index 3 - team face off losses
+                     */
+                    int[] enterAfterNumInputs;
+
                     int shotsAgainst = postGameShotsAgainst.getValue();
-                    int faceOffWins;
-                    int faceOffLosses;
                     int shotsBlocked = postGameShotsBlocked.getValue();
                     int hits = postGameHits.getValue();
                     AtomicInteger powerPlays = new AtomicInteger(postGamePowerPlay.getValue());
                     int penalties = postGamePenalties.getValue();
-
+                    if ((powerPlays.get() > 0 && ppOptions.getItemCount() == 0) ||
+                            (penalties > 0 && pkOptions.getItemCount() == 0)) {
+                        JOptionPane.showMessageDialog(mainFrame, SPECIAL_TEAM_REQ, ENTER_STATS_AFTER,
+                                JOptionPane.ERROR_MESSAGE);
+                        return;
+                    }
                     try {
-                        goalsScored = Integer.parseInt(finalScoreTeam.getText());
-                        goalsAgainst = Integer.parseInt(finalScoreOpp.getText());
-                        faceOffWins = Integer.parseInt(postGameFaceOffWins.getText());
-                        faceOffLosses = Integer.parseInt(postGameFaceOffLosses.getText());
-                        if (goalsScored < 0 || goalsAgainst < 0 || faceOffWins < 0 || faceOffLosses < 0) {
+                        enterAfterNumInputs = checkForIntResponses(new String[]{finalScoreTeam.getText(),
+                                finalScoreOpp.getText(), postGameFaceOffWins.getText(),
+                                postGameFaceOffLosses.getText()});
+                        if (enterAfterNumInputs[0] < 0 || enterAfterNumInputs[1] < 0 || enterAfterNumInputs[2] < 0
+                                || enterAfterNumInputs[3] < 0) {
                             throw new NumberFormatException();
                         }
                     } catch (NumberFormatException ex) {
@@ -3907,7 +3929,7 @@ public class TeamGUI implements Runnable {
                         return;
                     }
 
-                    if (goalsAgainst > shotsAgainst) {
+                    if (enterAfterNumInputs[1] > shotsAgainst) {
                         JOptionPane.showMessageDialog(mainFrame, "Opponent's score cannot be greater than " +
                                 "the number of shots against your goalie.", ENTER_STATS_AFTER,
                                 JOptionPane.ERROR_MESSAGE);
@@ -3945,7 +3967,7 @@ public class TeamGUI implements Runnable {
 
                     enterGoalieContent.add(selectGoaliePanel);
 
-                    JSlider goalsAgainstSlider = new JSlider(0, goalsAgainst);
+                    JSlider goalsAgainstSlider = new JSlider(0, enterAfterNumInputs[1]);
                     JSlider shotsAgainstSlider = new JSlider(1, shotsAgainst);
                     ArrayList<Goalie> selectedGoalies = new ArrayList<>();
                     if (finalInput == JOptionPane.YES_OPTION) {
@@ -4018,25 +4040,24 @@ public class TeamGUI implements Runnable {
                         } else {
                             selectedGoalie = (Goalie) selectGoaliesForStats.getSelectedItem();
                             if (selectedGoalie == null) {
-                                JOptionPane.showMessageDialog(mainFrame, UNEXPECTED_ERROR +
-                                                "enterGoalie.addActionListener", ENTER_STATS_AFTER,
+                                JOptionPane.showMessageDialog(mainFrame, SELECT, ENTER_STATS_AFTER,
                                         JOptionPane.ERROR_MESSAGE);
                                 return;
                             }
-                            selectedGoalie.enterSaves(goalsAgainst, shotsAgainst);
+                            selectedGoalie.enterSaves(enterAfterNumInputs[1], shotsAgainst);
                         }
 
-                        if (goalsScored > goalsAgainst) {
+                        if (enterAfterNumInputs[0] > enterAfterNumInputs[1]) {
                             team.win();
-                            if (goalsAgainst == 0) {
+                            if (enterAfterNumInputs[1] == 0) {
                                 selectedGoalie.shutoutWin();
                             } else {
                                 selectedGoalie.win();
                             }
-                        } else if (goalsScored == goalsAgainst) {
+                        } else if (enterAfterNumInputs[0] == enterAfterNumInputs[1]) {
                             team.tie();
                             selectedGoalie.loseOT();
-                        } else if (goalsScored == goalsAgainst - 1) {
+                        } else if (enterAfterNumInputs[0] == enterAfterNumInputs[1] - 1) {
                             int input;
                             while (true) {
                                 input = JOptionPane.showConfirmDialog(mainFrame, REG_LOSS, ENTER_STATS_AFTER,
@@ -4057,9 +4078,9 @@ public class TeamGUI implements Runnable {
                         }
 
                         goalieWindow.dispose();
-                        if (goalsScored > 0) {
+                        if (enterAfterNumInputs[0] > 0) {
                             scoreTeamGoals.setVisible(true);
-                        } else if (faceOffWins > 0 || faceOffLosses > 0) {
+                        } else if (enterAfterNumInputs[2] > 0 || enterAfterNumInputs[3] > 0) {
                             enterTeamFaceOffs.setVisible(true);
                         } else if (shotsBlocked > 0) {
                             enterTeamShotBlocks.setVisible(true);
@@ -4078,7 +4099,7 @@ public class TeamGUI implements Runnable {
                     goalieWindow.setVisible(true);
 
                     AtomicInteger ppGoals = new AtomicInteger();
-                    if (goalsScored > 0) {
+                    if (enterAfterNumInputs[0] > 0) {
                         AtomicInteger enteredGoalsScored = new AtomicInteger();
                         AtomicInteger enteredGoalsAgainst = new AtomicInteger();
 
@@ -4273,8 +4294,9 @@ public class TeamGUI implements Runnable {
                                             specialTeamsLine.lineScoredOn();
                                         }
                                     } else {
-                                        JOptionPane.showMessageDialog(scoreTeamGoals, UNEXPECTED_ERROR +
-                                                        "enterGoalsListener", ENTER_STATS_AFTER,
+                                        JOptionPane.showMessageDialog(scoreTeamGoals,
+                                                NO_OPTIONS.substring(0, NO_OPTIONS.indexOf('.') + 1) +
+                                                        "Please select players manually instead.", ENTER_STATS_AFTER,
                                                 JOptionPane.ERROR_MESSAGE);
                                         return;
                                     }
@@ -4293,16 +4315,16 @@ public class TeamGUI implements Runnable {
                                         enteredGoalsAgainst.incrementAndGet() + " successfully entered",
                                         ENTER_STATS_AFTER, JOptionPane.INFORMATION_MESSAGE);
                             }
-                            if (enteredGoalsScored.get() == goalsScored) {
+                            if (enteredGoalsScored.get() == enterAfterNumInputs[0]) {
                                 scoreButtonsPanel.remove(enterTeamGoal);
                                 scoreTeamGoals.repaint();
-                                if (enteredGoalsAgainst.get() == goalsAgainst) {
+                                if (enteredGoalsAgainst.get() == enterAfterNumInputs[1]) {
                                     scoreTeamGoals.dispose();
                                     if (ppGoals.get() >= powerPlays.get()) {
                                         enterTeamPPs.dispose();
                                         powerPlays.set(0);
                                     }
-                                    if (faceOffWins > 0 || faceOffLosses > 0) {
+                                    if (enterAfterNumInputs[2] > 0 || enterAfterNumInputs[3] > 0) {
                                         enterTeamFaceOffs.setVisible(true);
                                     } else if (shotsBlocked > 0) {
                                         enterTeamShotBlocks.setVisible(true);
@@ -4318,16 +4340,16 @@ public class TeamGUI implements Runnable {
                                 }
                                 return;
                             }
-                            if (enteredGoalsAgainst.get() == goalsAgainst) {
+                            if (enteredGoalsAgainst.get() == enterAfterNumInputs[1]) {
                                 scoreButtonsPanel.remove(enterOpponentGoal);
                                 scoreTeamGoals.repaint();
-                                if (enteredGoalsScored.get() == goalsScored) {
+                                if (enteredGoalsScored.get() == enterAfterNumInputs[0]) {
                                     scoreTeamGoals.dispose();
                                     if (ppGoals.get() >= powerPlays.get()) {
                                         enterTeamPPs.dispose();
                                         powerPlays.set(0);
                                     }
-                                    if (faceOffWins > 0 || faceOffLosses > 0) {
+                                    if (enterAfterNumInputs[2] > 0 || enterAfterNumInputs[3] > 0) {
                                         enterTeamFaceOffs.setVisible(true);
                                     } else if (shotsBlocked > 0) {
                                         enterTeamShotBlocks.setVisible(true);
@@ -4353,12 +4375,12 @@ public class TeamGUI implements Runnable {
                     }
 
                     // Enter Face Offs
-                    if (faceOffWins > 0 || faceOffLosses > 0) {
+                    if (enterAfterNumInputs[2] > 0 || enterAfterNumInputs[3] > 0) {
                         Container faceOffContent = enterTeamFaceOffs.getContentPane();
                         faceOffContent.setLayout(new BoxLayout(faceOffContent, BoxLayout.Y_AXIS));
                         faceOffContent.add(selectCenterPanel);
-                        JSlider winsSlider = new JSlider(0, faceOffWins);
-                        JSlider lossesSlider = new JSlider(0, faceOffLosses);
+                        JSlider winsSlider = new JSlider(0, enterAfterNumInputs[2]);
+                        JSlider lossesSlider = new JSlider(0, enterAfterNumInputs[3]);
                         JLabel winsLabel = new JLabel(FACE_OFF_WIN + winsSlider.getValue());
                         JLabel lossesLabel = new JLabel(FACE_OFF_LOSS + lossesSlider.getValue());
                         winsSlider.addChangeListener(e1 -> {
