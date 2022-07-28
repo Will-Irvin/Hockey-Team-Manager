@@ -9,7 +9,7 @@ public abstract class Line implements Serializable {
 
     // Error messages
     public static final String EMPTY_POSITIONS = "Positions cannot be left empty";
-    public static final String PLAYER_DUPLICATES_ERROR = "The same player cannot be at two different positions";
+    public static final String PLAYER_DUPLICATES_ERROR = "The same player cannot be at two different positions.";
     public static final String POSITION_DUPLICATES_ERROR = "Given positions must be different";
 
     /**

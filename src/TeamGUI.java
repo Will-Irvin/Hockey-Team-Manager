@@ -194,6 +194,9 @@ public class TeamGUI implements Runnable {
             "file until you click \"Game Over\".<hr>If you make a mistake and need to restart, you can close and " +
             "restart the application without clicking \"Game Over\".<br> This will undo any stats that you have " +
             "already entered.<hr></center></html>";
+    private static final String CHANGE_LINE_NOTE = "<html><center>Note: You cannot swap two players at once on the " +
+            "same line (e.g. switch the left wing with the right wing).<br>Instead, you must use a placeholder player" +
+            " and make the swap one at a time.</center></html>";
 
     // Error Strings
     private static final String NUMBER_ERROR = "Please enter a valid number where prompted.";
@@ -2047,6 +2050,7 @@ public class TeamGUI implements Runnable {
                 } else {
                     updatePlayerComponents(null, editingSkater, oldIndex, oldIndex);
                     changePositionCheck.setText(CHANGE_POSITION + editingSkater.getPosition());
+                    mainFrame.repaint();
                 }
                 try {
                     updateFile();
@@ -2338,10 +2342,12 @@ public class TeamGUI implements Runnable {
                     changeGoalieShotsAgainst.setText("");
                 }
             } catch (NumberFormatException ex) {
-                JOptionPane.showMessageDialog(mainFrame, NUMBER_ERROR, EDIT_GOALIE, JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(mainFrame, NUMBER_ERROR + BLANK_UPDATED, EDIT_GOALIE,
+                        JOptionPane.ERROR_MESSAGE);
                 return;
             } catch (NullPointerException | IllegalArgumentException ex) {
-                JOptionPane.showMessageDialog(mainFrame, ex.getMessage(), EDIT_GOALIE, JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(mainFrame, ex.getMessage() + BLANK_UPDATED, EDIT_GOALIE,
+                        JOptionPane.ERROR_MESSAGE);
                 return;
             }
             Goalie newGoalie = null;
@@ -2355,13 +2361,14 @@ public class TeamGUI implements Runnable {
             if (newGoalie != null) {
                 int index = team.changePlayer(editingGoalie, newGoalie);
                 if (index == -1) {
-                    JOptionPane.showMessageDialog(mainFrame, PLAYER_NUMBER_DUPLICATE, EDIT_GOALIE,
-                            JOptionPane.ERROR_MESSAGE);
+                    JOptionPane.showMessageDialog(mainFrame, PLAYER_NUMBER_DUPLICATE + BLANK_UPDATED,
+                            EDIT_GOALIE, JOptionPane.ERROR_MESSAGE);
                     return;
                 }
                 updatePlayerComponents(editingGoalie, newGoalie, oldIndex, index);
             } else {
                 updatePlayerComponents(null, editingGoalie, oldIndex, oldIndex);
+                mainFrame.repaint();
             }
 
             try {
@@ -2934,6 +2941,8 @@ public class TeamGUI implements Runnable {
             JButton assignPlayers = new JButton("Assign These Players");
             createPanelForContainer(new JComponent[]{assignPlayers}, playersWindowContent);
 
+            JLabel changePlayersNote = new JLabel(CHANGE_LINE_NOTE);
+            createPanelForContainer(new JComponent[]{changePlayersNote}, playersWindowContent);
             playersWindow.pack();
             playersWindow.setVisible(true);
 
@@ -3464,6 +3473,40 @@ public class TeamGUI implements Runnable {
         hitLive = new JButton(HIT);
         createPanelForContainer(new JComponent[]{shotBlockLive, hitLive}, liveStats);
         shotBlockLive.addActionListener(e -> {
+            // Clears the selection in create line tab and removes any selected components
+            // Select LD Panel may be used so this ensures that create line tab does not appear to miss components
+            lineTypeGroup.clearSelection();
+            for (int i = 0; i < selectedLine.length; i++) {
+                if (selectedLine[i]) {
+                    selectedLine[i] = false;
+                    switch (i) {
+                        case 0 -> { // Offense Line
+                            createLineContent.remove(selectCenterPanel);
+                            createLineContent.remove(selectLWPanel);
+                            createLineContent.remove(selectRWPanel);
+                        }
+                        case 1 -> { // De Line
+                            createLineContent.remove(selectLDPanel);
+                            createLineContent.remove(selectRDPanel);
+                        }
+                        case 2 -> { // PP Line
+                            createLineContent.remove(selectCenterPanel);
+                            createLineContent.remove(selectLWPanel);
+                            createLineContent.remove(selectRWPanel);
+                            createLineContent.remove(selectLDPanel);
+                            createLineContent.remove(selectRDPanel);
+                        }
+                        case 3 -> { // PK Line
+                            createLineContent.remove(selectLWPanel);
+                            createLineContent.remove(selectRWPanel);
+                            createLineContent.remove(selectLDPanel);
+                            createLineContent.remove(selectRDPanel);
+                        }
+                    }
+                    break;
+                }
+            }
+
             Line currentLine;
             if (powerPlayLive.isSelected()) {
                 currentLine = (Line) ppOptions.getSelectedItem();
@@ -3934,6 +3977,39 @@ public class TeamGUI implements Runnable {
                                 "the number of shots against your goalie.", ENTER_STATS_AFTER,
                                 JOptionPane.ERROR_MESSAGE);
                         return;
+                    }
+                    // Clears the selection in create line tab and removes any selected components
+                    // Some components may be used in this process which is why the other tab must be reset
+                    lineTypeGroup.clearSelection();
+                    for (int i = 0; i < selectedLine.length; i++) {
+                        if (selectedLine[i]) {
+                            selectedLine[i] = false;
+                            switch (i) {
+                                case 0 -> { // Offense Line
+                                    createLineContent.remove(selectCenterPanel);
+                                    createLineContent.remove(selectLWPanel);
+                                    createLineContent.remove(selectRWPanel);
+                                }
+                                case 1 -> { // De Line
+                                    createLineContent.remove(selectLDPanel);
+                                    createLineContent.remove(selectRDPanel);
+                                }
+                                case 2 -> { // PP Line
+                                    createLineContent.remove(selectCenterPanel);
+                                    createLineContent.remove(selectLWPanel);
+                                    createLineContent.remove(selectRWPanel);
+                                    createLineContent.remove(selectLDPanel);
+                                    createLineContent.remove(selectRDPanel);
+                                }
+                                case 3 -> { // PK Line
+                                    createLineContent.remove(selectLWPanel);
+                                    createLineContent.remove(selectRWPanel);
+                                    createLineContent.remove(selectLDPanel);
+                                    createLineContent.remove(selectRDPanel);
+                                }
+                            }
+                            break;
+                        }
                     }
 
                     // Window for each stat that needs further clarification from user

@@ -144,7 +144,7 @@ public class Skater extends Player {
      * @throws IllegalArgumentException If the given stat is negative
      */
     public void setAssists(int assists) throws IllegalArgumentException {
-        if (goals < 0) {
+        if (assists < 0) {
             throw new IllegalArgumentException("Assists " + POS_STAT);
         } else {
             this.assists = assists;
