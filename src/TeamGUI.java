@@ -4815,8 +4815,6 @@ public class TeamGUI implements Runnable {
                             guiltyPlayer.penalty(penaltyLength);
                             if (checkSuccess.isSelected()) {
                                 pkLine.success();
-                            } else {
-                                pkLine.failure();
                             }
                             JOptionPane.showMessageDialog(enterTeamPKs, "Penalty " +
                                     enteredPenalties.incrementAndGet() + " Entered Successfullly", ENTER_STATS_AFTER,
