@@ -279,7 +279,7 @@ public class Team implements Serializable {
             return -1;
         }
         if (oldPlayer instanceof Skater) {
-            if (!skaters.remove(oldPlayer)) {
+            if (!removePlayer(oldPlayer)) {
                 return -2;
             }
         } else if (oldPlayer instanceof Goalie){

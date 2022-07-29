@@ -220,8 +220,8 @@ public class PKLine extends SpecialTeamsLine {
     public String lineRoster() {
         return String.format("""
                         %s
-                        Offense: %s
-                        Offense: %s
+                        Offense 1 (LW): %s
+                        Offense 2 (RW): %s
                         Left Defense: %s
                         Right Defense: %s
                         PK%%: %.2f""", getName(), offense1.getName(), offense2.getName(), leftDe.getName(),

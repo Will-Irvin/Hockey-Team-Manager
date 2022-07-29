@@ -155,7 +155,7 @@ public class TeamGUI implements Runnable {
     private static final String SELECT_DE = "Select Defenseman";
     private static final String SELECT_OTHER_DE = "Select Other Defenseman";
     private static final String THAT_SHOT_BLOCK = "That Blocked The Shot:";
-    private static final String SELECT_SKATER_WHO_HIT = "Select Skater who made the hit";
+    private static final String SELECT_SKATER_WHO_HIT = "Select Skater who Made the Hit";
     private static final String SELECT_OTHER_SKATER = "Select Other Skater";
     private static final String ASSIST_CHECK = "This Player Assisted";
     private static final String CANCEL = "Cancel";
@@ -169,7 +169,7 @@ public class TeamGUI implements Runnable {
     private static final String POST_SHOTS_BLOCKED = "Select Number of Shots Blocked by your Skaters: ";
     private static final String POST_SHOTS_AGAINST = "Select Number of Shots Against your Goalie: ";
     private static final String POST_HITS = "Select Number of Hits made by your Team: ";
-    private static final String GOAL_AGAINST_GOALIE = "Select Number of Goals Scored on this Goalie:";
+    private static final String GOAL_AGAINST_GOALIE = "Select Number of Goals Scored on this Goalie: ";
     private static final String SELECT_EXPIRED_PP = "Select Number of Expired Power Play Opportunities: ";
     private static final String SELECT_SERVING_PLAYER = "Select Player Serving Penalty:";
     private static final String PENALTY_LENGTH = "Enter Duration of Penalty in Minutes:";
@@ -189,11 +189,11 @@ public class TeamGUI implements Runnable {
             "their previous stats will be lost unless you have a backup file.</html>";
     private static final String ENTER_LIVE_INSTRUCTIONS = "<html><center>This tab is best for watching the game live " +
             "and entering stats as the game progresses.<br>You must have created at least one of each type of line to" +
-            " be able to use this tab.<hr>Any stats you update may display in some elements of the application; " +
-            "however,<br> the application will not be completely updated and your changes will not be saved to your " +
-            "file until you click \"Game Over\".<hr>If you make a mistake and need to restart, you can close and " +
-            "restart the application without clicking \"Game Over\".<br> This will undo any stats that you have " +
-            "already entered.<hr></center></html>";
+            " be able to completely use this tab.<hr>Any stats you update may display in some elements of the " +
+            "application; however,<br> the application will not be completely updated and your changes will not be " +
+            "saved to your file until you click \"Game Over\".<hr>If you make a mistake and need to restart, you can " +
+            "close and restart the application without clicking \"Game Over\".<br> This will undo any stats that you " +
+            "have already entered.<hr></center></html>";
     private static final String CHANGE_LINE_NOTE = "<html><center>Note: You cannot swap two players at once on the " +
             "same line (e.g. switch the left wing with the right wing).<br>Instead, you must use a placeholder player" +
             " and make the swap one at a time.</center></html>";
@@ -3206,7 +3206,7 @@ public class TeamGUI implements Runnable {
                 }
             }
 
-            useLinesOrPlayers.addActionListener(e1 -> {
+            ActionListener switchLinesAndPlayersLive = e1 -> {
                 if (useLinesOrPlayers.isSelected()) {
                     useLinesOrPlayers.setText(USE_LINES);
                     liveGoalContent.remove(lineRosterPanel);
@@ -3233,7 +3233,8 @@ public class TeamGUI implements Runnable {
                     liveGoalContent.add(lineRosterPanel, 1);
                 }
                 enterGoalLive.pack();
-            });
+            };
+            useLinesOrPlayers.addActionListener(switchLinesAndPlayersLive);
 
             ActionListener enterGoal = e1 -> {
                 if (e1.getActionCommand().equals(enterGoalButton.getActionCommand())) {
@@ -3340,6 +3341,7 @@ public class TeamGUI implements Runnable {
                 @Override
                 public void windowClosed(WindowEvent e) {
                     mainFrame.setVisible(true);
+                    useLinesOrPlayers.removeActionListener(switchLinesAndPlayersLive);
                 }
             });
 
@@ -3617,7 +3619,7 @@ public class TeamGUI implements Runnable {
             Container shotBlockContent = shotBlockWindow.getContentPane();
             shotBlockContent.setLayout(new BoxLayout(shotBlockContent, BoxLayout.Y_AXIS));
 
-            JLabel selectBlockerLabel = new JLabel(SELECT_DE + THAT_SHOT_BLOCK);
+            JLabel selectBlockerLabel = new JLabel(SELECT_DE + ' ' + THAT_SHOT_BLOCK);
             JComboBox<Defenseman> blockerOptions = new JComboBox<>();
             Skater[] skaters = currentLine.getSkaters();
             if (currentLine instanceof DefenseLine) {
@@ -3640,7 +3642,7 @@ public class TeamGUI implements Runnable {
                     selectOtherDefense.setText("Select Defenseman from Current Line");
                     shotBlockContent.remove(selectBlockerPanel);
                     shotBlockContent.add(selectLDPanel, 0);
-                    selectLDLabel.setText(SELECT_DE + THAT_SHOT_BLOCK);
+                    selectLDLabel.setText(SELECT_DE + ' ' + THAT_SHOT_BLOCK);
                 } else {
                     selectOtherDefense.setText(SELECT_OTHER_DE);
                     shotBlockContent.remove(selectLDPanel);
@@ -4003,6 +4005,7 @@ public class TeamGUI implements Runnable {
                 pkLinePanel.remove(pkLinePanel.getComponentCount() - 1);
                 pkLinePanel.add(pkOptions);
                 liveStats.add(defenseLinePanel, 2);
+                useLinesOrPlayers.removeAll();
                 try {
                     updateFile();
                 } catch (IOException ex) {
@@ -4327,7 +4330,7 @@ public class TeamGUI implements Runnable {
 
 
                         // Updates screen based on the toggle button selection
-                        useLinesOrPlayers.addActionListener(e1 -> {
+                        ActionListener switchLinesAndPlayersAfter = e1 -> {
                             if (useLinesOrPlayers.isSelected()) {
                                 useLinesOrPlayers.setText(USE_LINES);
 
@@ -4359,7 +4362,8 @@ public class TeamGUI implements Runnable {
                             }
                             scoreTeamGoals.pack();
                             scoreTeamGoals.repaint();
-                        });
+                        };
+                        useLinesOrPlayers.addActionListener(switchLinesAndPlayersAfter);
 
                         JButton enterTeamGoal = new JButton(TEAM_GOAL);
                         JButton enterOpponentGoal = new JButton(OPPONENT_GOAL);
@@ -4487,6 +4491,7 @@ public class TeamGUI implements Runnable {
                                 scoreTeamGoals.repaint();
                                 if (enteredGoalsAgainst.get() == enterAfterNumInputs[1]) {
                                     scoreTeamGoals.dispose();
+                                    useLinesOrPlayers.removeActionListener(switchLinesAndPlayersAfter);
                                     if (ppGoals.get() >= powerPlays.get()) {
                                         enterTeamPPs.dispose();
                                         powerPlays.set(0);
@@ -4510,6 +4515,7 @@ public class TeamGUI implements Runnable {
                             if (enteredGoalsAgainst.get() == enterAfterNumInputs[1]) {
                                 scoreButtonsPanel.remove(enterOpponentGoal);
                                 scoreTeamGoals.repaint();
+                                useLinesOrPlayers.removeActionListener(switchLinesAndPlayersAfter);
                                 if (enteredGoalsScored.get() == enterAfterNumInputs[0]) {
                                     scoreTeamGoals.dispose();
                                     if (ppGoals.get() >= powerPlays.get()) {
