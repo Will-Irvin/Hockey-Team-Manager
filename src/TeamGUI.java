@@ -3349,8 +3349,8 @@ public class TeamGUI implements Runnable {
 
         scoredAgainstLive.addActionListener(e -> {
             Goalie goalieInNet = (Goalie) selectGoaliesForStats.getSelectedItem();
+            int input;
             if (goalieInNet == null) {
-                int input;
                 do {
                     input = JOptionPane.showConfirmDialog(mainFrame, "You do not currently have a goalie" +
                             " in net. Was this an empty net goal?", ENTER_STATS_LIVE, JOptionPane.YES_NO_OPTION,
@@ -3363,7 +3363,7 @@ public class TeamGUI implements Runnable {
             if (penaltyLive.isSelected()) {
                 PKLine failedLine = (PKLine) pkOptions.getSelectedItem();
                 if (failedLine != null) {
-                    failedLine.failure();
+                    failedLine.lineScoredOn();
                     penaltyOptionsLive.clearSelection();
                     liveStats.remove(pkLinePanel);
                     liveStats.remove(penaltyOverPanel);
@@ -3373,6 +3373,97 @@ public class TeamGUI implements Runnable {
                     JOptionPane.showMessageDialog(mainFrame, NO_OPTIONS + "penalty kill line.",
                             ENTER_STATS_LIVE, JOptionPane.ERROR_MESSAGE);
                     return;
+                }
+            } else if (powerPlayLive.isSelected()) {
+                PPLine failedLine = (PPLine) ppOptions.getSelectedItem();
+                if (failedLine != null) {
+                    failedLine.lineScoredOn();
+                } else {
+                    JOptionPane.showMessageDialog(mainFrame, NO_OPTIONS + "power play line.",
+                            ENTER_STATS_LIVE, JOptionPane.ERROR_MESSAGE);
+                    return;
+                }
+            } else {
+                do {
+                    input = JOptionPane.showConfirmDialog(mainFrame, "Can your currently selected lines be " +
+                                    "used for adjusting +/- stats?", ENTER_STATS_LIVE, JOptionPane.YES_NO_OPTION,
+                            JOptionPane.QUESTION_MESSAGE);
+                } while (input != JOptionPane.YES_OPTION && input != JOptionPane.NO_OPTION);
+                if (input == JOptionPane.YES_OPTION) {
+                    OffenseLine oLine = (OffenseLine) offenseLines.getSelectedItem();
+                    DefenseLine dLine = (DefenseLine) defenseLines.getSelectedItem();
+                    if (oLine != null && dLine != null) {
+                        oLine.lineScoredOn();
+                        dLine.lineScoredOn();
+                    } else {
+                        JOptionPane.showMessageDialog(mainFrame, NO_OPTIONS +
+                                        "offense line and a defense line.",
+                                ENTER_STATS_LIVE, JOptionPane.ERROR_MESSAGE);
+                    }
+                } else {
+                    if (team.getSkaters().length < 5) {
+                        JOptionPane.showMessageDialog(mainFrame,
+                                NO_OPTIONS.substring(0, NO_OPTIONS.length() - 1) + "t least 5 skaters.",
+                                ENTER_STATS_LIVE, JOptionPane.ERROR_MESSAGE);
+                        return;
+                    }
+                    mainFrame.setVisible(false);
+                    JWindow scoredOnWindow = new JWindow(mainFrame);
+                    scoredOnWindow.setLocationRelativeTo(mainFrame);
+                    Container scoredOnContent = scoredOnWindow.getContentPane();
+                    scoredOnContent.setLayout(new BoxLayout(scoredOnContent, BoxLayout.Y_AXIS));
+                    JLabel scoredOnPlayersLabel = new JLabel("Select Players on Ice when Goal was Scored");
+                    createPanelForContainer(new JComponent[]{scoredOnPlayersLabel}, scoredOnContent);
+                    playerScoreLabel.setText("");
+                    scoredOnContent.add(playerScorePanel);
+                    assistPlayerPanel1.remove(assist1Check);
+                    scoredOnContent.add(assistPlayerPanel1);
+                    assistPlayerPanel2.remove(assist2Check);
+                    scoredOnContent.add(assistPlayerPanel2);
+                    scoredOnContent.add(selectOtherPlayersPanel);
+                    JButton enterPlayers = new JButton("Select Players");
+                    createPanelForContainer(new JComponent[]{enterPlayers}, scoredOnContent);
+                    enterPlayers.addActionListener(e1 -> {
+                        Skater skater1 = (Skater) scorerPlayerOptions.getSelectedItem();
+                        Skater skater2 = (Skater) assistPlayerOptions1.getSelectedItem();
+                        Skater skater3 = (Skater) assistPlayerOptions2.getSelectedItem();
+                        Skater skater4 = (Skater) otherPlayerOptions1.getSelectedItem();
+                        Skater skater5 = (Skater) otherPlayerOptions2.getSelectedItem();
+                        if (skater1 == null || skater2 == null || skater3 == null || skater4 == null || skater5 == null)
+                        {
+                            JOptionPane.showMessageDialog(mainFrame, UNEXPECTED_ERROR +
+                                    "enterPlayers.addActionListener", ENTER_STATS_LIVE, JOptionPane.ERROR_MESSAGE);
+                            scoredOnWindow.dispose();
+                            return;
+                        }
+                        if (skater1.equals(skater2) || skater1.equals(skater3) || skater1.equals(skater4) ||
+                                skater1.equals(skater5) || skater2.equals(skater3) || skater2.equals(skater4) ||
+                                skater2.equals(skater5) || skater3.equals(skater4) || skater3.equals(skater5) ||
+                                skater4.equals(skater5)) {
+                            JOptionPane.showMessageDialog(mainFrame, PLAYER_DUPLICATE, ENTER_STATS_LIVE,
+                                    JOptionPane.ERROR_MESSAGE);
+                            return;
+                        }
+                        skater1.scoredAgainst();
+                        skater2.scoredAgainst();
+                        skater3.scoredAgainst();
+                        skater4.scoredAgainst();
+                        skater5.scoredAgainst();
+                        scoredOnWindow.dispose();
+                    });
+
+                    scoredOnWindow.addWindowListener(new WindowAdapter() {
+                        @Override
+                        public void windowClosed(WindowEvent e) {
+                            playerScoreLabel.setText(SELECT_SCORER);
+                            assistPlayerPanel1.add(assist1Check);
+                            assistPlayerPanel2.add(assist2Check);
+                            mainFrame.setVisible(true);
+                        }
+                    });
+
+                    scoredOnWindow.pack();
+                    scoredOnWindow.setVisible(true);
                 }
             }
             if (goalieInNet != null) {
