@@ -166,7 +166,7 @@ public class TeamGUI implements Runnable {
     private static final String HIT = "Hit";
     private static final String ENTER_PENALTIES = "Select Number of Penalties called on your Players: ";
     private static final String ENTER_POWER_PLAY = "Select Number of Power Play Opportunities: ";
-    private static final String POST_SHOTS_BLOCKED = "Select Number of Shots Blocked by your Skaters: ";
+    private static final String POST_SHOTS_BLOCKED = "Select Number of Shots Blocked by your Defenseman: ";
     private static final String POST_SHOTS_AGAINST = "Select Number of Shots Against your Goalie: ";
     private static final String POST_HITS = "Select Number of Hits made by your Team: ";
     private static final String GOAL_AGAINST_GOALIE = "Select Number of Goals Scored on this Goalie: ";
@@ -3280,47 +3280,45 @@ public class TeamGUI implements Runnable {
                                         JOptionPane.ERROR_MESSAGE);
                                 return;
                             }
-                            while (true) {
-                                try {
-                                    if (scoringLine instanceof OffenseLine oLine) {
-                                        DefenseLine dLine = (DefenseLine) defenseLines.getSelectedItem();
-                                        if (dLine == null) {
-                                            JOptionPane.showMessageDialog(enterGoalLive, NO_OPTIONS + "line " +
-                                                    "or select players manually.", ENTER_STATS_LIVE,
-                                                    JOptionPane.ERROR_MESSAGE);
-                                            return;
-                                        }
-                                        if (assist2 != null) {
-                                            oLine.score(scorer, assist1, assist2, dLine);
-                                        } else if (assist1 != null) {
-                                            oLine.score(scorer, assist1, dLine);
-                                        } else {
-                                            oLine.score(scorer, dLine);
-                                        }
-                                    } else {
-                                        SpecialTeamsLine specialTeams = (SpecialTeamsLine) scoringLine;
-                                        if (assist2 != null) {
-                                            specialTeams.score(scorer, assist1, assist2);
-                                        } else if (assist1 != null) {
-                                            specialTeams.score(scorer, assist1);
-                                        } else {
-                                            specialTeams.score(scorer);
-                                        }
-                                        if (specialTeams instanceof PPLine) {
-                                            specialTeams.success();
-                                            penaltyOptionsLive.clearSelection();
-                                            liveStats.remove(ppLinePanel);
-                                            liveStats.remove(penaltyOverPanel);
-                                            liveStats.add(defenseLinePanel, 1);
-                                            liveStats.add(offenseLinePanel, 1);
-                                            mainFrame.repaint();
-                                        }
+                            try {
+                                if (scoringLine instanceof OffenseLine oLine) {
+                                    DefenseLine dLine = (DefenseLine) defenseLines.getSelectedItem();
+                                    if (dLine == null) {
+                                        JOptionPane.showMessageDialog(enterGoalLive, NO_OPTIONS + "line " +
+                                                        "or select players manually.", ENTER_STATS_LIVE,
+                                                JOptionPane.ERROR_MESSAGE);
+                                        return;
                                     }
-                                    break;
-                                } catch (IllegalArgumentException ex) {
-                                    JOptionPane.showMessageDialog(enterGoalLive, ex.getMessage(), ENTER_STATS_LIVE,
-                                            JOptionPane.ERROR_MESSAGE);
+                                    if (assist2 != null) {
+                                        oLine.score(scorer, assist1, assist2, dLine);
+                                    } else if (assist1 != null) {
+                                        oLine.score(scorer, assist1, dLine);
+                                    } else {
+                                        oLine.score(scorer, dLine);
+                                    }
+                                } else {
+                                    SpecialTeamsLine specialTeams = (SpecialTeamsLine) scoringLine;
+                                    if (assist2 != null) {
+                                        specialTeams.score(scorer, assist1, assist2);
+                                    } else if (assist1 != null) {
+                                        specialTeams.score(scorer, assist1);
+                                    } else {
+                                        specialTeams.score(scorer);
+                                    }
+                                    if (specialTeams instanceof PPLine) {
+                                        specialTeams.success();
+                                        penaltyOptionsLive.clearSelection();
+                                        liveStats.remove(ppLinePanel);
+                                        liveStats.remove(penaltyOverPanel);
+                                        liveStats.add(defenseLinePanel, 1);
+                                        liveStats.add(offenseLinePanel, 1);
+                                        mainFrame.repaint();
+                                    }
                                 }
+                            } catch (IllegalArgumentException ex) {
+                                JOptionPane.showMessageDialog(enterGoalLive, ex.getMessage(), ENTER_STATS_LIVE,
+                                        JOptionPane.ERROR_MESSAGE);
+                                return;
                             }
                         } else {
                             JOptionPane.showMessageDialog(enterGoalLive, NO_OPTIONS + "line or select " +
@@ -4764,7 +4762,6 @@ public class TeamGUI implements Runnable {
 
                     // Enter Penalty Kills
                     if (penalties > 0 && pkOptions.getItemCount() > 0) {
-                        enterTeamPKs.setFocusable(true);
                         AtomicInteger enteredPenalties = new AtomicInteger();
                         Container enterPKContent = enterTeamPKs.getContentPane();
                         enterPKContent.setLayout(new BoxLayout(enterPKContent, BoxLayout.Y_AXIS));
