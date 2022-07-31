@@ -18,7 +18,7 @@ import java.util.concurrent.atomic.*;
 public class TeamGUI implements Runnable {
     // Read in from the stored file, user selects team from this list
     private static final ArrayList<Team> teams = new ArrayList<>();
-    private Team team;  // Team that the user chooses to open or creates
+    private Team team;  // Team that the user chooses to open
 
     // Select GUI Strings/Components
     private static final String INIT = "Initialize";
@@ -51,7 +51,7 @@ public class TeamGUI implements Runnable {
     private static final String NEW_FILE_ERR = "There was an issue creating the given file name. It may be invalid " +
             "or already exist on your computer. Please delete the old file or try a different name.";
     private static final String DUPLICATES_INSTRUCTIONS = "<html><center>Select the Teams from your program above " +
-            "that you would like to replace with the information from the text file.<br> Hold down Ctrl to select" +
+            "that you would like to replace with the information from the text file.<br>Hold down Ctrl to select" +
             " multiple teams.</center></html>";
     private static final String FILE_DUPLICATE_PLAYER = "Two or more players share the same number";
     private static final String FILE_DUPLICATE_LINE = "Two or more lines share the same name";
@@ -639,8 +639,8 @@ public class TeamGUI implements Runnable {
      */
     public void openFile() throws IOException, ClassNotFoundException, Exception {
         File f = new File(FILE_NAME);
-        if (!f.exists()) {
-            if (!f.createNewFile()) throw new Exception("An unexpected error occurred - openFile 1");
+        if (!f.exists()) {  // No file found, new data created
+            if (!f.createNewFile()) throw new Exception(UNEXPECTED_ERROR + "openFile 1");
             ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(f));
             oos.writeInt(1);
             oos.writeObject(createSample());
@@ -654,7 +654,7 @@ public class TeamGUI implements Runnable {
             if (o instanceof Team t) {
                 teams.add(t);
             } else {
-                throw new Exception("Unexpected error occurred while reading from the file - openFile 2");
+                throw new Exception(UNEXPECTED_ERROR + "openFile 2");
             }
         }
         ois.close();
@@ -688,11 +688,11 @@ public class TeamGUI implements Runnable {
      */
     public ArrayList<Team> importFile(File f) throws IOException {
         BufferedReader br = new BufferedReader(new FileReader(f));
-        int lineNum = 1;
+        int lineNum = 1;  // Keep track of current line number, used in error reporting
         ArrayList<Team> duplicates = new ArrayList<>();
-        String regEx = "\\|";
+        String regEx = "\\|";  // String used to split by '|' char
         try {
-            int numTeams = Integer.parseInt(br.readLine());
+            int numTeams = Integer.parseInt(br.readLine());  // Number of teams in file
             lineNum++;
             int index;
             for (int i = 0; i < numTeams; i++) {
@@ -701,8 +701,8 @@ public class TeamGUI implements Runnable {
                 team = new Team(teamInfo[0], Integer.parseInt(teamInfo[1]), Integer.parseInt(teamInfo[2]),
                         Integer.parseInt(teamInfo[3]));
                 lineNum++;
-                int loopTotal = Integer.parseInt(br.readLine());
-                for (int k = 0; k < loopTotal; k++) {
+                int loopTotal = Integer.parseInt(br.readLine());  // Number of skaters
+                for (int k = 0; k < loopTotal; k++) {  // Read in skaters
                     String[] skaterInfo = br.readLine().split(regEx);
                     Skater skater;
                     switch (skaterInfo[3]) {
@@ -737,8 +737,8 @@ public class TeamGUI implements Runnable {
                     }
                     lineNum++;
                 }
-                loopTotal = Integer.parseInt(br.readLine());
-                for (int k = 0; k < loopTotal; k++) {
+                loopTotal = Integer.parseInt(br.readLine());  // Number of goalies
+                for (int k = 0; k < loopTotal; k++) {  // Read in goalies
                     String[] goalieInfo = br.readLine().split(regEx);
                     index = team.addPlayer(new Goalie(goalieInfo[0], Integer.parseInt(goalieInfo[1]),
                             Double.parseDouble(goalieInfo[6]), Integer.parseInt(goalieInfo[7]),
@@ -749,8 +749,8 @@ public class TeamGUI implements Runnable {
                     }
                     lineNum++;
                 }
-                loopTotal = Integer.parseInt(br.readLine());
-                for (int k = 0; k < loopTotal; k++) {
+                loopTotal = Integer.parseInt(br.readLine());  // Number of lines
+                for (int k = 0; k < loopTotal; k++) {  // Read in lines
                     String[] lineInfo = br.readLine().split(regEx);
                     Line line;
                     switch (lineInfo.length) {
@@ -973,9 +973,10 @@ public class TeamGUI implements Runnable {
 
     /**
      * Initializes all combo boxes containing elements of a team such as the boxes for selecting a line, a skater, a
-     * goalie, etc.
+     * goalie, etc. as well as the position option combo boxes
      */
     private void setUpComboBoxes() {
+        // Lines
         lineOptions = new JComboBox<>();
         lineOptions.addItem(null);
         nonDefenseLines = new JComboBox<>();
@@ -1002,6 +1003,7 @@ public class TeamGUI implements Runnable {
             }
         }
 
+        // Skaters
         centerOptions = new JComboBox<>();
         centerOptions.addItem(null);
         pickLeftWing = new JComboBox<>();
@@ -1037,6 +1039,7 @@ public class TeamGUI implements Runnable {
             }
         }
 
+        // Goalies
         goalieOptions = new JComboBox<>();
         selectGoaliesForStats = new JComboBox<>();
         goalieOptions.addItem(null);
@@ -1046,38 +1049,16 @@ public class TeamGUI implements Runnable {
             selectGoaliesForStats.addItem(goalie);
         }
 
-        positionOptions = new JComboBox<>();
-        positionOptions.addItem(Position.Center);
-        positionOptions.addItem(Position.Left_Wing);
-        positionOptions.addItem(Position.Right_Wing);
-        positionOptions.addItem(Position.Left_Defense);
-        positionOptions.addItem(Position.Right_Defense);
-        changePosition = new JComboBox<>();
-        changePosition.addItem(Position.Center);
-        changePosition.addItem(Position.Left_Wing);
-        changePosition.addItem(Position.Right_Wing);
-        changePosition.addItem(Position.Left_Defense);
-        changePosition.addItem(Position.Right_Defense);
-        scorerOptions = new JComboBox<>();
-        scorerOptions.addItem(Position.Center);
-        scorerOptions.addItem(Position.Left_Wing);
-        scorerOptions.addItem(Position.Right_Wing);
-        scorerOptions.addItem(Position.Left_Defense);
-        scorerOptions.addItem(Position.Right_Defense);
-        assistOptions1 = new JComboBox<>();
-        assistOptions1.addItem(null);
-        assistOptions1.addItem(Position.Center);
-        assistOptions1.addItem(Position.Left_Wing);
-        assistOptions1.addItem(Position.Right_Wing);
-        assistOptions1.addItem(Position.Left_Defense);
-        assistOptions1.addItem(Position.Right_Defense);
-        assistOptions2 = new JComboBox<>();
-        assistOptions2.addItem(null);
-        assistOptions2.addItem(Position.Center);
-        assistOptions2.addItem(Position.Left_Wing);
-        assistOptions2.addItem(Position.Right_Wing);
-        assistOptions2.addItem(Position.Left_Defense);
-        assistOptions2.addItem(Position.Right_Defense);
+        // Positions
+        Position[] positions = new Position[]{Position.Center, Position.Left_Wing, Position.Right_Wing,
+                Position.Left_Defense, Position.Right_Defense};
+        positionOptions = new JComboBox<>(positions);
+        changePosition = new JComboBox<>(positions);
+        scorerOptions = new JComboBox<>(positions);
+        assistOptions1 = new JComboBox<>(positions);
+        assistOptions1.insertItemAt(null, 0);
+        assistOptions2 = new JComboBox<>(positions);
+        assistOptions2.insertItemAt(null, 0);
     }
 
     /**
@@ -1087,7 +1068,7 @@ public class TeamGUI implements Runnable {
      * @param newIndex Index where the new line falls in the team line ArrayList
      */
     private void updateLineComboBoxes(Line oldLine, Line newLine, int newIndex) {
-        if (oldLine != null) {
+        if (oldLine != null) {  // Delete old line from combo boxes
             lineOptions.removeItem(oldLine);
             if (oldLine instanceof DefenseLine) {
                 defenseLines.removeItem(oldLine);
@@ -1102,7 +1083,7 @@ public class TeamGUI implements Runnable {
             }
         }
 
-        if (newLine != null) {
+        if (newLine != null) {  // Insert new line in necessary combo boxes
             lineOptions.insertItemAt(newLine, newIndex + 1);
 
             int low;
@@ -1255,7 +1236,7 @@ public class TeamGUI implements Runnable {
      * @param index Index where the new skater was added to the team ArrayList
      */
     private void updatePlayerComponents(Player oldPlayer, Player newPlayer, int oldIndex, int index) {
-        if (oldPlayer != null) {  // Remove old skater
+        if (oldPlayer != null) {  // Remove old player
             if (oldPlayer instanceof Skater oldSkater) {
                 pickLeftWing.removeItem(oldSkater);
                 pickRightWing.removeItem(oldSkater);
@@ -1306,7 +1287,7 @@ public class TeamGUI implements Runnable {
             }
         }
 
-        if (oldPlayer == null && oldIndex == index) {
+        if (oldPlayer == null && oldIndex == index) {  // Player is unchanged, but stats are updated
             if (newPlayer instanceof Skater newSkater) {
                 skaterStats.removeRow(oldIndex);
                 skaterStats.insertRow(index, newSkater.getStatsArray());
@@ -1319,7 +1300,7 @@ public class TeamGUI implements Runnable {
             return;
         }
 
-        if (newPlayer != null) {
+        if (newPlayer != null) {  // Add new player to proper locations
             if (newPlayer instanceof Skater newSkater) {
                 pickLeftWing.insertItemAt(newSkater, index + 1);
                 pickRightWing.insertItemAt(newSkater, index + 1);
@@ -1492,7 +1473,7 @@ public class TeamGUI implements Runnable {
             } catch (Exception ex) {
                 JOptionPane.showMessageDialog(mainFrame, ex.getMessage(), EDIT_TEAM, JOptionPane.ERROR_MESSAGE);
             }
-            if (!name.isBlank()) {
+            if (!name.isBlank()) {  // Create new team with the same information but new name
                 Team newTeam = new Team(team);
                 newTeam.setName(name);
                 changeTeamName.setText("");
@@ -1521,7 +1502,7 @@ public class TeamGUI implements Runnable {
         resetTeamStats.addActionListener(e -> {
             int response = JOptionPane.showConfirmDialog(mainFrame, RESET_CONFIRM + "the entire team" + TO_ZERO,
                     RESET_TEAM_STATS, JOptionPane.YES_NO_OPTION);
-            if (response == JOptionPane.YES_OPTION) {
+            if (response == JOptionPane.YES_OPTION) {  // Ensure user truly wants to reset stats
                 team.resetTeamStats();
                 try {
                     updateFile();
@@ -1539,7 +1520,7 @@ public class TeamGUI implements Runnable {
 
         teamTabs.add(EDIT_TEAM, editTeam);
 
-        // Text Area that displays the teams roster
+        // Text Area that displays the team's roster
         viewRoster = new JTextArea(team.generateRoster());
         viewRoster.setEditable(false);
         JScrollPane viewRosterScroll = new JScrollPane(viewRoster);
@@ -1569,8 +1550,6 @@ public class TeamGUI implements Runnable {
         viewTeamStats.setEditable(false);
         JScrollPane viewTeamStatsScroll = new JScrollPane(viewTeamStats);
         teamTabs.add("View Team Stats", viewTeamStatsScroll);
-
-
 
         mainTabs.add("Manage Team", teamTabs);
 
@@ -1619,6 +1598,8 @@ public class TeamGUI implements Runnable {
         createPlayer = new JButton(CREATE_SKATER);
         createPanelForContainer(new JComponent[]{createPlayer}, createSkater);
 
+        // Labels and fields for initializing player stats
+
         enterGoalsLabel = new JLabel(GOALS_STRING);
         enterGoals = new JTextField(ENTER_STAT_SIZE);
         enterAssistsLabel = new JLabel(ASSISTS_STRING);
@@ -1639,21 +1620,24 @@ public class TeamGUI implements Runnable {
         enterShotsBlocked = new JTextField(ENTER_STAT_SIZE);
         JPanel defenseStatsPanel = createPanel(new JComponent[]{enterBlocksLabel, enterShotsBlocked});
 
-
         enterFaceOffLabel = new JLabel(FACE_OFF_STRING);
         enterFaceOffPercent = new JTextField(ENTER_STAT_SIZE);
         enterFaceOffTotal = new JTextField(ENTER_STAT_SIZE);
         JPanel centerStatsPanel =  createPanel(new JComponent[]{enterFaceOffLabel, enterFaceOffPercent,
                 enterFaceOffTotal});
 
+        /*
+          Adds stat components to the container when selected for the user to initialize their skater's stats.
+          Removes stat components when unselected.
+         */
         assignSkaterStats.addActionListener(e -> {
             if (assignSkaterStats.isSelected()) {
                 Position position = (Position) positionOptions.getSelectedItem();
                 createSkater.add(basicStatsPanel, createSkater.getComponentCount() - 1);
                 createSkater.add(advancedStatsPanel, createSkater.getComponentCount() - 1);
-                if (position == Position.Center) {
+                if (position == Position.Center) {  // Adds panel to initialize center stats
                     createSkater.add(centerStatsPanel, createSkater.getComponentCount() - 1);
-                } else if (position == Position.Left_Defense || position == Position.Right_Defense) {
+                } else if (position == Position.Left_Defense || position == Position.Right_Defense) {  // Panel for de
                     createSkater.add(defenseStatsPanel, createSkater.getComponentCount() - 1);
                 }
             } else {
@@ -1665,6 +1649,7 @@ public class TeamGUI implements Runnable {
             mainFrame.repaint();
         });
 
+        // Adds/Removes relevant panels depending on what position is selected for the new player
         positionOptions.addItemListener(e -> {
             if (assignSkaterStats.isSelected() && e.getStateChange() == ItemEvent.SELECTED) {
                 Position position = (Position) positionOptions.getSelectedItem();
@@ -1679,6 +1664,7 @@ public class TeamGUI implements Runnable {
             }
         });
 
+        // Takes in input from the user in the various fields and creates new player from this information
         createPlayer.addActionListener(e -> {
             String name = enterSkaterName.getText();
             String stickHand;
@@ -1688,10 +1674,9 @@ public class TeamGUI implements Runnable {
             } else {
                 stickHand = Skater.STICK_RIGHT;
             }
-
             Position position = (Position) positionOptions.getSelectedItem();
             try {
-                if (assignSkaterStats.isSelected()) {
+                if (assignSkaterStats.isSelected()) {  // Initializes stats of the new skater
                     int goals = Integer.parseInt(enterGoals.getText());
                     int assists = Integer.parseInt(enterAssists.getText());
                     int plusMinus = Integer.parseInt(enterPlusMinus.getText());
@@ -1710,7 +1695,7 @@ public class TeamGUI implements Runnable {
                         newSkater = new Skater(name, enterSkaterNumber.getValue(), stickHand, position, goals, assists,
                                 plusMinus, hits, penaltyMinutes);
                     }
-                } else {
+                } else {  // Uses more limited constructor, other stats initialized to 0
                     if (position == Position.Center) {
                         newSkater = new Center(name, enterSkaterNumber.getValue(), stickHand);
                     } else if (position == Position.Left_Defense || position == Position.Right_Defense) {
@@ -1727,7 +1712,7 @@ public class TeamGUI implements Runnable {
                 return;
             }
             int index = team.addPlayer(newSkater);
-            if (index == -1) {
+            if (index == -1) {  // Player is a duplicate
                 JOptionPane.showMessageDialog(mainFrame, PLAYER_NUMBER_DUPLICATE, CREATE_SKATER,
                         JOptionPane.ERROR_MESSAGE);
                 return;
@@ -1813,6 +1798,8 @@ public class TeamGUI implements Runnable {
             mainFrame.repaint();
         });
 
+        // Components for various stats related to the skater
+
         changeGoalsLabel = new JLabel(GOALS_STRING);
         changeGoals = new JTextField(ENTER_STAT_SIZE);
         changeAssistsLabel = new JLabel(ASSISTS_STRING);
@@ -1848,7 +1835,10 @@ public class TeamGUI implements Runnable {
         changeShotsBlocked = new JTextField(ENTER_STAT_SIZE);
         JPanel changeDefensePanel = createPanel(new JComponent[]{changeBlocksLabel, changeShotsBlocked});
 
-        // Updates stick hand swap button and adds proper components for a center or defenseman
+        /*
+         Updates stick hand swap button and adds proper components for a center or defenseman to the edit player tab
+         Updates View Skater Text Area to display the currently selected skater's stats
+         */
         skaterOptions.addItemListener(e -> {
             Skater newSkater = (Skater) skaterOptions.getSelectedItem();
             if (e.getStateChange() == ItemEvent.SELECTED && newSkater != null) {
@@ -1870,7 +1860,10 @@ public class TeamGUI implements Runnable {
             }
         });
 
-        // Updates any changes being made to a skater in the edit skaters tab
+        /*
+           Updates any changes being made to a skater in the edit skaters tab
+           If a field is blank, it is not updated
+         */
         editPlayer.addActionListener(e -> {
             Skater editingSkater = (Skater) skaterOptions.getSelectedItem();
             if (editingSkater == null) {  // Did not choose a skater
@@ -2013,7 +2006,7 @@ public class TeamGUI implements Runnable {
                     }
                     change = true;
                 }
-            } else if (changeSkaterNumberCheck.isSelected()) {
+            } else if (changeSkaterNumberCheck.isSelected()) {  // Changes player number if needed
                 if (editingSkater instanceof Center) {
                     newSkater = new Center(editingSkater);
                 } else if (editingSkater instanceof  Defenseman) {
@@ -2030,7 +2023,7 @@ public class TeamGUI implements Runnable {
 
                 if (newSkater != null) {
                     int input;
-                    do {
+                    do {  // Confirmation message, making these changes will delete lines containing this player
                         input = JOptionPane.showConfirmDialog(mainFrame, EDIT_SKATER_CONFIRM, EDIT_SKATER,
                                 JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
                     } while (input != JOptionPane.YES_OPTION && input != JOptionPane.NO_OPTION);
@@ -2038,7 +2031,7 @@ public class TeamGUI implements Runnable {
                         return;
                     }
                     int index = team.changePlayer(editingSkater, newSkater);
-                    if (index == -1) {
+                    if (index == -1) {  // Player is a duplicate
                         JOptionPane.showMessageDialog(mainFrame, PLAYER_NUMBER_DUPLICATE, EDIT_SKATER,
                                 JOptionPane.ERROR_MESSAGE);
                         return;
@@ -2066,7 +2059,7 @@ public class TeamGUI implements Runnable {
             }
         });
 
-        // Confirms user's selection and resets stats of the selected player
+        // Confirms user's selection and resets stats of the selected player, updates relevant components
         resetPlayerStats.addActionListener(e -> {
             Skater selectedSkater = (Skater) skaterOptions.getSelectedItem();
             if (selectedSkater != null) {
@@ -2181,6 +2174,7 @@ public class TeamGUI implements Runnable {
         createGoalie = new JButton(CREATE_GOALIE);
         createPanelForContainer(new JComponent[]{createGoalie}, createGoalieContent);
 
+        // Adds relevant stat panels to the container when selected, removes them when deselected
         assignGoalieStats.addActionListener(e -> {
             if (assignGoalieStats.isSelected()) {
                 createGoalieContent.add(goalieRecordPanel, createGoalieContent.getComponentCount() - 1);
@@ -2193,23 +2187,23 @@ public class TeamGUI implements Runnable {
         });
 
         /*
-           Parses stats from relevant text fields, creates new goalie, adds it to the team, and updates relevant GUI
-           elements.
+          Parses stats from relevant text fields, creates new goalie, adds it to the team, and updates relevant GUI
+          elements.
          */
         createGoalie.addActionListener(e -> {
             String name = enterGoalieName.getText();
             int goalieNum = selectGoalieNumber.getValue();
             Goalie newGoalie;
             try {
-                if (assignGoalieStats.isSelected()) {
-                    int wins = Integer.parseInt(enterGoalieWins.getText());
-                    int losses = Integer.parseInt(enterGoalieLosses.getText());
-                    int otLosses = Integer.parseInt(enterGoalieOTLosses.getText());
+                if (assignGoalieStats.isSelected()) {  // Initialize stats with user values
+                    int[] record = checkForIntResponses(new String[]{enterGoalieWins.getText(),
+                            enterGoalieLosses.getText(), enterGoalieOTLosses.getText()});
                     int shutouts = enterShutouts.getValue();
                     double savePercent = Double.parseDouble(enterSavePercentage.getText());
                     int shotsFaced = Integer.parseInt(enterGoalieShotsAgainst.getText());
-                    newGoalie = new Goalie(name, goalieNum, savePercent, shotsFaced, wins, losses, otLosses, shutouts);
-                } else {
+                    newGoalie = new Goalie(name, goalieNum, savePercent, shotsFaced, record[0], record[1], record[2],
+                            shutouts);
+                } else {  // Initialize stats to 0
                     newGoalie = new Goalie(name, goalieNum);
                 }
             } catch (NumberFormatException ex) {
@@ -2221,7 +2215,7 @@ public class TeamGUI implements Runnable {
             }
 
             int index = team.addPlayer(newGoalie);
-            if (index == -1) {
+            if (index == -1) {  // Player is a duplicate
                 JOptionPane.showMessageDialog(mainFrame, PLAYER_NUMBER_DUPLICATE, CREATE_GOALIE,
                         JOptionPane.ERROR_MESSAGE);
                 return;
@@ -2230,6 +2224,7 @@ public class TeamGUI implements Runnable {
             try {
                 updateFile();
                 updatePlayerComponents(null, newGoalie, -1, index);
+                // Reset text fields
                 enterGoalieName.setText("");
                 enterGoalieWins.setText("");
                 enterGoalieLosses.setText("");
@@ -2277,6 +2272,8 @@ public class TeamGUI implements Runnable {
         changeGoalieNumber.addChangeListener(e ->
                 changeGoalieNumberCheck.setText(CHANGE_NUMBER + " " + changeGoalieNumber.getValue()));
 
+        // Components for other stats
+
         changeGoalieWinsLabel = new JLabel(WINS_STRING);
         changeGoalieWins = new JTextField(ENTER_STAT_SIZE);
         changeGoalieLossesLabel = new JLabel(LOSSES_STRING);
@@ -2301,9 +2298,13 @@ public class TeamGUI implements Runnable {
         deleteGoalie = new JButton("Delete Selected Goalie");
         createPanelForContainer(new JComponent[]{deleteGoalie}, editGoalieContent);
 
+        /*
+          Parses any changes to stats entered by the user, makes those changes, and updates the relevant components.
+          Any blank fields will be ignored and unchanged.
+         */
         editGoalie.addActionListener(e -> {
             Goalie editingGoalie = (Goalie) goalieOptions.getSelectedItem();
-            if (editingGoalie == null) {
+            if (editingGoalie == null) {  // No selection made
                 JOptionPane.showMessageDialog(mainFrame, SELECT, EDIT_GOALIE, JOptionPane.ERROR_MESSAGE);
                 return;
             }
@@ -2316,6 +2317,7 @@ public class TeamGUI implements Runnable {
             String svPercent = changeSavePercentage.getText();
             String shotsFaced = changeGoalieShotsAgainst.getText();
             try {
+                // Attempt to update all of the stats that are entered by the user
                 if (!name.isBlank()) {
                     editingGoalie.setName(name);
                     changeGoalieName.setText("");
@@ -2352,7 +2354,7 @@ public class TeamGUI implements Runnable {
             }
             Goalie newGoalie = null;
 
-            if (changeGoalieNumberCheck.isSelected()) {
+            if (changeGoalieNumberCheck.isSelected()) {  // Create new goalie with same info, but different number
                 newGoalie = new Goalie(editingGoalie);
                 newGoalie.setPlayerNumber(changeGoalieNumber.getValue());
             }
@@ -2360,7 +2362,7 @@ public class TeamGUI implements Runnable {
             int oldIndex = goalieOptions.getSelectedIndex() - 1;
             if (newGoalie != null) {
                 int index = team.changePlayer(editingGoalie, newGoalie);
-                if (index == -1) {
+                if (index == -1) {  // Player is duplicate
                     JOptionPane.showMessageDialog(mainFrame, PLAYER_NUMBER_DUPLICATE + BLANK_UPDATED,
                             EDIT_GOALIE, JOptionPane.ERROR_MESSAGE);
                     return;
@@ -2381,6 +2383,7 @@ public class TeamGUI implements Runnable {
             }
         });
 
+        // Reset selected goalie's stats to 0 and update the relevant components
         resetGoalieStats.addActionListener(e -> {
             Goalie editingGoalie = (Goalie) goalieOptions.getSelectedItem();
             if (editingGoalie == null) {
@@ -2406,6 +2409,7 @@ public class TeamGUI implements Runnable {
             }
         });
 
+        // Confirm user selection, remove the selected goalie from the team's lists, and update any relevant components
         deleteGoalie.addActionListener(e -> {
             Goalie deletingGoalie = (Goalie) goalieOptions.getSelectedItem();
             if (deletingGoalie == null) {
@@ -2475,6 +2479,7 @@ public class TeamGUI implements Runnable {
         createLine = new JButton(CREATE_LINE);
         createPanelForContainer(new JComponent[]{createLine}, createLineContent);
 
+        // Radio buttons for selecting the different line types
         lineTypeLabel = new JLabel("Select Type of Line:");
         lineTypeGroup = new ButtonGroup();
         lineType = new JRadioButton[]{new JRadioButton(OFFENSE_LINE), new JRadioButton(DEFENSE_LINE),
@@ -2485,6 +2490,8 @@ public class TeamGUI implements Runnable {
         final boolean[] selectedLine = {false, false, false, false};
         createPanelForContainer(new JComponent[]{lineTypeLabel}, createLineContent);
         createPanelForContainer(lineType, createLineContent);
+
+        // Panels to select the players at different positions
 
         // Center
         selectCenterLabel = new JLabel(CENTER);
@@ -2520,7 +2527,10 @@ public class TeamGUI implements Runnable {
         enterNumOpps = new JTextField(ENTER_STAT_SIZE);
         JPanel enterNumOppsPanel = createPanel(new JComponent[]{enterNumOppsLabel, enterNumOpps});
 
-        // Displays text fields to enter success percentage and number of opportunities for the newly created line
+        /*
+         Displays text fields to enter success percentage and number of opportunities for the newly created line
+         Only appears/applies to special teams lines
+         */
         enterStatsToggle.addActionListener(e -> {
             if (enterStatsToggle.isSelected()) {
                 createLineContent.add(enterSuccessPercentagePanel);
@@ -2532,7 +2542,10 @@ public class TeamGUI implements Runnable {
             mainFrame.repaint();
         });
 
-        // Action Listener for the Radio Buttons (lineType)
+        /*
+         Action Listener for the Radio Buttons (lineType)
+         Adds relevant components to container depending on selected line
+         */
         ActionListener lineTypeListener = e -> {
             if (e.getActionCommand().equals(OFFENSE_LINE)) {  // Set up Offense
                 selectedLine[0] = true;
@@ -2621,6 +2634,10 @@ public class TeamGUI implements Runnable {
             type.addActionListener(lineTypeListener);
         }
 
+        /*
+          Reads in information provided by the user, creates new line from that information, and updates relavant
+          components with that new line
+         */
         createLine.addActionListener(e -> {
             Line newLine;
             if (lineType[0].isSelected()) {  // Offense Line
@@ -2692,7 +2709,7 @@ public class TeamGUI implements Runnable {
                 return;
             }
             int index = team.addLine(newLine);
-            if (index == -1) {
+            if (index == -1) {  // Line is a duplicate
                 JOptionPane.showMessageDialog(mainFrame, "Two lines" + UNIQUE_NAME, CREATE_LINE,
                         JOptionPane.ERROR_MESSAGE);
                 return;
@@ -2771,8 +2788,9 @@ public class TeamGUI implements Runnable {
             }
         });
 
+        // Updates changes input by the user, updates the team and relevant components with the new changes
         updateLineChanges.addActionListener(e -> {
-            if (lineOptions.getSelectedItem() == null) {
+            if (lineOptions.getSelectedItem() == null) {  // No line selected
                 JOptionPane.showMessageDialog(mainFrame, SELECT, EDIT_LINE,
                         JOptionPane.ERROR_MESSAGE);
                 return;
@@ -2780,7 +2798,7 @@ public class TeamGUI implements Runnable {
             String name = changeLineName.getText();
             Line editingLine = (Line) lineOptions.getSelectedItem();
             Line newLine = null;
-            if (editingLine instanceof OffenseLine oLine) {
+            if (editingLine instanceof OffenseLine oLine) {  // Offense line, only can change name
                 try {
                     newLine = new OffenseLine(oLine);
                     newLine.setName(name);
@@ -2788,7 +2806,7 @@ public class TeamGUI implements Runnable {
                     JOptionPane.showMessageDialog(mainFrame, ex.getMessage(), EDIT_LINE, JOptionPane.ERROR_MESSAGE);
                     return;
                 }
-            } else if (editingLine instanceof DefenseLine defenseLine) {
+            } else if (editingLine instanceof DefenseLine defenseLine) {  // De line, only can change name
                 try {
                     newLine = new DefenseLine(defenseLine);
                     newLine.setName(name);
@@ -2796,8 +2814,9 @@ public class TeamGUI implements Runnable {
                     JOptionPane.showMessageDialog(mainFrame, ex.getMessage(), EDIT_LINE, JOptionPane.ERROR_MESSAGE);
                     return;
                 }
-            } else if (editingLine instanceof SpecialTeamsLine specialLine) {
+            } else if (editingLine instanceof SpecialTeamsLine specialLine) {  // Special Teams
                 try {
+                    // Stats not updated by user
                     if (changeSuccessPercent.getText().isBlank() && changeNumOpps.getText().isBlank()) {
                         if (specialLine instanceof PPLine pp) {
                             newLine = new PPLine(pp);
@@ -2806,13 +2825,13 @@ public class TeamGUI implements Runnable {
                             newLine = new PKLine(pk);
                             newLine.setName(name);
                         }
-                    } else {
+                    } else {  // Stats and/or name being updated
                         double successPercent = Double.parseDouble(changeSuccessPercent.getText());
                         int numAttempts = Integer.parseInt(changeNumOpps.getText());
                         specialLine.setSuccessStats(successPercent, numAttempts);
                         changeSuccessPercent.setText("");
                         changeNumOpps.setText("");
-                        if (name.isBlank()) {
+                        if (name.isBlank()) {  // No name change, do not need to replace line on team
                             try {
                                 updateFile();
                                 viewLine.setText(editingLine.lineRoster());
@@ -2845,7 +2864,7 @@ public class TeamGUI implements Runnable {
                 }
             }
             int index = team.changeLine(editingLine, newLine);
-            if (index == -1) {
+            if (index == -1) {  // New name is a duplicate
                 JOptionPane.showMessageDialog(mainFrame, "Two lines" + UNIQUE_NAME, EDIT_LINE,
                         JOptionPane.ERROR_MESSAGE);
                 return;
@@ -2865,21 +2884,30 @@ public class TeamGUI implements Runnable {
             }
         });
 
+        /*
+          Displays a new JFrame where the user can select new players to assign to the line
+          Main frame will be hidden while this frame is active and will reappear once the user is finished, or the new
+          frame is closed
+         */
         changeLinePlayers.addActionListener(e -> {
-            if (lineOptions.getSelectedItem() == null) {
+            if (lineOptions.getSelectedItem() == null) {  // No line selected
                 JOptionPane.showMessageDialog(mainFrame, SELECT, EDIT_LINE, JOptionPane.ERROR_MESSAGE);
                 return;
             }
             mainFrame.setVisible(false);
 
             Line editingLine = (Line) lineOptions.getSelectedItem();
-            JFrame playersWindow = new JFrame("Change Players");
-            playersWindow.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
-            Container playersWindowContent = playersWindow.getContentPane();
-            playersWindowContent.setLayout(new BoxLayout(playersWindowContent, BoxLayout.Y_AXIS));
-            playersWindow.setLocationRelativeTo(mainFrame);
+            // Set up new frame
+            JFrame playersFrame = new JFrame("Change Players");
+            playersFrame.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
+            Container playersFrameContent = playersFrame.getContentPane();
+            playersFrameContent.setLayout(new BoxLayout(playersFrameContent, BoxLayout.Y_AXIS));
+            playersFrame.setLocationRelativeTo(mainFrame);
 
-            // Clears the selection in create line tab and removes any selected components
+            /*
+              Clears the selection in create line tab and removes any selected components
+              These components are reused in this frame, and glitchy behavior occurs if they are not removed
+             */
             lineTypeGroup.clearSelection();
             for (int i = 0; i < selectedLine.length; i++) {
                 if (selectedLine[i]) {
@@ -2914,38 +2942,43 @@ public class TeamGUI implements Runnable {
 
             JTextArea displayCurrentPlayers = new JTextArea(editingLine.lineRoster());
             displayCurrentPlayers.setEditable(false);
-            createPanelForContainer(new JComponent[]{displayCurrentPlayers}, playersWindowContent);
+            createPanelForContainer(new JComponent[]{displayCurrentPlayers}, playersFrameContent);
 
+            // Add proper select player panels to the frame
             if (editingLine instanceof OffenseLine) {
-                playersWindowContent.add(selectCenterPanel);
-                playersWindowContent.add(selectLWPanel);
-                playersWindowContent.add(selectRWPanel);
+                playersFrameContent.add(selectCenterPanel);
+                playersFrameContent.add(selectLWPanel);
+                playersFrameContent.add(selectRWPanel);
             } else if (editingLine instanceof DefenseLine) {
-                playersWindowContent.add(selectLDPanel);
-                playersWindowContent.add(selectRDPanel);
+                playersFrameContent.add(selectLDPanel);
+                playersFrameContent.add(selectRDPanel);
             } else if (editingLine instanceof PPLine) {
-                playersWindowContent.add(selectCenterPanel);
-                playersWindowContent.add(selectLWPanel);
-                playersWindowContent.add(selectRWPanel);
-                playersWindowContent.add(selectLDPanel);
-                playersWindowContent.add(selectRDPanel);
+                playersFrameContent.add(selectCenterPanel);
+                playersFrameContent.add(selectLWPanel);
+                playersFrameContent.add(selectRWPanel);
+                playersFrameContent.add(selectLDPanel);
+                playersFrameContent.add(selectRDPanel);
             } else if (editingLine instanceof PKLine) {
-                playersWindowContent.add(selectLWPanel);
-                playersWindowContent.add(selectRWPanel);
-                playersWindowContent.add(selectLDPanel);
-                playersWindowContent.add(selectRDPanel);
+                playersFrameContent.add(selectLWPanel);
+                playersFrameContent.add(selectRWPanel);
+                playersFrameContent.add(selectLDPanel);
+                playersFrameContent.add(selectRDPanel);
                 selectLWLabel.setText(OFFENSE + "1:");
                 selectRWLabel.setText(OFFENSE + "2:");
             }
 
             JButton assignPlayers = new JButton("Assign These Players");
-            createPanelForContainer(new JComponent[]{assignPlayers}, playersWindowContent);
+            createPanelForContainer(new JComponent[]{assignPlayers}, playersFrameContent);
 
             JLabel changePlayersNote = new JLabel(CHANGE_LINE_NOTE);
-            createPanelForContainer(new JComponent[]{changePlayersNote}, playersWindowContent);
-            playersWindow.pack();
-            playersWindow.setVisible(true);
+            createPanelForContainer(new JComponent[]{changePlayersNote}, playersFrameContent);
+            playersFrame.pack();
+            playersFrame.setVisible(true);
 
+            /*
+              If a player is selected, replace that player in the line.
+              If a box selection is left blank, no change is made.
+             */
             assignPlayers.addActionListener(e1 -> {
                 boolean change = false;
                 try {
@@ -3011,7 +3044,7 @@ public class TeamGUI implements Runnable {
                         }
                     }
                 } catch (IllegalArgumentException | NullPointerException ex) {
-                    JOptionPane.showMessageDialog(playersWindow, ex.getMessage(), EDIT_LINE,
+                    JOptionPane.showMessageDialog(playersFrame, ex.getMessage(), EDIT_LINE,
                             JOptionPane.ERROR_MESSAGE);
                     return;
                 }
@@ -3019,14 +3052,14 @@ public class TeamGUI implements Runnable {
                     try {
                         updateFile();
                         viewLine.setText(editingLine.lineRoster());
-                        JOptionPane.showMessageDialog(playersWindow, UPDATE_SUCCESS, EDIT_LINE,
+                        JOptionPane.showMessageDialog(playersFrame, UPDATE_SUCCESS, EDIT_LINE,
                                 JOptionPane.INFORMATION_MESSAGE);
                     } catch (IOException ex) {
                         JOptionPane.showMessageDialog(mainFrame, BIN_FILE_ERROR, EDIT_LINE, JOptionPane.ERROR_MESSAGE);
                     } catch (Exception ex) {
                         JOptionPane.showMessageDialog(mainFrame, ex.getMessage(), EDIT_LINE, JOptionPane.ERROR_MESSAGE);
                     }
-                    playersWindow.dispose();
+                    playersFrame.dispose();
                 } else {
                     JOptionPane.showMessageDialog(mainFrame, "Please select new players for the line or close" +
                             " the window.", EDIT_LINE, JOptionPane.ERROR_MESSAGE);
@@ -3034,7 +3067,7 @@ public class TeamGUI implements Runnable {
             });
 
             // Redisplay main JFrame when the window is closed
-            playersWindow.addWindowListener(new WindowAdapter() {
+            playersFrame.addWindowListener(new WindowAdapter() {
                 @Override
                 public void windowClosed(WindowEvent e) {
                     mainFrame.setVisible(true);
@@ -3094,35 +3127,7 @@ public class TeamGUI implements Runnable {
 
         enterStatsTabs = new JTabbedPane();
 
-        // Enter Live
-        Container liveStats = new Container();
-        liveStats.setLayout(new BoxLayout(liveStats, BoxLayout.Y_AXIS));
-
-        JLabel enterLiveInstructions = new JLabel(ENTER_LIVE_INSTRUCTIONS);
-        createPanelForContainer(new JComponent[]{enterLiveInstructions}, liveStats);
-
-        offenseLinesLabel = new JLabel(SELECT_CURRENT + OFFENSE_LINE + ':');
-        JPanel offenseLinePanel = createPanel(new JComponent[]{offenseLinesLabel, offenseLines});
-        liveStats.add(offenseLinePanel);
-
-        deLinesLabel = new JLabel(SELECT_CURRENT + DEFENSE_LINE + ":");
-        JPanel defenseLinePanel = createPanel(new JComponent[]{deLinesLabel, defenseLines});
-        liveStats.add(defenseLinePanel);
-
-        goaliesForStatsLabel = new JLabel(SELECT_CURRENT + "Goalie In Net:");
-        JPanel selectGoaliePanel = createPanel(new JComponent[]{goaliesForStatsLabel, selectGoaliesForStats});
-        liveStats.add(selectGoaliePanel);
-
-        AtomicInteger teamGoals = new AtomicInteger();
-        AtomicInteger opponentGoals = new AtomicInteger();
-        currentScore = new JLabel(CURRENT_SCORE + teamGoals.get() + "-" +
-                opponentGoals.get());
-        createPanelForContainer(new JComponent[]{currentScore}, liveStats);
-
-        goalLive = new JButton(TEAM_GOAL);
-        scoredAgainstLive = new JButton(OPPONENT_GOAL);
-        createPanelForContainer(new JComponent[]{goalLive, scoredAgainstLive}, liveStats);
-
+        // Components used in both tabs for scoring a goal
         scorerLabel = new JLabel("Position of Scorer:");
         JPanel scorerPanel = createPanel(new JComponent[]{scorerLabel, scorerOptions});
 
@@ -3148,20 +3153,59 @@ public class TeamGUI implements Runnable {
         JPanel selectOtherPlayersPanel = createPanel(new JComponent[]{otherPlayerOptions1,
                 otherPlayerOptions2});
 
+        useLinesOrPlayers = new JToggleButton(USE_PLAYERS);
+        JPanel linesOrPlayersPanel = new JPanel();
+        linesOrPlayersPanel.add(useLinesOrPlayers);
+
+        // Enter Live
+
+        Container liveStats = new Container();
+        liveStats.setLayout(new BoxLayout(liveStats, BoxLayout.Y_AXIS));
+
+        JLabel enterLiveInstructions = new JLabel(ENTER_LIVE_INSTRUCTIONS);
+        createPanelForContainer(new JComponent[]{enterLiveInstructions}, liveStats);
+
+        // Panels to select current lines/goalies
+
+        offenseLinesLabel = new JLabel(SELECT_CURRENT + OFFENSE_LINE + ':');
+        JPanel offenseLinePanel = createPanel(new JComponent[]{offenseLinesLabel, offenseLines});
+        liveStats.add(offenseLinePanel);
+
+        deLinesLabel = new JLabel(SELECT_CURRENT + DEFENSE_LINE + ":");
+        JPanel defenseLinePanel = createPanel(new JComponent[]{deLinesLabel, defenseLines});
+        liveStats.add(defenseLinePanel);
+
         ppLineLabel = new JLabel(SELECT_CURRENT + PP_LINE + ':');
         JPanel ppLinePanel = createPanel(new JComponent[]{ppLineLabel, ppOptions});
 
         pkOptionsLabel = new JLabel(SELECT_CURRENT + PK_LINE + ':');
         JPanel pkLinePanel = createPanel(new JComponent[]{pkOptionsLabel, pkOptions});
 
-        useLinesOrPlayers = new JToggleButton(USE_PLAYERS);
-        JPanel linesOrPlayersPanel = new JPanel();
-        linesOrPlayersPanel.add(useLinesOrPlayers);
+        goaliesForStatsLabel = new JLabel(SELECT_CURRENT + "Goalie In Net:");
+        JPanel selectGoaliePanel = createPanel(new JComponent[]{goaliesForStatsLabel, selectGoaliesForStats});
+        liveStats.add(selectGoaliePanel);
+
+        // Track current score of the game based on user input
+        AtomicInteger teamGoals = new AtomicInteger();
+        AtomicInteger opponentGoals = new AtomicInteger();
+        currentScore = new JLabel(CURRENT_SCORE + teamGoals.get() + "-" +
+                opponentGoals.get());
+        createPanelForContainer(new JComponent[]{currentScore}, liveStats);
+
+        goalLive = new JButton(TEAM_GOAL);
+        scoredAgainstLive = new JButton(OPPONENT_GOAL);
+        createPanelForContainer(new JComponent[]{goalLive, scoredAgainstLive}, liveStats);
 
         penaltyOver = new JButton("Penalty Expired");
         JPanel penaltyOverPanel = new JPanel();
         penaltyOverPanel.add(penaltyOver);
 
+        /*
+          Prompt the user in a new window to select the positions of the current line that were involved with the goal
+          or manually select the players who scored the goal.
+          The user is able to leave the window if needed, and the enter stats live tab will be updated with the new
+          score.
+         */
         goalLive.addActionListener(e -> {
             mainFrame.setVisible(false);
             JWindow enterGoalLive = new JWindow(mainFrame);
@@ -3206,6 +3250,7 @@ public class TeamGUI implements Runnable {
                 }
             }
 
+            // Updates the screen to display player select or position select depending on toggle selection
             ActionListener switchLinesAndPlayersLive = e1 -> {
                 if (useLinesOrPlayers.isSelected()) {
                     useLinesOrPlayers.setText(USE_LINES);
@@ -3236,6 +3281,10 @@ public class TeamGUI implements Runnable {
             };
             useLinesOrPlayers.addActionListener(switchLinesAndPlayersLive);
 
+            /*
+              Updates selected player stats, updates team goals, displays new team score in the enter live tab
+              If power play is active, PPLine will succeed, and the enter live tab will be reset
+             */
             ActionListener enterGoal = e1 -> {
                 if (e1.getActionCommand().equals(enterGoalButton.getActionCommand())) {
                     if (useLinesOrPlayers.isSelected()) {
@@ -3252,7 +3301,7 @@ public class TeamGUI implements Runnable {
                         if (scorer.equals(assist1) || scorer.equals(assist2) || scorer.equals(other1) ||
                                 scorer.equals(other2) || assist1.equals(assist2) || assist1.equals(other1)
                                 || assist1.equals(other2) || assist2.equals(other1) ||
-                                assist2.equals(other2) || other1.equals(other2)) {
+                                assist2.equals(other2) || other1.equals(other2)) {  // Check duplicate players
                             JOptionPane.showMessageDialog(enterGoalLive, PLAYER_DUPLICATE, ENTER_STATS_LIVE,
                                     JOptionPane.ERROR_MESSAGE);
                             return;
@@ -3329,7 +3378,7 @@ public class TeamGUI implements Runnable {
                     teamGoals.getAndIncrement();
                     currentScore.setText(CURRENT_SCORE + teamGoals.get() + '-' + opponentGoals.get());
                 }
-                enterGoalLive.dispose();
+                enterGoalLive.dispose();  // Close window once goal is entered
             };
 
             enterGoalButton.addActionListener(enterGoal);
@@ -3347,6 +3396,11 @@ public class TeamGUI implements Runnable {
             enterGoalLive.setVisible(true);
         });
 
+        /*
+          Display new window where similar to team goal window, user will select players who were on the ice for
+          the goal to adjust their plus minus stats using the line or selecting the players manually
+          If a penalty kill is active, the current line will fail the penalty kill and the enter live tab will be reset
+         */
         scoredAgainstLive.addActionListener(e -> {
             Goalie goalieInNet = (Goalie) selectGoaliesForStats.getSelectedItem();
             int input;
@@ -3384,12 +3438,12 @@ public class TeamGUI implements Runnable {
                     return;
                 }
             } else {
-                do {
+                do {  // Ask user if they want to enter players manually or not
                     input = JOptionPane.showConfirmDialog(mainFrame, "Can your currently selected lines be " +
                                     "used for adjusting +/- stats?", ENTER_STATS_LIVE, JOptionPane.YES_NO_OPTION,
                             JOptionPane.QUESTION_MESSAGE);
                 } while (input != JOptionPane.YES_OPTION && input != JOptionPane.NO_OPTION);
-                if (input == JOptionPane.YES_OPTION) {
+                if (input == JOptionPane.YES_OPTION) {  // Use lines
                     OffenseLine oLine = (OffenseLine) offenseLines.getSelectedItem();
                     DefenseLine dLine = (DefenseLine) defenseLines.getSelectedItem();
                     if (oLine != null && dLine != null) {
@@ -3400,7 +3454,7 @@ public class TeamGUI implements Runnable {
                                         "offense line and a defense line.",
                                 ENTER_STATS_LIVE, JOptionPane.ERROR_MESSAGE);
                     }
-                } else {
+                } else {  // Select player manually
                     if (team.getSkaters().length < 5) {
                         JOptionPane.showMessageDialog(mainFrame,
                                 NO_OPTIONS.substring(0, NO_OPTIONS.length() - 1) + "t least 5 skaters.",
@@ -3408,6 +3462,7 @@ public class TeamGUI implements Runnable {
                         return;
                     }
                     mainFrame.setVisible(false);
+                    // Set up window
                     JWindow scoredOnWindow = new JWindow(mainFrame);
                     scoredOnWindow.setLocationRelativeTo(mainFrame);
                     Container scoredOnContent = scoredOnWindow.getContentPane();
@@ -3423,6 +3478,7 @@ public class TeamGUI implements Runnable {
                     scoredOnContent.add(selectOtherPlayersPanel);
                     JButton enterPlayers = new JButton("Select Players");
                     createPanelForContainer(new JComponent[]{enterPlayers}, scoredOnContent);
+                    // Check selected players, and enter goal scored
                     enterPlayers.addActionListener(e1 -> {
                         Skater skater1 = (Skater) scorerPlayerOptions.getSelectedItem();
                         Skater skater2 = (Skater) assistPlayerOptions1.getSelectedItem();
@@ -3474,6 +3530,7 @@ public class TeamGUI implements Runnable {
             mainFrame.repaint();
         });
 
+        // Enter a save for the goalie
         shotAgainstOnGoalLive = new JButton("Save by your Goalie");
         createPanelForContainer(new JComponent[]{shotAgainstOnGoalLive}, liveStats);
         shotAgainstOnGoalLive.addActionListener(e -> {
@@ -3485,8 +3542,13 @@ public class TeamGUI implements Runnable {
             }
         });
 
+        // Enter a Face Off that occured
         faceOffLive = new JButton(FACE_OFF);
         createPanelForContainer(new JComponent[]{faceOffLive}, liveStats);
+        /*
+          Ask the user if their center won the face off or not, use the currently selected line to select which center
+          should win the face off
+         */
         faceOffLive.addActionListener(e -> {
             int input;
             do {
@@ -3510,6 +3572,7 @@ public class TeamGUI implements Runnable {
                 PKLine line = (PKLine) pkOptions.getSelectedItem();
                 if (line != null) {
                     Skater[] skaters = line.getSkaters();
+                    // User needs to choose from the two centers on the line
                     if (skaters[0] instanceof Center c1 && skaters[1] instanceof Center c2) {
                         int center;
                         do {
@@ -3531,11 +3594,11 @@ public class TeamGUI implements Runnable {
                                 c2.loseFaceOff();
                             }
                         }
-                    } else if (skaters[0] instanceof Center c) {
+                    } else if (skaters[0] instanceof Center c) {  // Only one center on the line
                         c.winFaceOff();
-                    } else if (skaters[1] instanceof Center c) {
+                    } else if (skaters[1] instanceof Center c) {  // Only one center on the line
                         c.winFaceOff();
-                    } else {
+                    } else {  // No centers on the line
                         JOptionPane.showMessageDialog(mainFrame, "This line does not have a center that can " +
                                         "save their face off win rate.\nPlease select another line or change the " +
                                         "position of one of these players to a center.",
@@ -3560,9 +3623,15 @@ public class TeamGUI implements Runnable {
             }
         });
 
+        // Select skater who blocked a shot / made a body check
         shotBlockLive = new JButton(SHOT_BLOCK);
         hitLive = new JButton(HIT);
         createPanelForContainer(new JComponent[]{shotBlockLive, hitLive}, liveStats);
+        /*
+          User selects a defenseman who blocked a shot in a new window
+          Window is initialized with just the defenseman of the currently selected line, but user can choose to select
+          from any defenseman
+         */
         shotBlockLive.addActionListener(e -> {
             // Clears the selection in create line tab and removes any selected components
             // Select LD Panel may be used so this ensures that create line tab does not appear to miss components
@@ -3635,6 +3704,7 @@ public class TeamGUI implements Runnable {
 
             JToggleButton selectOtherDefense = new JToggleButton(SELECT_OTHER_DE);
             createPanelForContainer(new JComponent[]{selectOtherDefense}, shotBlockContent);
+            // Switch between selecting from just the current line or the entire team
             selectOtherDefense.addActionListener(e1 -> {
                 if (selectOtherDefense.isSelected()) {
                     selectOtherDefense.setText("Select Defenseman from Current Line");
@@ -3654,6 +3724,7 @@ public class TeamGUI implements Runnable {
             JButton cancel = new JButton(CANCEL);
             createPanelForContainer(new JComponent[]{enterShotBlock, cancel}, shotBlockContent);
 
+            // Enter the shot block for the selected defenseman
             ActionListener enterShotBlockAction = e1 -> {
                 if (e1.getActionCommand().equals(enterShotBlock.getActionCommand())) {
                     Defenseman blocker;
@@ -3684,6 +3755,11 @@ public class TeamGUI implements Runnable {
             shotBlockWindow.pack();
             shotBlockWindow.setVisible(true);
         });
+        /*
+          New window opens up for user to select which skater made a body check
+          Window is initialized with skaters from currently selected line(s), but can be switched by the user to select
+          any skater on the team
+         */
         hitLive.addActionListener(e -> {
             Line currentLine;
             DefenseLine defenseLine = null;
@@ -3720,6 +3796,7 @@ public class TeamGUI implements Runnable {
 
             JToggleButton useOtherSkater = new JToggleButton(SELECT_OTHER_SKATER);
             createPanelForContainer(new JComponent[]{useOtherSkater}, hitContent);
+            // Update selection combo box to select from any skater
             useOtherSkater.addActionListener(e1 -> {
                 if (useOtherSkater.isSelected()) {
                     useOtherSkater.setText("Select Skater on Current Line");
@@ -3771,6 +3848,7 @@ public class TeamGUI implements Runnable {
             hitWindow.setVisible(true);
         });
 
+        // Buttons to activate a special teams situation
         penaltyOptionsLive = new ButtonGroup();
         powerPlayLive = new JToggleButton("Power Play");
         penaltyLive = new JToggleButton("Penalty Kill");
@@ -3781,6 +3859,10 @@ public class TeamGUI implements Runnable {
         createPanelForContainer(new JComponent[]{powerPlayLive, penaltyLive, penaltyLengthLabel, penaltyLengthField},
                 liveStats);
 
+        /*
+          Activates special teams situations; removes and adds proper components for selecting lines to the tab as well
+          as the "Penalty Expired" button. Prompts user to select guilty player if a penalty is selected
+         */
         ActionListener penaltiesListener = e -> {
             if (ppOptions.getItemCount() == 0 || pkOptions.getItemCount() == 0) {
                 JOptionPane.showMessageDialog(mainFrame, NO_OPTIONS +"power play line and a penalty kill line.",
@@ -3811,6 +3893,7 @@ public class TeamGUI implements Runnable {
                 }
 
                 mainFrame.setVisible(false);
+                // Window to select the player serving the penalty
                 JWindow selectPlayer = new JWindow();
                 Container selectPlayerContent = selectPlayer.getContentPane();
                 selectPlayerContent.setLayout(new BoxLayout(selectPlayerContent, BoxLayout.Y_AXIS));
@@ -3848,6 +3931,10 @@ public class TeamGUI implements Runnable {
         powerPlayLive.addActionListener(penaltiesListener);
         penaltyLive.addActionListener(penaltiesListener);
 
+        /*
+          Updates stats properly for the selected special teams lines and resets the displayed components for selecting
+          lines as well as removes the "Penalty Over" button
+         */
         penaltyOver.addActionListener(e -> {
             if (powerPlayLive.isSelected()) {
                 PPLine failedLine = (PPLine) ppOptions.getSelectedItem();
@@ -3877,6 +3964,7 @@ public class TeamGUI implements Runnable {
             mainFrame.repaint();
         });
 
+        // Resets team score, updates team record, saves and displays all changes to the GUI
         gameOver = new JButton("Game Over");
         createPanelForContainer(new JComponent[]{gameOver}, liveStats);
         gameOver.addActionListener(e -> {
@@ -4168,7 +4256,9 @@ public class TeamGUI implements Runnable {
                             int goalsAgainstOneGoalie = goalsAgainstSlider.getValue();
                             if (selectedGoalie != null) {
                                 selectedGoalie.enterSaves(goalsAgainstOneGoalie, shotsAgainstOneGoalie);
-                                selectedGoalies.add(selectedGoalie);
+                                if (!selectedGoalies.contains(selectedGoalie)) {
+                                    selectedGoalies.add(selectedGoalie);
+                                }
                             } else {
                                 JOptionPane.showMessageDialog(mainFrame, UNEXPECTED_ERROR +
                                                 "enterGoalie.addActionListener", ENTER_STATS_AFTER,
@@ -5065,73 +5155,72 @@ public class TeamGUI implements Runnable {
                     "record for this team?", CREATE_TEAM, JOptionPane.YES_NO_CANCEL_OPTION);
             switch (input) {
                 case JOptionPane.YES_OPTION -> { // Prompt for wins, losses, ot losses
-                    while (true) {
-                        try {
-                            // Entering information for new team
-                            String name = JOptionPane.showInputDialog(selectFrame, NAME_STRING, CREATE_TEAM,
-                                    JOptionPane.QUESTION_MESSAGE);
-                            int wins = Integer.parseInt(JOptionPane.showInputDialog(selectFrame, WINS_STRING,
-                                    CREATE_TEAM, JOptionPane.QUESTION_MESSAGE));
-                            int losses = Integer.parseInt(JOptionPane.showInputDialog(selectFrame, LOSSES_STRING,
-                                    CREATE_TEAM, JOptionPane.QUESTION_MESSAGE));
-                            int otLosses = Integer.parseInt(JOptionPane.showInputDialog(selectFrame, OT_STRING,
-                                    CREATE_TEAM, JOptionPane.QUESTION_MESSAGE));
-                            Team newTeam = new Team(name, wins, losses, otLosses);
-
-                            int index = addTeam(newTeam);
-                            if (index == -1) {
-                                JOptionPane.showMessageDialog(selectFrame, "Two teams" + UNIQUE_NAME,
-                                        CREATE_TEAM, JOptionPane.ERROR_MESSAGE);
-                                return;
-                            }
-                            teamSelection.insertItemAt(newTeam, index);
-                            updateFile();
-
-                            // Set selected team and hide frame
-                            team = newTeam;
-                            selectFrame.setVisible(false);
-                            displayTeamGUI();
-                            break;
-                        } catch (NumberFormatException ex) {
-                            JOptionPane.showMessageDialog(selectFrame, NUMBER_ERROR, CREATE_TEAM,
-                                    JOptionPane.ERROR_MESSAGE);
-                        } catch (IOException ex) {
-                            JOptionPane.showMessageDialog(selectFrame, BIN_FILE_ERROR, CREATE_TEAM,
-                                    JOptionPane.ERROR_MESSAGE);
-                        } catch (Exception ex) {
-                            JOptionPane.showMessageDialog(selectFrame, ex.getMessage(), CREATE_TEAM,
-                                    JOptionPane.ERROR_MESSAGE);
+                    try {
+                        // Entering information for new team
+                        String name = JOptionPane.showInputDialog(selectFrame, NAME_STRING, CREATE_TEAM,
+                                JOptionPane.QUESTION_MESSAGE);
+                        if (name == null || name.isBlank()) {
+                            return;
                         }
+                        int wins = Integer.parseInt(JOptionPane.showInputDialog(selectFrame, WINS_STRING,
+                                CREATE_TEAM, JOptionPane.QUESTION_MESSAGE));
+                        int losses = Integer.parseInt(JOptionPane.showInputDialog(selectFrame, LOSSES_STRING,
+                                CREATE_TEAM, JOptionPane.QUESTION_MESSAGE));
+                        int otLosses = Integer.parseInt(JOptionPane.showInputDialog(selectFrame, OT_STRING,
+                                CREATE_TEAM, JOptionPane.QUESTION_MESSAGE));
+                        Team newTeam = new Team(name, wins, losses, otLosses);
+
+                        int index = addTeam(newTeam);
+                        if (index == -1) {
+                            JOptionPane.showMessageDialog(selectFrame, "Two teams" + UNIQUE_NAME,
+                                    CREATE_TEAM, JOptionPane.ERROR_MESSAGE);
+                            return;
+                        }
+                        teamSelection.insertItemAt(newTeam, index);
+                        updateFile();
+
+                        // Set selected team and hide frame
+                        team = newTeam;
+                        selectFrame.setVisible(false);
+                        displayTeamGUI();
+                    } catch (NumberFormatException ex) {
+                        JOptionPane.showMessageDialog(selectFrame, NUMBER_ERROR, CREATE_TEAM,
+                                JOptionPane.ERROR_MESSAGE);
+                    } catch (IOException ex) {
+                        JOptionPane.showMessageDialog(selectFrame, BIN_FILE_ERROR, CREATE_TEAM,
+                                JOptionPane.ERROR_MESSAGE);
+                    } catch (Exception ex) {
+                        JOptionPane.showMessageDialog(selectFrame, ex.getMessage(), CREATE_TEAM,
+                                JOptionPane.ERROR_MESSAGE);
                     }
                 }
                 case JOptionPane.NO_OPTION -> {  // Similar to yes, but only prompt for name
-                    while (true) {
-                        try {
-                            String name = JOptionPane.showInputDialog(selectFrame, NAME_STRING, CREATE_TEAM,
-                                    JOptionPane.QUESTION_MESSAGE);
-
-                            Team newTeam = new Team(name);
-
-                            int index = addTeam(newTeam);
-                            if (index == -1) {
-                                JOptionPane.showMessageDialog(selectFrame, "Two teams " + UNIQUE_NAME,
-                                        CREATE_TEAM, JOptionPane.ERROR_MESSAGE);
-                                return;
-                            }
-                            updateFile();
-
-                            team = newTeam;
-                            teamSelection.insertItemAt(team, index);
-                            selectFrame.setVisible(false);
-                            displayTeamGUI();
-                            break;
-                        } catch (IOException ex) {
-                            JOptionPane.showMessageDialog(selectFrame, BIN_FILE_ERROR, CREATE_TEAM,
-                                    JOptionPane.ERROR_MESSAGE);
-                        } catch (Exception ex) {
-                            JOptionPane.showMessageDialog(selectFrame, ex.getMessage(), CREATE_TEAM,
-                                    JOptionPane.ERROR_MESSAGE);
+                    try {
+                        String name = JOptionPane.showInputDialog(selectFrame, NAME_STRING, CREATE_TEAM,
+                                JOptionPane.QUESTION_MESSAGE);
+                        if (name == null) {
+                            return;
                         }
+                        Team newTeam = new Team(name);
+
+                        int index = addTeam(newTeam);
+                        if (index == -1) {
+                            JOptionPane.showMessageDialog(selectFrame, "Two teams " + UNIQUE_NAME,
+                                    CREATE_TEAM, JOptionPane.ERROR_MESSAGE);
+                            return;
+                        }
+                        updateFile();
+
+                        team = newTeam;
+                        teamSelection.insertItemAt(team, index);
+                        selectFrame.setVisible(false);
+                        displayTeamGUI();
+                    } catch (IOException ex) {
+                        JOptionPane.showMessageDialog(selectFrame, BIN_FILE_ERROR, CREATE_TEAM,
+                                JOptionPane.ERROR_MESSAGE);
+                    } catch (Exception ex) {
+                        JOptionPane.showMessageDialog(selectFrame, ex.getMessage(), CREATE_TEAM,
+                                JOptionPane.ERROR_MESSAGE);
                     }
                 }
             }
