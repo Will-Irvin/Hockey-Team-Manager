@@ -81,6 +81,7 @@ public class TeamGUI implements Runnable {
     JButton importTextFile;
 
     JButton newUsers;
+    JButton closeApp;
 
     // MainGUI Constants/Components
 
@@ -3979,13 +3980,13 @@ public class TeamGUI implements Runnable {
                         JOptionPane.ERROR_MESSAGE);
                 return;
             }
-            if (teamGoals.get() > opponentGoals.get()) {
+            if (teamGoals.get() > opponentGoals.get()) {  // Win
                 team.win();
                 mainGoalie.win();
-            } else if (teamGoals.get() == opponentGoals.get()) {
+            } else if (teamGoals.get() == opponentGoals.get()) {  // Tie
                 team.tie();
                 mainGoalie.loseOT();
-            } else if (teamGoals.get() == opponentGoals.get() - 1) {
+            } else if (teamGoals.get() == opponentGoals.get() - 1) {  // Possibly OT
                 int input;
                 do {
                     input = JOptionPane.showConfirmDialog(mainFrame, REG_LOSS, ENTER_STATS_LIVE,
@@ -3998,11 +3999,12 @@ public class TeamGUI implements Runnable {
                     team.lose();
                     mainGoalie.lose();
                 }
-            } else {
+            } else {  // Loss
                 team.lose();
                 mainGoalie.lose();
             }
 
+            // Reset Goals and Update Elements
             teamGoals.set(0);
             opponentGoals.set(0);
             currentScore.setText(CURRENT_SCORE + "0-0");
@@ -4105,7 +4107,7 @@ public class TeamGUI implements Runnable {
 
             @Override
             public void actionPerformed(ActionEvent e) {
-                if (goalieWindow == null) {
+                if (goalieWindow == null) {  // Checks that window is not already open
                     if (team.getSkaters().length < 5 || team.getGoalies().length == 0 || pickLeftDe.getItemCount() < 2
                             || centerOptions.getItemCount() < 2) {
                         JOptionPane.showMessageDialog(mainFrame, ENTER_AFTER_REQS, ENTER_STATS_AFTER,
@@ -4211,6 +4213,7 @@ public class TeamGUI implements Runnable {
                     mainTabs.addChangeListener(haltTabs);
                     enterStatsTabs.addChangeListener(haltTabs);
 
+                    // Check if multiple goalies played in the game
                     int multipleGoalies;
                     do {
                         multipleGoalies = JOptionPane.showConfirmDialog(mainFrame, "Did multiple goalies " +
@@ -4223,6 +4226,7 @@ public class TeamGUI implements Runnable {
 
                     enterGoalieContent.add(selectGoaliePanel);
 
+                    // Components for if multiples goalies need to play
                     JSlider goalsAgainstSlider = new JSlider(0, enterAfterNumInputs[1]);
                     JSlider shotsAgainstSlider = new JSlider(1, shotsAgainst);
                     ArrayList<Goalie> selectedGoalies = new ArrayList<>();
@@ -4247,6 +4251,12 @@ public class TeamGUI implements Runnable {
                     JButton enterGoalie = new JButton("Enter Goalie");
                     createPanelForContainer(new JComponent[]{enterGoalie}, enterGoalieContent);
 
+                    /*
+                      For a single goalie: updates stats and records for the single goalie and progresses to next window
+                      For multiple goalies: updates stats for currently selected goalie, if stats are finished, has user
+                      select which goalie should have this game on their record, and updates the goalie's record, and
+                      progresses to the next window
+                     */
                     enterGoalie.addActionListener(e1 -> {
                         Goalie selectedGoalie;
                         if (finalInput == JOptionPane.YES_OPTION) {
@@ -4357,7 +4367,7 @@ public class TeamGUI implements Runnable {
                     goalieWindow.setVisible(true);
 
                     AtomicInteger ppGoals = new AtomicInteger();
-                    if (enterAfterNumInputs[0] > 0) {
+                    if (enterAfterNumInputs[0] > 0) {  // Enter Goals
                         AtomicInteger enteredGoalsScored = new AtomicInteger();
                         AtomicInteger enteredGoalsAgainst = new AtomicInteger();
 
@@ -4384,6 +4394,10 @@ public class TeamGUI implements Runnable {
                         scoreGoalsContent.add(otherLinePanel);
                         defenseLinePanel.add(defenseLineRoster);
 
+                        /*
+                          Updates currently displayed components. Updates line roster for selected line, and adds
+                          defense line roster when necessary
+                         */
                         nonDefenseLines.addItemListener(e1 -> {
                             if (e1.getStateChange() == ItemEvent.SELECTED) {
                                 Line selection = (Line) nonDefenseLines.getSelectedItem();
@@ -4458,8 +4472,13 @@ public class TeamGUI implements Runnable {
                         JPanel scoreButtonsPanel = createPanel(new JComponent[]{enterTeamGoal, enterOpponentGoal});
                         scoreGoalsContent.add(scoreButtonsPanel);
 
+                        /*
+                          Ensures that players/lines have properly been selected, enters the stats for the relevant
+                          selections, updates the totals, and if the entered amount has reached the number of goals,
+                          progresses to the next window
+                         */
                         ActionListener enterGoalsListener = e1 -> {
-                            if (useLinesOrPlayers.isSelected()) {
+                            if (useLinesOrPlayers.isSelected()) {  // Using players
                                 Skater scorer = (Skater) scorerPlayerOptions.getSelectedItem();
                                 Skater assist1 = (Skater) assistPlayerOptions1.getSelectedItem();
                                 Skater assist2 = (Skater) assistPlayerOptions2.getSelectedItem();
@@ -4467,7 +4486,7 @@ public class TeamGUI implements Runnable {
                                 Skater onIce2 = (Skater) otherPlayerOptions2.getSelectedItem();
 
                                 if (scorer == null || assist1 == null || assist2 == null || onIce1 == null ||
-                                        onIce2 == null) {
+                                        onIce2 == null) {  // Player has not been selected
                                     JOptionPane.showMessageDialog(scoreTeamGoals, UNEXPECTED_ERROR +
                                                     "enterGoalsListener", ENTER_STATS_AFTER, JOptionPane.ERROR_MESSAGE);
                                     return;
@@ -4476,7 +4495,7 @@ public class TeamGUI implements Runnable {
                                 if (scorer.equals(assist1) || scorer.equals(assist2) || scorer.equals(onIce1) ||
                                         scorer.equals(onIce2) || assist1.equals(assist2) || assist1.equals(onIce1)
                                         || assist1.equals(onIce2) || assist2.equals(onIce1) ||
-                                        assist2.equals(onIce2) || onIce1.equals(onIce2)) {
+                                        assist2.equals(onIce2) || onIce1.equals(onIce2)) {  // Duplicate players
                                     JOptionPane.showMessageDialog(scoreTeamGoals, PLAYER_DUPLICATE, ENTER_STATS_AFTER,
                                             JOptionPane.ERROR_MESSAGE);
                                     return;
@@ -4504,12 +4523,12 @@ public class TeamGUI implements Runnable {
                                     onIce2.scoredAgainst();
                                 }
 
-                            } else {
+                            } else {  // Using lines
                                 Position scorer = (Position) scorerOptions.getSelectedItem();
                                 Position assist1 = (Position) assistOptions1.getSelectedItem();
                                 Position assist2 = (Position) assistOptions2.getSelectedItem();
 
-                                if (assist1 == null && assist2 != null) {
+                                if (assist1 == null && assist2 != null) {  // Wrong assist selected
                                     JOptionPane.showMessageDialog(scoreTeamGoals, USE_ASSIST_1, ENTER_STATS_AFTER,
                                             JOptionPane.ERROR_MESSAGE);
                                     return;
@@ -4574,10 +4593,10 @@ public class TeamGUI implements Runnable {
                                         enteredGoalsAgainst.incrementAndGet() + " successfully entered",
                                         ENTER_STATS_AFTER, JOptionPane.INFORMATION_MESSAGE);
                             }
-                            if (enteredGoalsScored.get() == enterAfterNumInputs[0]) {
+                            if (enteredGoalsScored.get() == enterAfterNumInputs[0]) {  // Done entering team goals
                                 scoreButtonsPanel.remove(enterTeamGoal);
                                 scoreTeamGoals.repaint();
-                                if (enteredGoalsAgainst.get() == enterAfterNumInputs[1]) {
+                                if (enteredGoalsAgainst.get() == enterAfterNumInputs[1]) {  // Done entering opp goals
                                     scoreTeamGoals.dispose();
                                     useLinesOrPlayers.removeActionListener(switchLinesAndPlayersAfter);
                                     if (ppGoals.get() >= powerPlays.get()) {
@@ -4600,11 +4619,11 @@ public class TeamGUI implements Runnable {
                                 }
                                 return;
                             }
-                            if (enteredGoalsAgainst.get() == enterAfterNumInputs[1]) {
+                            if (enteredGoalsAgainst.get() == enterAfterNumInputs[1]) {  // Done entering opp goals
                                 scoreButtonsPanel.remove(enterOpponentGoal);
                                 scoreTeamGoals.repaint();
                                 useLinesOrPlayers.removeActionListener(switchLinesAndPlayersAfter);
-                                if (enteredGoalsScored.get() == enterAfterNumInputs[0]) {
+                                if (enteredGoalsScored.get() == enterAfterNumInputs[0]) {  // Done entering team goals
                                     scoreTeamGoals.dispose();
                                     if (ppGoals.get() >= powerPlays.get()) {
                                         enterTeamPPs.dispose();
@@ -4657,6 +4676,10 @@ public class TeamGUI implements Runnable {
 
                         JButton enterFaceOffsButton = new JButton("Enter " + FACE_OFF + 's');
                         createPanelForContainer(new JComponent[]{enterFaceOffsButton}, faceOffContent);
+                        /*
+                          Updates stats for the current center, if the entered totals are finished, progresses to the
+                          next window
+                         */
                         enterFaceOffsButton.addActionListener(e1 -> {
                             Center selectedCenter = (Center) centerOptions.getSelectedItem();
                             if (selectedCenter == null) {
@@ -4714,6 +4737,10 @@ public class TeamGUI implements Runnable {
                         JButton shotsBlockedButton = new JButton("Enter " + SHOT_BLOCK + 's');
                         createPanelForContainer(new JComponent[]{shotsBlockedButton}, enterShotsBlockedContent);
 
+                        /*
+                          Updates shot blocks for the currently selected defenseman, once the shot block total has been
+                          reached, progresses to the next window
+                         */
                         shotsBlockedButton.addActionListener(e1 -> {
                             Defenseman selectedDe = (Defenseman) pickLeftDe.getSelectedItem();
                             if (selectedDe == null) {
@@ -4766,6 +4793,10 @@ public class TeamGUI implements Runnable {
 
                         JButton hitsButton = new JButton("Enter " + HIT + 's');
                         createPanelForContainer(new JComponent[]{hitsButton}, enterHitsContent);
+                        /*
+                          Enters the hits for the selected skaters, once the total has been reached, progresses to the
+                          next window
+                         */
                         hitsButton.addActionListener(e1 -> {
                             Skater selectedSkater = (Skater) pickLeftWing.getSelectedItem();
                             if (selectedSkater == null) {
@@ -4803,9 +4834,9 @@ public class TeamGUI implements Runnable {
                         Container enterPPContent = enterTeamPPs.getContentPane();
                         enterPPContent.setLayout(new BoxLayout(enterPPContent, BoxLayout.Y_AXIS));
 
-
                         enterPPContent.add(ppLinePanel);
 
+                        // Slider is set to entered value subtracted with number of power play goals scored
                         JSlider ppSlider = new JSlider(1, powerPlays.get() - ppGoals.get());
                         JLabel ppSliderLabel = new JLabel(SELECT_EXPIRED_PP + ppSlider.getValue());
                         createPanelForContainer(new JComponent[]{ppSliderLabel, ppSlider}, enterPPContent);
@@ -4817,6 +4848,10 @@ public class TeamGUI implements Runnable {
                         JButton enterPPs = new JButton("Enter Power Plays");
                         createPanelForContainer(new JComponent[]{enterPPs}, enterPPContent);
 
+                        /*
+                          Failure is updated for selected line, total is updated, once the needed amount has been
+                          entered, progresses to the next window
+                         */
                         enterPPs.addActionListener(e1 -> {
                             PPLine selectedPPLine = (PPLine) ppOptions.getSelectedItem();
 
@@ -4864,7 +4899,6 @@ public class TeamGUI implements Runnable {
                         enterTimeLength.setEditable(true);
                         createPanelForContainer(new JComponent[]{timeLabel, enterTimeLength}, enterPKContent);
 
-
                         JCheckBox checkSuccess = new JCheckBox("Penalty Killed Successfully");
                         pkLinePanel.add(checkSuccess);
                         enterPKContent.add(pkLinePanel);
@@ -4872,6 +4906,10 @@ public class TeamGUI implements Runnable {
                         JButton enterPenalty = new JButton("Enter Penalty");
                         createPanelForContainer(new JComponent[]{enterPenalty}, enterPKContent);
 
+                        /*
+                          Enters penalty minutes for the guilty players, enters success/failure for pk lines, and once
+                          the necessary penalties have been entered, closes the window
+                         */
                         enterPenalty.addActionListener(e1 -> {
                             double penaltyLength;
                             Skater guiltyPlayer = (Skater) pickRightWing.getSelectedItem();
@@ -5123,7 +5161,8 @@ public class TeamGUI implements Runnable {
 
         // Bottom of Frame, button where new users can find additional guidance
         newUsers = new JButton("Help and Guidance for New Users");
-        createPanelForContainer(new JComponent[]{newUsers}, selectContent);
+        closeApp = new JButton("Close Application");
+        createPanelForContainer(new JComponent[]{newUsers, closeApp}, selectContent);
 
         selectFrame.pack();
         selectFrame.setLocationRelativeTo(null);
@@ -5313,6 +5352,8 @@ public class TeamGUI implements Runnable {
             JOptionPane.showMessageDialog(selectFrame, NEW_INFO, NEW_USER_INFO, JOptionPane.INFORMATION_MESSAGE);
             JOptionPane.showMessageDialog(selectFrame, NEW_INFO_2, NEW_USER_INFO, JOptionPane.INFORMATION_MESSAGE);
         });
+
+        closeApp.addActionListener(e -> selectFrame.dispose());
     }
 
     public static void main(String[] args) {
