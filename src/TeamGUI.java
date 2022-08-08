@@ -4981,6 +4981,7 @@ public class TeamGUI implements Runnable {
             openFile();
         } catch (IOException | ClassNotFoundException e) {
             JOptionPane.showMessageDialog(null, BIN_FILE_ERROR, INIT, JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(null, e.getStackTrace(), INIT, JOptionPane.ERROR_MESSAGE);
             return;
         } catch (Exception e) {
             JOptionPane.showMessageDialog(null, e.getMessage(), INIT, JOptionPane.ERROR_MESSAGE);
