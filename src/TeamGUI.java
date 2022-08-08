@@ -22,7 +22,9 @@ public class TeamGUI implements Runnable {
 
     // Select GUI Strings/Components
     private static final String INIT = "Initialize";
-    private static final String FILE_NAME = "HockeyTeamManagerData";  // Designated name for file storing data
+    // Designated name for file storing data
+    private static final String FILE_NAME = System.getProperty("user.dir") + File.pathSeparator +
+            "HockeyTeamManagerData";
     private static final String NEW_INFO = "Thank you for using Team Manager! Here are a few things to note as you " +
             "get started:\nIf this is your first time launching the application you will notice that the app comes " +
             "preloaded with a sample team. This is included as a way to ease yourself into the application.\n" +
