@@ -4,6 +4,7 @@ import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.awt.event.*;
 import java.io.*;
+import java.nio.file.*;
 import java.util.ArrayList;
 import java.util.concurrent.atomic.*;
 
@@ -23,8 +24,8 @@ public class TeamGUI implements Runnable {
     // Select GUI Strings/Components
     private static final String INIT = "Initialize";
     // Designated name for file storing data
-    private static final String FILE_NAME = System.getProperty("user.dir") + File.separator +
-            "HockeyTeamManagerData";
+    private static final Path FILE_NAME = Paths.get(System.getProperty("user.dir") + File.separator +
+            "HockeyTeamManagerData");
     private static final String NEW_INFO = "Thank you for using Team Manager! Here are a few things to note as you " +
             "get started:\nIf this is your first time launching the application you will notice that the app comes " +
             "preloaded with a sample team. This is included as a way to ease yourself into the application.\n" +
@@ -641,9 +642,9 @@ public class TeamGUI implements Runnable {
      * @throws Exception If there is an unexpected error with the file
      */
     public void openFile() throws IOException, ClassNotFoundException, Exception {
-        File f = new File(FILE_NAME);
+        File f = new File(FILE_NAME.toString());
         if (!f.exists()) {  // No file found, new data created
-            if (!f.createNewFile()) throw new Exception(UNEXPECTED_ERROR + "openFile 1");
+            Files.createFile(FILE_NAME);
             ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(f));
             oos.writeInt(1);
             oos.writeObject(createSample());
@@ -657,7 +658,7 @@ public class TeamGUI implements Runnable {
             if (o instanceof Team t) {
                 teams.add(t);
             } else {
-                throw new Exception(UNEXPECTED_ERROR + "openFile 2");
+                throw new Exception(UNEXPECTED_ERROR + "openFile");
             }
         }
         ois.close();
@@ -669,7 +670,7 @@ public class TeamGUI implements Runnable {
      * @throws Exception For unexpected errors with the file
      */
     public static void updateFile() throws IOException, Exception {
-        File f = new File(FILE_NAME);
+        File f = new File(FILE_NAME.toString());
         if (!f.exists()) {
             if (!f.createNewFile()) throw new Exception("An unexpected error occurred - updateFile");
         }
