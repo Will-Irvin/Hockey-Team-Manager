@@ -4983,7 +4983,7 @@ public class TeamGUI implements Runnable {
         } catch (IOException | ClassNotFoundException e) {
             JOptionPane.showMessageDialog(null, BIN_FILE_ERROR, INIT, JOptionPane.ERROR_MESSAGE);
             JOptionPane.showMessageDialog(null, e.getStackTrace(), INIT, JOptionPane.ERROR_MESSAGE);
-            JOptionPane.showMessageDialog(null, e.getMessage());
+            JOptionPane.showMessageDialog(null, e.getMessage() + '\n' + FILE_NAME.toString());
             return;
         } catch (Exception e) {
             JOptionPane.showMessageDialog(null, e.getMessage(), INIT, JOptionPane.ERROR_MESSAGE);
