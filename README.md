@@ -6,8 +6,7 @@ After finishing my first college course in programming in Java, I wanted to star
 experiences to consider a possible application using Java. I thought of my years watching and playing hockey, and I realized that Java's object-oriented nature would
 work well with storing data for different players on a team. 
 ## Build Status
-All of the functionality that I have intended to implement for the project is completed. I am not currently aware of any bugs in the application. I am planning on 
-having some personal friends test the application, and they may suggest some other features to implement.
+All of the functionality that I have intended to implement for the project is completed. I am not currently aware of any bugs in the application.
 ## Features
 The backend code dealing with the different team, line, and player classes was built from the ground up; and the GUI for the application was designed and implemented
 using Swing. Using the GUI, a user can create, edit, and delete their teams, players, goalies, and lines. Once they have created all of the players on a team in the
